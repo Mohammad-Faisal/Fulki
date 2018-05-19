@@ -51,9 +51,11 @@
         android:id="@+id/explore_floating"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:src="@drawable/ic_add_white"
         app:layout_anchor="@id/explore_view_pager"
         app:layout_anchorGravity="bottom|right"
-        android:src="@drawable/ic_add_white"/>
+        android:layout_marginBottom="60dp"
+        android:layout_marginRight="10dp"/>
 
 
 

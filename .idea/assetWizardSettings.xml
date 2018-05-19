@@ -34,7 +34,7 @@
                                           <PersistentState>
                                             <option name="values">
                                               <map>
-                                                <entry key="url" value="jar:file:/home/faisal/Desktop/android-studio/plugins/android/lib/android.jar!/images/material_design_icons/content/ic_add_black_24dp.xml" />
+                                                <entry key="url" value="jar:file:/home/faisal/Desktop/android-studio/plugins/android/lib/android.jar!/images/material_design_icons/action/ic_date_range_black_24dp.xml" />
                                               </map>
                                             </option>
                                           </PersistentState>
@@ -44,9 +44,9 @@
                                   </option>
                                   <option name="values">
                                     <map>
-                                      <entry key="outputName" value="ic_add_white" />
+                                      <entry key="outputName" value="ic_clock_blue" />
                                       <entry key="theme" value="CUSTOM" />
-                                      <entry key="themeColor" value="f9fdff" />
+                                      <entry key="themeColor" value="2f4d7c" />
                                     </map>
                                   </option>
                                 </PersistentState>

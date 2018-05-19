@@ -16,6 +16,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -54,7 +55,8 @@ public class CreateEventActivity extends AppCompatActivity {
     private static final String TAG = "CreateEventActivity";
 
     ImageView mCreateEventImage;
-    EditText mCreateEventTitle , mCreateEventLocation , mCreateEventDate , mCreateEventDescription;
+    EditText mCreateEventTitle , mCreateEventLocation , mCreateEventDescription;
+    TextView mCreateEventDate;
     Button mCreateEventCreate;
     Uri imageUri;
     byte [] thumb_byte;
@@ -109,10 +111,9 @@ public class CreateEventActivity extends AppCompatActivity {
                 Log.d(TAG, "onDateSet: mm/dd/yyyy   "+ month1 +"/" + dayOfMonth + "/" + year1);
                 dateText  = dayOfMonth+"/"+month1 + "/" + year1;
                 mCreateEventDate.setText(dateText);
+                mCreateEventDate.setText(dateText);
             };
         });
-
-
 
     }
 
@@ -191,15 +192,19 @@ public class CreateEventActivity extends AppCompatActivity {
 
 
                         Map<String , Object> postMap = new HashMap<>();
-                        postMap.put("user_id" , mUserID);
-                        postMap.put("user_name" , titleText);    //user name of post is equal to our title
+                        postMap.put("moderator_id" , mUserID);
+                        postMap.put("title" , titleText);    //user name of post is equal to our title
                         postMap.put("image_url" , mainImageUrl);
                         postMap.put("thumb_image_url" , thumbImageUrl);
-                        postMap.put("caption" , descriptionText);
+                        postMap.put("description" , descriptionText);
                         postMap.put("time_and_date" , dateText);
                         postMap.put("timestamp" ,timestamp);
                         postMap.put("event_push_id" , eventPushId);
                         postMap.put("location" , locationText);
+                        postMap.put("people_cnt" , "0");
+                        postMap.put("discussion_cnt","0");
+                        postMap.put("clap_cnt" , "0");
+                        postMap.put("love_cnt" , "0");
 
                         //setting the path to file so that later we can delete this post
                         PostFiles postFiles = new PostFiles("event_images/"+mUserID+"/"+randomName+".jpg" ,"event_thumb_images/"+mUserID+"/"+randomName+".jpg", eventPushId);

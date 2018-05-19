@@ -64,13 +64,10 @@ public class MeetingRoomsAdapter extends RecyclerView.Adapter<MeetingRoomsAdapte
         holder.meetingNumberPerson.setText(MeetingPerson);
 
 
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent meetingIntent= new Intent(context , MeetingActivity.class);
-                meetingIntent.putExtra("meetingID" , meetingID);
-                context.startActivity(meetingIntent);
-            }
+        holder.itemView.setOnClickListener(view -> {
+            Intent meetingIntent= new Intent(context , MeetingActivity.class);
+            meetingIntent.putExtra("meetingID" , meetingID);
+            context.startActivity(meetingIntent);
         });
 
     }

@@ -1,4 +1,4 @@
-package candor.flare.CHAT.Meeting;
+package candor.fulki.CHAT.Meeting;
 
 import android.content.Context;
 import android.net.Uri;
@@ -35,7 +35,6 @@ public class MeetingFragment extends Fragment {
     // --- FIREBASE ----//
     DatabaseReference mRootRef;
     private String mUserID;
-
 
     public MeetingFragment() {
         // Required empty public constructor

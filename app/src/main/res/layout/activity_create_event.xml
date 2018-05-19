@@ -29,7 +29,7 @@
 
             <TextView
                 android:layout_width="match_parent"
-                android:layout_height="20dp"
+                android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
                 android:fontFamily="@font/nunito"
                 android:textAlignment="center"
@@ -43,12 +43,12 @@
                 android:layout_marginRight="15dp"
                 android:layout_marginTop="10dp"
                 android:background="@drawable/edittext_background_change_while_typing"
-                android:padding="10dp" />
+                android:padding="12dp" />
 
             <TextView
                 android:layout_width="match_parent"
-                android:layout_height="20dp"
-                android:layout_marginTop="20dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
                 android:fontFamily="@font/nunito"
                 android:textAlignment="center"
                 android:text="    Location" />
@@ -61,19 +61,19 @@
                 android:layout_marginRight="15dp"
                 android:layout_marginTop="10dp"
                 android:background="@drawable/edittext_background_change_while_typing"
-                android:padding="10dp" />
+                android:padding="12dp" />
 
 
 
             <TextView
                 android:layout_width="match_parent"
-                android:layout_height="20dp"
-                android:layout_marginTop="20dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
                 android:fontFamily="@font/nunito"
                 android:textAlignment="center"
                 android:text="    Date" />
 
-            <EditText
+            <TextView
                 android:id="@+id/create_event_date"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -81,13 +81,13 @@
                 android:layout_marginRight="15dp"
                 android:layout_marginTop="10dp"
                 android:background="@drawable/edittext_background_change_while_typing"
-                android:padding="10dp" />
+                android:padding="12dp" />
 
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="20dp"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="10dp"
                 android:fontFamily="@font/nunito"
                 android:textAlignment="center"
                 android:text="    Description" />
@@ -100,7 +100,7 @@
                 android:layout_marginRight="15dp"
                 android:layout_marginTop="10dp"
                 android:background="@drawable/edittext_background_change_while_typing"
-                android:padding="10dp" />
+                android:padding="12dp" />
 
 
 
@@ -126,14 +126,18 @@
 
 
 
-
-
-
         </LinearLayout>
 
 
 
+
+
+
+
+
     </android.support.v4.widget.NestedScrollView>
+
+
 
 
 
