@@ -6,8 +6,11 @@
     >
 
     <android.support.v7.widget.CardView
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginBottom="10dp"
         android:layout_width="match_parent"
-        android:layout_height="300dp"
+        android:layout_height="wrap_content"
         android:padding="10dp"
         android:elevation="10dp"
         android:id="@+id/item_event_card">
@@ -35,48 +38,104 @@
                 />
             <LinearLayout
                 android:layout_marginTop="10dp"
-                android:weightSum="10"
+                android:weightSum="12"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:src="@drawable/ic_location_green"
-                    />
-                <TextView
-                    android:layout_weight="3"
-                    android:id="@+id/item_event_locaiton"
-                    android:text="Dhaka Bangladesh"
-                    android:textSize="10sp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="3">
 
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:src="@drawable/ic_clock_blue"
-                    />
-                <TextView
-                    android:layout_weight="3"
-                    android:id="@+id/item_event_date"
-                    android:text="Monday 2017"
-                    android:textSize="10sp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
+                    <ImageView
+                        android:layout_gravity="center_horizontal"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/ic_location_green"
+                        />
+                    <TextView
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginLeft="4dp"
+                        android:id="@+id/item_event_locaiton"
+                        android:text="Dhaka Bangladesh"
+                        android:textSize="10sp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
 
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:src="@drawable/ic_person_icon"
-                    />
-                <TextView
-                    android:layout_weight="3"
-                    android:id="@+id/item_event_people_cnt"
-                    android:text="100 people"
-                    android:textSize="10sp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="3">
+
+                    <ImageView
+                        android:layout_gravity="center_horizontal"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/ic_clock_blue"
+                        />
+                    <TextView
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginLeft="4dp"
+                        android:id="@+id/item_event_date"
+                        android:text="Monday 2017"
+                        android:textSize="10sp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="3">
+
+                    <ImageView
+                        android:layout_gravity="center_horizontal"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/ic_person_icon"
+                        />
+                    <TextView
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginLeft="4dp"
+                        android:id="@+id/item_event_people_cnt"
+                        android:text="100 people"
+                        android:textSize="10sp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="3">
+
+                    <ImageView
+                        android:layout_gravity="center_horizontal"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/ic_comment_black"
+                        />
+                    <TextView
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginLeft="4dp"
+                        android:id="@+id/item_event_comment_cnt"
+                        android:text="100 comment"
+                        android:textSize="10sp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+
+                </LinearLayout>
+
 
             </LinearLayout>
 

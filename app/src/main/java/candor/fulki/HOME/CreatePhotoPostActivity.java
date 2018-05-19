@@ -255,6 +255,7 @@ public class CreatePhotoPostActivity extends AppCompatActivity {
 
                                 Map<String , Object> postMap = new HashMap<>();
 
+
                                 postMap.put("user_id" , mUserID);
                                 postMap.put("user_name" , mUserName);
                                 postMap.put("image_url" , mainImageUrl);
@@ -264,12 +265,13 @@ public class CreatePhotoPostActivity extends AppCompatActivity {
                                 postMap.put("timestamp" ,timestamp );
                                 postMap.put("post_push_id" , postPushId);
                                 postMap.put("location" , "default");
+                                postMap.put("like_cnt" , 0);
+                                postMap.put("comment_cnt" ,0);
+                                postMap.put("share_cnt" ,0);
 
                                 //setting the path to file so that later we can delete this post
                                 PostFiles postFiles = new PostFiles("post_images/"+mUserID+"/"+randomName+".jpg" ,"post_thumb_images/"+mUserID+"/"+randomName+".jpg", postPushId);
                                 firebaseFirestore.collection("images").document(mUserID).collection("posts").document(postPushId).set(postFiles);
-
-
                                 firebaseFirestore.collection("posts").document(postPushId).set(postMap).addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {

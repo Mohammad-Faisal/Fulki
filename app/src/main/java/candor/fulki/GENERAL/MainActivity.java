@@ -42,6 +42,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.ittianyu.bottomnavigationviewex.BottomNavigationViewEx;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -252,7 +253,6 @@ public class MainActivity extends AppCompatActivity {
 
        // initializeFragment();
 
-
         getSupportActionBar().setTitle("   Flare");
         getSupportActionBar().setElevation(1);
 
@@ -275,16 +275,19 @@ public class MainActivity extends AppCompatActivity {
                             finish();
                         }else{
 
+
+                            HashMap <String  , Object > update = new HashMap<>();
+                            String deviceTokenID = FirebaseInstanceId.getInstance().getToken();
+                            update.put("device_id" ,deviceTokenID );
+                            FirebaseFirestore.getInstance().collection("users").document(mUserID).update(update);
+
+
                             mUserName = task.getResult().getString("name");
                             mUserThumbImage = task.getResult().getString("thumb_image");
                             mUserImage = task.getResult().getString("image");
 
 
-
-
                             imageLoader.displayImage(mUserThumbImage, imageView, userImageOptions);
-
-
 
 
                             //setting up the recyclerview
@@ -297,62 +300,21 @@ public class MainActivity extends AppCompatActivity {
 
 
                             mCreatePostImage.setOnClickListener(v -> {
-
                                 if(TextPost){
-                                    mProgress = new ProgressDialog(MainActivity.this);
-                                    mProgress.setTitle("Posting.......");
-                                    mProgress.setMessage("please wait while we upload your post");
-                                    mProgress.setCanceledOnTouchOutside(false);
-                                    mProgress.show();
+                                    uploadTextPost();
 
-
-                                    //onclick
-                                    DocumentReference ref = FirebaseFirestore.getInstance().collection("posts").document();
-                                    String postPushId = ref.getId();
-
-
-                                    //time and date
-                                    Calendar c = Calendar.getInstance();
-                                    SimpleDateFormat sdf = new SimpleDateFormat("h:mm a MMM d, ''yy");
-                                    final String cur_time_and_date = sdf.format(c.getTime());
-                                    //timestamp
-                                    long timestamp = 1* new Date().getTime();
-                                    Long tsLong = System.currentTimeMillis()/1000;
-                                    String ts = tsLong.toString();
-
-                                    String Caption = mCreatePostText.getText().toString();
-
-                                    Map<String , Object> postMap = new HashMap<>();
-                                    postMap.put("user_id" , mUserID);
-                                    postMap.put("user_name" , mUserName);
-                                    postMap.put("image_url" , "default");
-                                    postMap.put("thumb_image_url" , "default");
-                                    postMap.put("caption" , Caption);
-                                    postMap.put("time_and_date" , cur_time_and_date);
-                                    postMap.put("timestamp" ,timestamp );
-                                    postMap.put("post_push_id" , postPushId);
-                                    postMap.put("location" , "default");
-
-
-                                    firebaseFirestore.collection("posts").document(postPushId).set(postMap).addOnCompleteListener(task1 -> {
-                                        mProgress.dismiss();
-                                        if(task1.isSuccessful()){
-                                            mProgress.dismiss();
-                                            mCreatePostText.setText("");
-                                        }else{
-                                            mProgress.dismiss();
-                                        }
-                                    });
-
-                                }else{
+                                } else{
                                     BringImagePicker();
                                 }
                             });
 
 
-                            if(isFirstPageLoad)loadFirstPosts();
+                            loadFirstPosts();;
 
-                            //load more posts
+                            //pagination
+                            //if(isFirstPageLoad)loadFirstPosts();
+
+                            /*//load more posts
                             recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
                                 @Override
                                 public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
@@ -362,7 +324,8 @@ public class MainActivity extends AppCompatActivity {
                                         loadMorePost();
                                     }
                                 }
-                            });
+                            });*/
+
                             }
                     } else {
                         Log.d(TAG, "get failed with ", task.getException());
@@ -382,9 +345,58 @@ public class MainActivity extends AppCompatActivity {
         };
     }
 
+    public void uploadTextPost(){
+
+        mProgress = new ProgressDialog(MainActivity.this);
+        mProgress.setTitle("Posting.......");
+        mProgress.setMessage("please wait while we upload your post");
+        mProgress.setCanceledOnTouchOutside(false);
+        mProgress.show();
+
+
+        DocumentReference ref = FirebaseFirestore.getInstance().collection("posts").document();
+        String postPushId = ref.getId();
+
+
+        Calendar c = Calendar.getInstance();
+        SimpleDateFormat sdf = new SimpleDateFormat("h:mm a MMM d, ''yy");
+        final String cur_time_and_date = sdf.format(c.getTime());
+        long timestamp = 1* new Date().getTime();
+        Long tsLong = System.currentTimeMillis()/1000;
+        String ts = tsLong.toString();
+
+        String Caption = mCreatePostText.getText().toString();
+
+        Map<String , Object> postMap = new HashMap<>();
+        postMap.put("user_id" , mUserID);
+        postMap.put("user_name" , mUserName);
+        postMap.put("image_url" , "default");
+        postMap.put("thumb_image_url" , "default");
+        postMap.put("caption" , Caption);
+        postMap.put("time_and_date" , cur_time_and_date);
+        postMap.put("timestamp" ,timestamp );
+        postMap.put("post_push_id" , postPushId);
+        postMap.put("location" , "Dhaka");
+        postMap.put("like_cnt" , 0);
+        postMap.put("comment_cnt" ,0);
+        postMap.put("share_cnt" ,0);
+
+
+
+        firebaseFirestore.collection("posts").document(postPushId).set(postMap).addOnCompleteListener(task1 -> {
+            mProgress.dismiss();
+            if(task1.isSuccessful()){
+                mProgress.dismiss();
+                mCreatePostText.setText("");
+            }else{
+                mProgress.dismiss();
+            }
+        });
+    }
+
     public void loadFirstPosts(){
         firebaseFirestore = FirebaseFirestore.getInstance();
-        Query nextQuery = firebaseFirestore.collection("posts").orderBy("timestamp" , Query.Direction.DESCENDING).limit(3);
+        Query nextQuery = firebaseFirestore.collection("posts").orderBy("timestamp" , Query.Direction.ASCENDING).limit(30);
         nextQuery.addSnapshotListener(MainActivity.this , (documentSnapshots, e) -> {
             if(!documentSnapshots.isEmpty()){
                 isFirstPageLoad = false;
@@ -426,7 +438,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-
 
     private TextWatcher filterTextWatcher = new TextWatcher() {
 
@@ -503,8 +514,6 @@ public class MainActivity extends AppCompatActivity {
                 return super.onOptionsItemSelected(item);
         }
     }
-
-
 
     @Override
     protected void onResume() {

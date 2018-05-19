@@ -73,8 +73,9 @@ public class ShowPleopleListActivity extends AppCompatActivity {
         mPeopleList.setLayoutManager(mLinearLayout);
         mPeopleList.setAdapter(mPeopleAdapter);
 
+        loadFirstData();
 
-        if(!isFirstPageLoaded)loadFirstData();
+        /*if(!isFirstPageLoaded)loadFirstData();
         mPeopleList.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
@@ -83,34 +84,35 @@ public class ShowPleopleListActivity extends AppCompatActivity {
                     if(isFirstPageLoaded)loadMoreData();
                 }
             }
-        });
+        });*/
     }
 
     private void loadFirstData(){
+
         firebaseFirestore = FirebaseFirestore.getInstance();
         Query nextQuery = firebaseFirestore.collection(type+"/" + userID + "/"+type)
                 .orderBy("timestamp" , Query.Direction.DESCENDING)
-                .limit(5);
+                .limit(100);
         nextQuery.addSnapshotListener(ShowPleopleListActivity.this , (documentSnapshots, e) -> {
-                if(!documentSnapshots.isEmpty()){
-                    lastVisible = documentSnapshots.getDocuments().get(documentSnapshots.size()-1);
-                    isFirstPageLoaded = true;
-                    for(DocumentChange doc: documentSnapshots.getDocumentChanges()){
-                        if(doc.getType() == DocumentChange.Type.ADDED){
-                            UserBasic basic = new UserBasic();
-                            basic.setmUserID(doc.getDocument().getString("id"));
-                            basic.setmUserName(doc.getDocument().getString("name"));
-                            basic.setmUserThumbImage(doc.getDocument().getString("thumb_image"));
-                            userList.add(basic);
-                            userList.add(basic);
-                            userList.add(basic);
-                            userList.add(basic);
-                            userList.add(basic);
-                            userList.add(basic);
-                            mPeopleAdapter.notifyDataSetChanged();
-                        }
+            if(!documentSnapshots.isEmpty()){
+                lastVisible = documentSnapshots.getDocuments().get(documentSnapshots.size()-1);
+                //isFirstPageLoaded = true;
+                for(DocumentChange doc: documentSnapshots.getDocumentChanges()){
+                    if(doc.getType() == DocumentChange.Type.ADDED){
+                        UserBasic basic = new UserBasic();
+                        basic.setmUserID(doc.getDocument().getString("id"));
+                        basic.setmUserName(doc.getDocument().getString("name"));
+                        basic.setmUserThumbImage(doc.getDocument().getString("thumb_image"));
+                        userList.add(basic);
+                        userList.add(basic);
+                        userList.add(basic);
+                        userList.add(basic);
+                        userList.add(basic);
+                        userList.add(basic);
+                        mPeopleAdapter.notifyDataSetChanged();
                     }
                 }
+            }
         });
     }
 

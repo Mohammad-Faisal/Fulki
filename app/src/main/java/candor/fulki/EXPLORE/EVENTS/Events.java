@@ -13,7 +13,7 @@ public class Events {
     private String description;
     private String people_cnt;
     private String discussion_cnt;
-    private String timestamp;
+    private long timestamp;
     private String clap_cnt;
     private String love_cnt;
 
@@ -97,11 +97,11 @@ public class Events {
         this.discussion_cnt = discussion_cnt;
     }
 
-    public String getTimestamp() {
+    public long getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(String timestamp) {
+    public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
     }
 
@@ -109,7 +109,7 @@ public class Events {
 
     }
 
-    public Events(String title, String moderator_id, String time_and_date, String image_url, String thumb_image_url, String location, String event_push_id, String description, String people_cnt, String discussion_cnt, String timestamp, String clap_cnt, String love_cnt) {
+    public Events(String title, String moderator_id, String time_and_date, String image_url, String thumb_image_url, String location, String event_push_id, String description, String people_cnt, String discussion_cnt, long timestamp, String clap_cnt, String love_cnt) {
         this.title = title;
         this.moderator_id = moderator_id;
         this.time_and_date = time_and_date;

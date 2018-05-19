@@ -5,7 +5,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 
 import candor.fulki.CHAT.Conversation.ConversationFragment;
-import candor.flare.CHAT.Meeting.MeetingFragment;
+import candor.fulki.CHAT.Meeting.MeetingFragment;
 
 public class InboxPagerAdapter extends FragmentStatePagerAdapter {
     int mNumOfTabs;

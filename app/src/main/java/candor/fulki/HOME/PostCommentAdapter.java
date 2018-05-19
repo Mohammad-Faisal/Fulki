@@ -34,6 +34,7 @@ import java.util.List;
 
 import candor.fulki.GENERAL.Functions;
 import candor.fulki.GENERAL.GetTimeAgo;
+import candor.fulki.GENERAL.MainActivity;
 import candor.fulki.NOTIFICATION.Notifications;
 import candor.fulki.PROFILE.ProfileActivity;
 import candor.fulki.R;
@@ -173,7 +174,7 @@ public class PostCommentAdapter extends RecyclerView.Adapter<PostCommentAdapter.
                 String time_stamp = String.valueOf(new Date().getTime());
                 DocumentReference ref = FirebaseFirestore.getInstance().collection("notifications/"+mCurrentCommenterID+"/notificatinos").document();
                 String likeNotificatoinPushID = ref.getId();
-                Likes mLikes = new Likes(mUserID , likeNotificatoinPushID);
+                Likes mLikes = new Likes(mUserID , MainActivity.mUserName , MainActivity.mUserThumbImage ,likeNotificatoinPushID , time_stamp);
                 Notifications pushNoti = new Notifications( "comment_like" ,mUserID , mCurrentCommenterID, mPostID ,likeNotificatoinPushID , time_stamp,"n"  );
 
                 firebaseFirestore.collection("notifications/"+mCurrentCommenterID+"/notificatinos").document(likeNotificatoinPushID).set(pushNoti);

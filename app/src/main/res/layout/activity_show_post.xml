@@ -34,7 +34,7 @@
             <android.support.v7.widget.Toolbar
                 android:id="@+id/show_post_collapsing_toolbar"
                 android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
+                android:layout_height="60dp"
                 app:layout_collapseMode="pin"
                 />
         </android.support.design.widget.CollapsingToolbarLayout>
@@ -189,7 +189,7 @@
     </android.support.v4.widget.NestedScrollView>
 
     <LinearLayout
-
+        android:padding="4dp"
         android:background="@color/White"
         android:layout_gravity="bottom"
         android:layout_width="match_parent"
@@ -202,8 +202,8 @@
             android:layout_height="40dp"
             android:src="@drawable/ic_blank_profile"/>
         <EditText
-            android:layout_marginBottom="5dp"
-            android:background="@drawable/background_message_text"
+            android:layout_marginBottom="0dp"
+            android:background="@color/White"
             android:id="@+id/comment_write"
             android:layout_width="0dp"
             android:layout_height="wrap_content"

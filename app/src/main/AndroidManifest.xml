@@ -107,7 +107,9 @@
             android:name=".EXPLORE.EVENTS.CreateEventActivity"
             android:parentActivityName=".EXPLORE.ExploreActivity"
             android:screenOrientation="portrait" />
-        <activity android:name=".EXPLORE.EVENTS.ShowEventActivity"></activity>
+        <activity android:name=".EXPLORE.EVENTS.ShowEventActivity"
+            android:screenOrientation="portrait"
+            android:parentActivityName=".EXPLORE.ExploreActivity"></activity>
     </application>
 
 </manifest>

@@ -208,7 +208,10 @@ public class ListPeopleAdapter extends RecyclerView.Adapter<ListPeopleAdapter.Li
             userNameText.setText(name);
         }
         public void setFollowBtn(String mListUserID){
-            if(!ownProfile){
+            Log.d(TAG, "setFollowBtn:     "+mUserID + "    "+mListUserID);
+            if(mUserID.equals(mListUserID)){
+                followBtn.setVisibility(View.GONE);
+            }else{
                 FirebaseFirestore.getInstance().collection("followings/" + mUserID + "/followings").document(mListUserID).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<DocumentSnapshot> task) {
@@ -228,8 +231,6 @@ public class ListPeopleAdapter extends RecyclerView.Adapter<ListPeopleAdapter.Li
                         }
                     }
                 });
-            }else{
-                followBtn.setVisibility(View.GONE);
             }
         }
 

@@ -32,7 +32,6 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
                 android:fontFamily="@font/nunito"
-                android:textAlignment="center"
                 android:text="    Title" />
 
             <EditText
@@ -41,16 +40,17 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="15dp"
                 android:layout_marginRight="15dp"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="2dp"
                 android:background="@drawable/edittext_background_change_while_typing"
                 android:padding="12dp" />
 
             <TextView
+                android:layout_marginLeft="10dp"
+                android:textSize="10sp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:fontFamily="@font/nunito"
-                android:textAlignment="center"
                 android:text="    Location" />
 
             <EditText
@@ -59,18 +59,19 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="15dp"
                 android:layout_marginRight="15dp"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="2dp"
                 android:background="@drawable/edittext_background_change_while_typing"
                 android:padding="12dp" />
 
 
 
             <TextView
+                android:layout_marginLeft="10dp"
+                android:textSize="10sp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:fontFamily="@font/nunito"
-                android:textAlignment="center"
                 android:text="    Date" />
 
             <TextView
@@ -79,17 +80,18 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="15dp"
                 android:layout_marginRight="15dp"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="2dp"
                 android:background="@drawable/edittext_background_change_while_typing"
                 android:padding="12dp" />
 
 
             <TextView
+                android:layout_marginLeft="10dp"
+                android:textSize="10sp"
                 android:layout_width="match_parent"
                 android:layout_height="20dp"
                 android:layout_marginTop="10dp"
                 android:fontFamily="@font/nunito"
-                android:textAlignment="center"
                 android:text="    Description" />
 
             <EditText
@@ -98,7 +100,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="15dp"
                 android:layout_marginRight="15dp"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="2dp"
                 android:background="@drawable/edittext_background_change_while_typing"
                 android:padding="12dp" />
 

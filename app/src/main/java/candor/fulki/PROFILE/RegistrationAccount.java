@@ -31,6 +31,7 @@ import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -212,6 +213,7 @@ public class RegistrationAccount extends AppCompatActivity {
                                         }
 
 
+                                        String deviceTokenID = FirebaseInstanceId.getInstance().getToken();
                                         Map < String, String> userMap = new HashMap<>();
 
                                         userMap.put("name" , name1);
@@ -233,6 +235,7 @@ public class RegistrationAccount extends AppCompatActivity {
                                         userMap.put("lng" , "");
                                         userMap.put("rating" , "0");
                                         userMap.put("user_id" , mUserID);
+                                        userMap.put("device_id" , deviceTokenID);
 
 
                                         firebaseFirestore.collection("users").document(mUserID).set(userMap).addOnCompleteListener(new OnCompleteListener<Void>() {

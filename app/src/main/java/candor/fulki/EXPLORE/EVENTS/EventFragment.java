@@ -48,7 +48,7 @@ public class EventFragment extends Fragment {
         eventsList = new ArrayList<>();
         android.support.v7.widget.RecyclerView recyclerView = mView.findViewById(R.id.fragment_event_recycler);
         recyclerView.hasFixedSize();
-        recyclerView.setLayoutManager(new GridLayoutManager(getContext() , 2));
+        recyclerView.setLayoutManager(new GridLayoutManager(getContext() , 1));
         eventsAdapter = new EventsAdapter(eventsList, getContext() , getActivity());
         recyclerView.setAdapter(eventsAdapter);
 
@@ -61,7 +61,7 @@ public class EventFragment extends Fragment {
 
     public void loadEvents(){
         firebaseFirestore = FirebaseFirestore.getInstance();
-        Query nextQuery = firebaseFirestore.collection("events").orderBy("timestamp" , Query.Direction.DESCENDING).limit(100);
+        Query nextQuery = firebaseFirestore.collection("events").orderBy("timestamp" , Query.Direction.DESCENDING).limit(50);
         nextQuery.addSnapshotListener(getActivity() , (documentSnapshots, e) -> {
             if(!documentSnapshots.isEmpty()){
                 for(DocumentChange doc: documentSnapshots.getDocumentChanges()){

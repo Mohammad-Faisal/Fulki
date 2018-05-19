@@ -45,6 +45,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.Transaction;
+import com.google.firebase.firestore.WriteBatch;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.like.LikeButton;
@@ -70,14 +72,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import candor.fulki.EXPLORE.EVENTS.ShowEventActivity;
 import candor.fulki.GENERAL.Functions;
 import candor.fulki.GENERAL.MainActivity;
 import candor.fulki.NOTIFICATION.Notifications;
 import candor.fulki.PROFILE.ProfileActivity;
+import candor.fulki.PROFILE.ShowPleopleListActivity;
 import candor.fulki.R;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 import static com.firebase.ui.auth.AuthUI.getApplicationContext;
+import static java.lang.System.err;
 
 public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
 
@@ -168,7 +173,6 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
         ViewHolder viewHolder = holder;
         final Posts post = data.get(position);
         final String mCurrentPosterId = post.getUser_id();  //whose post is this
-        final String mPostID = post.getPost_push_id();
         final String postPushID = post.getPost_push_id();
         holder.setPostCaption(post.getCaption());
         holder.setPostDateTime(post.getTime_and_date());
@@ -182,7 +186,7 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
             holder.postLocaiton.setVisibility(View.GONE);
         }else{
             holder.postLocaiton.setVisibility(View.VISIBLE);
-            holder.setPostLocaiton("shared by "+location);
+            //holder.setPostLocaiton("shared by "+location);
         }
 
 
@@ -201,7 +205,6 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
             }
         });
 
-
         //setting user name and user image onclick listener
         holder.postUserImage.setOnClickListener(v -> {
 
@@ -214,50 +217,44 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
 
         });
 
-
         //setting user name and user image onclick listener
-        holder.postUserName.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent showPostIntent = new Intent(context  , ProfileActivity.class);
-                showPostIntent.putExtra("userID" , mCurrentPosterId);
+        holder.postUserName.setOnClickListener(v -> {
+            Intent showPostIntent = new Intent(context  , ProfileActivity.class);
+            showPostIntent.putExtra("userID" , mCurrentPosterId);
 
-                Pair< View , String > pair1 = Pair.create(holder.itemView.findViewById(R.id.post_user_single_imagee) ,"profile_image");
-                Pair< View , String > pair2 = Pair.create(holder.itemView.findViewById(R.id.post_user_name) ,"profile_name");
+            Pair< View , String > pair1 = Pair.create(holder.itemView.findViewById(R.id.post_user_single_imagee) ,"profile_image");
+            Pair< View , String > pair2 = Pair.create(holder.itemView.findViewById(R.id.post_user_name) ,"profile_name");
 
-                ActivityOptionsCompat optionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation(activity ,pair1 , pair2 );
-                context.startActivity(showPostIntent , optionsCompat.toBundle());
-            }
+            ActivityOptionsCompat optionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation(activity ,pair1 , pair2 );
+            context.startActivity(showPostIntent , optionsCompat.toBundle());
         });
 
-
         //setting like count
-        FirebaseFirestore.getInstance().collection("likes/" + mPostID + "/likes").addSnapshotListener(new EventListener<QuerySnapshot>() {
-            @Override
-            public void onEvent(QuerySnapshot documentSnapshots, FirebaseFirestoreException e) {
-                if (!documentSnapshots.isEmpty()) {
-                    int count = documentSnapshots.size();
-                    String cnt = Integer.toString(count);
-                    if (count == 1) {
-                        holder.setPostLikeCount(cnt + " like");
-                    } else {
-                        holder.setPostLikeCount(cnt + " likes");
-                    }
-
+        FirebaseFirestore.getInstance().collection("likes/" + postPushID + "/likes").addSnapshotListener((documentSnapshots, e) -> {
+            if (!documentSnapshots.isEmpty()) {
+                int count = documentSnapshots.size();
+                String cnt = Integer.toString(count);
+                firebaseFirestore.collection("posts").document(postPushID).update("like_cnt" , count);
+                if (count == 1) {
+                    holder.setPostLikeCount(cnt + " like");
                 } else {
-                    holder.postLikeButton.setLiked(false);
-                    holder.setPostLikeCount("0 like");
+                    holder.setPostLikeCount(cnt + " likes");
                 }
+            } else {
+                holder.postLikeButton.setLiked(false);
+                holder.setPostLikeCount("0 like");
             }
         });
 
         //setting comment count
-        FirebaseFirestore.getInstance().collection("comments/" + mPostID + "/comments").addSnapshotListener(new EventListener<QuerySnapshot>() {
+        FirebaseFirestore.getInstance().collection("comments/" + postPushID + "/comments").addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(QuerySnapshot documentSnapshots, FirebaseFirestoreException e) {
                 if (!documentSnapshots.isEmpty()) {
                     int count = documentSnapshots.size();
                     String cnt = Integer.toString(count);
+
+                    firebaseFirestore.collection("posts").document(postPushID).update("comment_cnt" , count);
                     if (count == 1) {
                         holder.setPostCommentCount(cnt + " comment");
                     } else {
@@ -270,26 +267,24 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
         });
 
         //setting share count
-        FirebaseFirestore.getInstance().collection("shares/" + mPostID + "/shares").addSnapshotListener(new EventListener<QuerySnapshot>() {
-            @Override
-            public void onEvent(QuerySnapshot documentSnapshots, FirebaseFirestoreException e) {
-                if (!documentSnapshots.isEmpty()) {
-                    int count = documentSnapshots.size();
-                    String cnt = Integer.toString(count);
-                    if (count == 1) {
-                        holder.postShareCount.setText(cnt + " share");
-                    } else {
-                        holder.postShareCount.setText(cnt + " shares");
-                    }
+        FirebaseFirestore.getInstance().collection("shares/" + postPushID + "/shares").addSnapshotListener((documentSnapshots, e) -> {
+            if (!documentSnapshots.isEmpty()) {
+                int count = documentSnapshots.size();
+                firebaseFirestore.collection("posts").document(postPushID).update("share_cnt" , count);
+                String cnt = Integer.toString(count);
+                if (count == 1) {
+                    holder.postShareCount.setText(cnt + " share");
                 } else {
-                    holder.postShareCount.setText("0 share");
+                    holder.postShareCount.setText(cnt + " shares");
                 }
+            } else {
+                holder.postShareCount.setText("0 share");
             }
         });
 
 
         //setting the current state of like button
-        FirebaseFirestore.getInstance().collection("likes/" + mPostID + "/likes").document(mUserID).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+        FirebaseFirestore.getInstance().collection("likes/" + postPushID + "/likes").document(mUserID).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if (task.isSuccessful()) {
@@ -315,314 +310,352 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
                 holder.postLikeButton.setLiked(true);
                 Functions f = new Functions();
 
-                //building comment
+                //building like
                 String time_stamp = String.valueOf(new Date().getTime());
                 DocumentReference ref = FirebaseFirestore.getInstance().collection("notifications/"+mCurrentPosterId+"/notificatinos").document();
                 String likeNotificatoinPushID = ref.getId();
-                Likes mLikes = new Likes(mUserID , likeNotificatoinPushID);
+
+
+                Likes mLikes = new Likes(mUserID , MainActivity.mUserName , MainActivity.mUserThumbImage ,likeNotificatoinPushID , time_stamp);
                 Notifications pushNoti = new Notifications( "like" ,mUserID , post.getUser_id() , postPushID ,likeNotificatoinPushID , time_stamp,"n"  );
 
 
-                firebaseFirestore.collection("notifications/"+post.getUser_id()+"/notificatinos").document(likeNotificatoinPushID).set(pushNoti);
-                firebaseFirestore.collection("posts/"+postPushID+"/notifications").document(likeNotificatoinPushID).set(pushNoti);
-                firebaseFirestore.collection("likes/" + mPostID + "/likes").document(mUserID).set(mLikes);
 
+                WriteBatch writeBatch  = firebaseFirestore.batch();
+
+                DocumentReference notificatinoRef = firebaseFirestore.collection("notifications/"+post.getUser_id()+"/notificatinos").document(likeNotificatoinPushID);
+                writeBatch.set(notificatinoRef, pushNoti);
+
+                DocumentReference postNotificatinoRef =  firebaseFirestore.collection("posts/"+postPushID+"/notifications").document(likeNotificatoinPushID);
+                writeBatch.set(postNotificatinoRef, pushNoti);
+
+                DocumentReference postLikeRef =  firebaseFirestore.collection("likes/" + postPushID + "/likes").document(mUserID); //.set(mLikes);
+                writeBatch.set(postLikeRef, mLikes);
+
+                writeBatch.commit().addOnSuccessListener(aVoid -> {
+                    Log.d(TAG, "liked:   like is successful");
+
+                }).addOnFailureListener(e -> {
+                    Log.d(TAG, "liked:   like is not succesful");
+                });
             }
             @Override
             public void unLiked(LikeButton likeButton) {
                 holder.postLikeButton.setLiked(false);
-                firebaseFirestore.collection("likes/" + mPostID + "/likes").document(mUserID).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                firebaseFirestore.collection("likes/" + postPushID + "/likes").document(mUserID).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                         if(task.isSuccessful()){
                             String likeNotificatoinPushID = task.getResult().getString("notificationID");
-                            firebaseFirestore.collection("likes/" + mPostID + "/likes").document(mUserID).delete();
-                            firebaseFirestore.collection("notifications/"+post.getUser_id()+"/notificatinos").document(likeNotificatoinPushID).delete();
-                            firebaseFirestore.collection("posts/"+postPushID+"/notifications").document(likeNotificatoinPushID).delete();
+
+
+                            WriteBatch writeBatch  = firebaseFirestore.batch();
+
+                            DocumentReference notificatinoRef = firebaseFirestore.collection("notifications/"+post.getUser_id()+"/notificatinos").document(likeNotificatoinPushID);
+                            writeBatch.delete(notificatinoRef);
+
+                            DocumentReference postNotificatinoRef =  firebaseFirestore.collection("posts/"+postPushID+"/notifications").document(likeNotificatoinPushID);
+                            writeBatch.delete(postNotificatinoRef);
+
+                            DocumentReference postLikeRef =  firebaseFirestore.collection("likes/" + postPushID + "/likes").document(mUserID); //.set(mLikes);
+                            writeBatch.delete(postLikeRef);
+
+
+                            writeBatch.commit().addOnSuccessListener(aVoid -> {
+                                Log.d(TAG, "liked:   unlike is successful");
+
+                            }).addOnFailureListener(e -> {
+                                Log.d(TAG, "liked:   unlike is not succesful");
+                            });
                         }
                     }
                 });
             }
         });
 
-
+        holder.postLikeCount.setOnClickListener(v -> {
+            Intent showPeopleIntent = new Intent(context , ShowPleopleListActivity.class);
+            showPeopleIntent.putExtra("type" , "likes");
+            showPeopleIntent.putExtra("user_id" ,postPushID );
+            context.startActivity(showPeopleIntent);
+        });
 
         //handling the comment onclick listener
-        holder.postCommentButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        holder.postCommentButton.setOnClickListener(v -> {
 
-               // Dialog commentDialog = new Dialog(context, android.R.style.Theme_Holo_Light_NoActionBar_Fullscreen);
-                Dialog commentDialog = new Dialog(context, android.R.style.ThemeOverlay_Material_ActionBar);
-                commentDialog.getWindow().getAttributes().windowAnimations = R.anim.fui_slide_in_right;
-                commentDialog.setContentView(R.layout.comment_pop_up_dialog);
+           // Dialog commentDialog = new Dialog(context, android.R.style.Theme_Holo_Light_NoActionBar_Fullscreen);
+            Dialog commentDialog = new Dialog(context, android.R.style.ThemeOverlay_Material_ActionBar);
+            commentDialog.getWindow().getAttributes().windowAnimations = R.anim.fui_slide_in_right;
+            commentDialog.setContentView(R.layout.comment_pop_up_dialog);
 
-                //containers
-                final RecyclerView mCommentList;
-                final List<Comments> commentList = new ArrayList<>();
-                LinearLayoutManager mLinearLayout;
-                final String postPushID = post.getPost_push_id();
+            //containers
+            final RecyclerView mCommentList;
+            final List<Comments> commentList = new ArrayList<>();
+            LinearLayoutManager mLinearLayout;
 
 
-                //--------- SETTING THE COMMENT ADAPTERS --//
-                final PostCommentAdapter mPostCommentAdapter = new PostCommentAdapter(commentList, context , activity);
-                mCommentList = commentDialog.findViewById(R.id.comment_list);
-                mLinearLayout = new LinearLayoutManager(context);
-                mCommentList.hasFixedSize();
-                mCommentList.setLayoutManager(mLinearLayout);
-                mCommentList.setAdapter(mPostCommentAdapter);
+            //--------- SETTING THE COMMENT ADAPTERS --//
+            final PostCommentAdapter mPostCommentAdapter = new PostCommentAdapter(commentList, context , activity);
+            mCommentList = commentDialog.findViewById(R.id.comment_list);
+            mLinearLayout = new LinearLayoutManager(context);
+            mCommentList.hasFixedSize();
+            mCommentList.setLayoutManager(mLinearLayout);
+            mCommentList.setAdapter(mPostCommentAdapter);
 
 
-                //-------------LOADING COMMENTS------------//
-                firebaseFirestore = FirebaseFirestore.getInstance();
-                Query nextQuery = firebaseFirestore.collection("comments/"+postPushID+"/comments").orderBy("time_stamp" , Query.Direction.DESCENDING);
-                nextQuery.addSnapshotListener(new EventListener<QuerySnapshot>() {
-                    @Override
-                    public void onEvent(QuerySnapshot documentSnapshots, FirebaseFirestoreException e) {
-                        for(DocumentChange doc: documentSnapshots.getDocumentChanges()){
-                            if(doc.getType() == DocumentChange.Type.ADDED){
-                                Comments singleComment = doc.getDocument().toObject(Comments.class);
-                                commentList.add(singleComment);
-                                mPostCommentAdapter.notifyDataSetChanged();
-                            }
-                        }
+            //-------------LOADING COMMENTS------------//
+            firebaseFirestore = FirebaseFirestore.getInstance();
+            Query nextQuery = firebaseFirestore.collection("comments/"+ postPushID+"/comments").orderBy("time_stamp" , Query.Direction.DESCENDING);
+            nextQuery.addSnapshotListener((documentSnapshots, e) -> {
+                for(DocumentChange doc: documentSnapshots.getDocumentChanges()){
+                    if(doc.getType() == DocumentChange.Type.ADDED){
+                        Comments singleComment = doc.getDocument().toObject(Comments.class);
+                        commentList.add(singleComment);
+                        mPostCommentAdapter.notifyDataSetChanged();
                     }
+                }
+            });
+
+
+
+
+            //comment onclick functionality
+            final TextView commentBox = commentDialog.findViewById(R.id.comment_write);
+            ImageButton commentPost = commentDialog.findViewById(R.id.comment_post);
+            commentPost.setOnClickListener(view -> {
+
+                String time_stamp = String.valueOf(new Date().getTime());
+
+
+                DocumentReference notiRef = FirebaseFirestore.getInstance().collection("notifications/"+mCurrentPosterId+"/notificatinos").document();
+                String commentNotificatoinPushID = notiRef.getId();
+
+                DocumentReference commentRef = FirebaseFirestore.getInstance().collection("comments/"+ postPushID +"/comments").document();
+                String commentID = commentRef.getId();
+
+                Notifications pushNoti = new Notifications( "comment" ,mUserID , post.getUser_id(), postPushID,commentNotificatoinPushID , time_stamp,"n"  );
+                Comments  comment =  new Comments(commentBox.getText().toString() , mUserID ,commentID, postPushID, commentNotificatoinPushID  , time_stamp);
+                commentBox.setText("");
+
+
+                WriteBatch writeBatch  = firebaseFirestore.batch();
+
+                DocumentReference notificatinoRef = firebaseFirestore.collection("notifications/"+post.getUser_id()+"/notificatinos").document(commentNotificatoinPushID);
+                writeBatch.set(notificatinoRef, pushNoti);
+
+                DocumentReference postNotificatinoRef =  firebaseFirestore.collection("posts/"+postPushID+"/notifications").document(commentNotificatoinPushID);
+                writeBatch.set(postNotificatinoRef, pushNoti);
+
+                writeBatch.set(commentRef, comment);
+
+                writeBatch.commit().addOnSuccessListener(aVoid -> {
+                    Log.d(TAG, "liked:   like is successful");
+
+                }).addOnFailureListener(e -> {
+                    Log.d(TAG, "liked:   like is not succesful");
                 });
-
-
-
-
-                //comment onclick functionality
-                final TextView commentBox = commentDialog.findViewById(R.id.comment_write);
-                ImageButton commentPost = commentDialog.findViewById(R.id.comment_post);
-                commentPost.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        String time_stamp = String.valueOf(new Date().getTime());
-                        DocumentReference ref = FirebaseFirestore.getInstance().collection("notifications/"+mCurrentPosterId+"/notificatinos").document();
-                        String commentNotificatoinPushID = ref.getId();
-
-                        DocumentReference commentRef = FirebaseFirestore.getInstance().collection("comments/"+postPushID+"/comments").document();
-                        String commentID = ref.getId();
-
-                        Notifications pushNoti = new Notifications( "comment" ,mUserID , post.getUser_id(), postPushID ,commentNotificatoinPushID , time_stamp,"n"  );
-                        Comments  comment =  new Comments(commentBox.getText().toString() , mUserID ,commentID, postPushID  , commentNotificatoinPushID  , time_stamp);
-                        commentBox.setText("");
-
-                        firebaseFirestore.collection("notifications/"+post.getUser_id()+"/notificatinos").document(commentNotificatoinPushID).set(pushNoti);
-                        firebaseFirestore.collection("comments/"+postPushID+"/comments").add(comment);
-                        firebaseFirestore.collection("posts/"+postPushID+"/notifications").document(commentNotificatoinPushID).set(pushNoti);
-                    }
-                });
-                commentDialog.show();
-            }
+            });
+            commentDialog.show();
         });
 
         //more options functionality
-        holder.mPostMoreOptions.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        holder.mPostMoreOptions.setOnClickListener(v -> {
 
-                if(mUserID.equals(mCurrentPosterId)){
-                    AlertDialog.Builder builder1 = new AlertDialog.Builder(context);
-                    builder1.setMessage("Do you want to Delete this post?");
-                    builder1.setCancelable(true);
-                    builder1.setPositiveButton(
-                            "Yes",
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
+            if(mUserID.equals(mCurrentPosterId)){
+                AlertDialog.Builder builder1 = new AlertDialog.Builder(context);
+                builder1.setMessage("Do you want to Delete this post?");
+                builder1.setCancelable(true);
+                builder1.setPositiveButton(
+                        "Yes",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
 
 
-                                    mProgress = new ProgressDialog(context);
-                                    mProgress.setTitle("Deleting Post.......");
-                                    mProgress.setMessage("please wait while we delete your post");
-                                    mProgress.setCanceledOnTouchOutside(false);
-                                    mProgress.show();
+                                mProgress = new ProgressDialog(context);
+                                mProgress.setTitle("Deleting Post.......");
+                                mProgress.setMessage("please wait while we delete your post");
+                                mProgress.setCanceledOnTouchOutside(false);
+                                mProgress.show();
 
-                                    // post theke delete korte hobe
-                                    //notification gula delete korte hobe
-                                    //share gula delete korte hobe
-                                    //comment gula delete korte hobe
-                                    //comment like gula delete korte hobe
-                                    //like gula delete korte hobe
+                                // post theke delete korte hobe
+                                //notification gula delete korte hobe
+                                //share gula delete korte hobe
+                                //comment gula delete korte hobe
+                                //comment like gula delete korte hobe
+                                //like gula delete korte hobe
 
 
-                                    firebaseFirestore.collection("posts").document(mPostID).delete().addOnCompleteListener(new OnCompleteListener<Void>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task<Void> task) {
-                                            if(task.isSuccessful()){
-                                                mProgress.dismiss();
-                                                notifyDataSetChanged();
-                                                Log.d(TAG, "onComplete: post is deleted !!");
-                                            }else{
-                                                Log.d(TAG, "onComplete: likes are not deleted !!!!");
-                                            }
+                                firebaseFirestore.collection("posts").document(postPushID).delete().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        if(task.isSuccessful()){
+                                            mProgress.dismiss();
+                                            notifyDataSetChanged();
+                                            Log.d(TAG, "onComplete: post is deleted !!");
+                                        }else{
+                                            Log.d(TAG, "onComplete: likes are not deleted !!!!");
                                         }
-                                    });
+                                    }
+                                });
 
 
-                                    /*firebaseFirestore.collection("comments").document(postPushID).delete();
-                                    firebaseFirestore.collection("comment_likes").document(postPushID).delete();
-                                    firebaseFirestore.collection("shares").document(postPushID).delete();*/
+                                /*firebaseFirestore.collection("comments").document(postPushID).delete();
+                                firebaseFirestore.collection("comment_likes").document(postPushID).delete();
+                                firebaseFirestore.collection("shares").document(postPushID).delete();*/
 
-                                    
 
-                                    /*firebaseFirestore.collection("images").document(mUserID).collection("posts").document(postPushID).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                                         if(task.isSuccessful()){
-                                             if(task.getResult().exists()){
-                                                 final String imagePath = task.getResult().get("imagePath").toString();
-                                                 final String thumbImagePath = task.getResult().get("imageThumbPath").toString();
-                                                 // Create a storage reference from our app
 
-                                                 final StorageReference storageRef = FirebaseStorage.getInstance().getReference();
-                                                 StorageReference imageRef = storageRef.child(imagePath);
-                                                 imageRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
-                                                     @Override
-                                                     public void onSuccess(Void aVoid) {
-                                                         StorageReference imageRef = storageRef.child(thumbImagePath);
-                                                         imageRef.delete();
-                                                         firebaseFirestore.collection("images").document(mUserID).collection("posts").document(postPushID).delete();
-                                                     }
-                                                 }).addOnFailureListener(new OnFailureListener() {
-                                                     @Override
-                                                     public void onFailure(@NonNull Exception exception) {
-                                                         // Uh-oh, an error occurred!
-                                                     }
-                                                 });
-                                             }
-                                         }else{
-                                             Log.d(TAG, "onComplete: some error occured");
+                                /*firebaseFirestore.collection("images").document(mUserID).collection("posts").document(postPushID).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                     if(task.isSuccessful()){
+                                         if(task.getResult().exists()){
+                                             final String imagePath = task.getResult().get("imagePath").toString();
+                                             final String thumbImagePath = task.getResult().get("imageThumbPath").toString();
+                                             // Create a storage reference from our app
+
+                                             final StorageReference storageRef = FirebaseStorage.getInstance().getReference();
+                                             StorageReference imageRef = storageRef.child(imagePath);
+                                             imageRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                 @Override
+                                                 public void onSuccess(Void aVoid) {
+                                                     StorageReference imageRef = storageRef.child(thumbImagePath);
+                                                     imageRef.delete();
+                                                     firebaseFirestore.collection("images").document(mUserID).collection("posts").document(postPushID).delete();
+                                                 }
+                                             }).addOnFailureListener(new OnFailureListener() {
+                                                 @Override
+                                                 public void onFailure(@NonNull Exception exception) {
+                                                     // Uh-oh, an error occurred!
+                                                 }
+                                             });
                                          }
-                                        }
-                                    });*/
+                                     }else{
+                                         Log.d(TAG, "onComplete: some error occured");
+                                     }
+                                    }
+                                });*/
 
 
 
-                                    /*Query nextQuery = firebaseFirestore.collection("posts/"+postPushID+"/notificatinos");
-                                    nextQuery.addSnapshotListener(new EventListener<QuerySnapshot>() {
-                                        @Override
-                                        public void onEvent(QuerySnapshot documentSnapshots, FirebaseFirestoreException e) {
-                                            for(DocumentChange doc: documentSnapshots.getDocumentChanges()){
-                                                if(doc.getType() == DocumentChange.Type.REMOVED){
-                                                    Notifications singleNotifications = doc.getDocument().toObject(Notifications.class);
-                                                    String notiID = singleNotifications.getNotification_id();
-                                                    String userID = singleNotifications.getNotification_to();
-                                                    firebaseFirestore.collection("notifications/"+userID+"/notificatinos").document(notiID).delete();
-                                                }else{
-                                                    Log.d(TAG, "onEvent: notification type is not added");
-                                                }
+                                /*Query nextQuery = firebaseFirestore.collection("posts/"+postPushID+"/notificatinos");
+                                nextQuery.addSnapshotListener(new EventListener<QuerySnapshot>() {
+                                    @Override
+                                    public void onEvent(QuerySnapshot documentSnapshots, FirebaseFirestoreException e) {
+                                        for(DocumentChange doc: documentSnapshots.getDocumentChanges()){
+                                            if(doc.getType() == DocumentChange.Type.REMOVED){
+                                                Notifications singleNotifications = doc.getDocument().toObject(Notifications.class);
+                                                String notiID = singleNotifications.getNotification_id();
+                                                String userID = singleNotifications.getNotification_to();
+                                                firebaseFirestore.collection("notifications/"+userID+"/notificatinos").document(notiID).delete();
+                                            }else{
+                                                Log.d(TAG, "onEvent: notification type is not added");
                                             }
                                         }
-                                    });*/
+                                    }
+                                });*/
 
 
-                                    /*firebaseFirestore.collection("posts").document(postPushID).delete().addOnCompleteListener(new OnCompleteListener<Void>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task<Void> task) {
-                                            if(task.isSuccessful()){
-                                                mProgress.dismiss();
-                                            }
+                                /*firebaseFirestore.collection("posts").document(postPushID).delete().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        if(task.isSuccessful()){
+                                            mProgress.dismiss();
                                         }
-                                    });*/
+                                    }
+                                });*/
 
 
 
-                                    dialog.cancel();
-                                }
-                            });
-                    builder1.setNegativeButton(
-                            "No",
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    dialog.cancel();
-                                }
-                            });
+                                dialog.cancel();
+                            }
+                        });
+                builder1.setNegativeButton(
+                        "No",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                            }
+                        });
 
-                    AlertDialog alert11 = builder1.create();
-                    alert11.show();
-                }else{
-                    AlertDialog.Builder builder1 = new AlertDialog.Builder(context);
-                    builder1.setMessage("Do you want to Report this post?");
-                    builder1.setCancelable(true);
+                AlertDialog alert11 = builder1.create();
+                alert11.show();
+            }else{
+                AlertDialog.Builder builder1 = new AlertDialog.Builder(context);
+                builder1.setMessage("Do you want to Report this post?");
+                builder1.setCancelable(true);
 
-                    builder1.setPositiveButton(
-                            "Yes",
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    dialog.cancel();
-                                }
-                            });
-                    builder1.setNegativeButton(
-                            "No",
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    dialog.cancel();
-                                }
-                            });
+                builder1.setPositiveButton(
+                        "Yes",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                            }
+                        });
+                builder1.setNegativeButton(
+                        "No",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                            }
+                        });
 
-                    AlertDialog alert11 = builder1.create();
-                    alert11.show();
-                }
+                AlertDialog alert11 = builder1.create();
+                alert11.show();
             }
         });
 
         //post share functionality
-        holder.postShareButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                //setting user details
-                FirebaseFirestore.getInstance().collection("users").document(mUserID).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                        if (task.isSuccessful()) {
-                            String mCurrentUserName = task.getResult().getString("name");
-                            Map<String , Object> postMap = new HashMap<>();
-                            postMap.put("user_id" , mUserID);
-                            postMap.put("image_url" , post.getImage_url());
-                            postMap.put("thumb_image_url" , post.getThumb_image_url());
-                            postMap.put("caption" , post.getCaption());
-                            postMap.put("time_and_date" , post.getTime_and_date());
-                            postMap.put("timestamp" ,post.getTimestamp() );
-                            postMap.put("post_push_id" , post.getPost_push_id());
-                            postMap.put("location" , mCurrentUserName);
+        holder.postShareButton.setOnClickListener(v -> {
+            //setting user details
+            FirebaseFirestore.getInstance().collection("users").document(mUserID).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                    if (task.isSuccessful()) {
+                        String mCurrentUserName = task.getResult().getString("name");
+                        Map<String , Object> postMap = new HashMap<>();
+                        postMap.put("user_id" , mUserID);
+                        postMap.put("image_url" , post.getImage_url());
+                        postMap.put("thumb_image_url" , post.getThumb_image_url());
+                        postMap.put("caption" , post.getCaption());
+                        postMap.put("time_and_date" , post.getTime_and_date());
+                        postMap.put("timestamp" ,post.getTimestamp() );
+                        postMap.put("post_push_id" , post.getPost_push_id());
+                        postMap.put("location" , mCurrentUserName);
 
 
-                            String time_stamp = String.valueOf(new Date().getTime());
-                            DocumentReference ref = FirebaseFirestore.getInstance().collection("notifications/"+mCurrentPosterId+"/notificatinos").document();
-                            String shareNotificatoinPushID = ref.getId();
+                        String time_stamp = String.valueOf(new Date().getTime());
+                        DocumentReference ref = FirebaseFirestore.getInstance().collection("notifications/"+mCurrentPosterId+"/notificatinos").document();
+                        String shareNotificatoinPushID = ref.getId();
 
-                            Notifications pushNoti = new Notifications( "share" ,mUserID , post.getUser_id(), postPushID ,shareNotificatoinPushID , time_stamp,"n"  );
-                            Shares  share =  new Shares(mUserID , shareNotificatoinPushID);
+                        Notifications pushNoti = new Notifications( "share" ,mUserID , post.getUser_id(), postPushID ,shareNotificatoinPushID , time_stamp,"n"  );
+                        Shares  share =  new Shares(mUserID , shareNotificatoinPushID);
 
-                            firebaseFirestore.collection("notifications/"+post.getUser_id()+"/notificatinos").document(shareNotificatoinPushID).set(pushNoti);
-                            firebaseFirestore.collection("shares/"+postPushID+"/shares").add(share);
-                            firebaseFirestore.collection("posts/"+postPushID+"/notifications").document(shareNotificatoinPushID).set(pushNoti);
+                        firebaseFirestore.collection("notifications/"+post.getUser_id()+"/notificatinos").document(shareNotificatoinPushID).set(pushNoti);
+                        firebaseFirestore.collection("shares/"+postPushID+"/shares").add(share);
+                        firebaseFirestore.collection("posts/"+postPushID+"/notifications").document(shareNotificatoinPushID).set(pushNoti);
 
 
-                            //we are posting the shared post as a new post but for like comment count we didnt change the postPushId of the post
-                            firebaseFirestore.collection("posts").add(postMap).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
-                                @Override
-                                public void onComplete(@NonNull Task<DocumentReference> task) {
-                                    if(task.isSuccessful()){
-                                        Toast.makeText(context, "Success !", Toast.LENGTH_SHORT).show();
-                                    }else{
-                                        Toast.makeText(context, "Success !", Toast.LENGTH_SHORT).show();
-                                    }
+                        //we are posting the shared post as a new post but for like comment count we didnt change the postPushId of the post
+                        firebaseFirestore.collection("posts").add(postMap).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
+                            @Override
+                            public void onComplete(@NonNull Task<DocumentReference> task) {
+                                if(task.isSuccessful()){
+                                    Toast.makeText(context, "Success !", Toast.LENGTH_SHORT).show();
+                                }else{
+                                    Toast.makeText(context, "Success !", Toast.LENGTH_SHORT).show();
                                 }
-                            });
+                            }
+                        });
 
 
 
-                        } else {
-                            Log.d(TAG, "onComplete: " + task.getException().toString());
-                        }
+                    } else {
+                        Log.d(TAG, "onComplete: " + task.getException().toString());
                     }
-                });
+                }
+            });
 
-            }
         });
 
         holder.postImage.setOnClickListener(new View.OnClickListener() {

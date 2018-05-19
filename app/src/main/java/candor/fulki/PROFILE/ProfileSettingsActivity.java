@@ -46,6 +46,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.WriteBatch;
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -287,9 +288,9 @@ public class ProfileSettingsActivity extends AppCompatActivity implements Adapte
 
 
 
-        Map< String, String> userMap = getAllData();
+        Map< String, Object> userMap = getAllData();
 
-        firebaseFirestore.collection("users").document().set(userMap).addOnCompleteListener(new OnCompleteListener<Void>() {
+        firebaseFirestore.collection("users").document().update(userMap).addOnCompleteListener(new OnCompleteListener<Void>() {
             public static final String TAG ="Update account process " ;
             @Override
             public void onComplete(@NonNull Task<Void> task) {
@@ -343,8 +344,9 @@ public class ProfileSettingsActivity extends AppCompatActivity implements Adapte
         return true;
     }
 
-    Map< String, String> getAllData() {
-        Map< String, String> userMap = new HashMap<>();
+    Map< String, Object> getAllData() {
+        String deviceTokenID = FirebaseInstanceId.getInstance().getToken();
+        Map< String, Object> userMap = new HashMap<>();
         userMap.put("name" , nameString);
         userMap.put("user_name" , userNameString);
         userMap.put("bio" , bioString);
@@ -362,7 +364,7 @@ public class ProfileSettingsActivity extends AppCompatActivity implements Adapte
         userMap.put("lng" , "");
         userMap.put("rating" , "");
         userMap.put("user_id" , mUserID);
-
+        userMap.put("device_id" , deviceTokenID);
         return userMap;
     }
 

@@ -7,6 +7,7 @@ package candor.fulki.HOME;
 public class Posts {
 
 
+    private long timestamp;
     private String user_name;
     private String user_id;
     private String time_and_date;
@@ -15,6 +16,21 @@ public class Posts {
     private String location;
     private String post_push_id;
     private String caption;
+    private int like_cnt;
+    private int comment_cnt;
+    private int share_cnt;
+
+    public Posts() {
+    }
+
+    public long getTimestamp() {
+
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
 
     public String getUser_name() {
         return user_name;
@@ -80,21 +96,32 @@ public class Posts {
         this.caption = caption;
     }
 
-    public long getTimestamp() {
-        return timestamp;
+    public int getLike_cnt() {
+        return like_cnt;
     }
 
-    public void setTimestamp(long timestamp) {
+    public void setLike_cnt(int like_cnt) {
+        this.like_cnt = like_cnt;
+    }
+
+    public int getComment_cnt() {
+        return comment_cnt;
+    }
+
+    public void setComment_cnt(int comment_cnt) {
+        this.comment_cnt = comment_cnt;
+    }
+
+    public int getShare_cnt() {
+        return share_cnt;
+    }
+
+    public void setShare_cnt(int share_cnt) {
+        this.share_cnt = share_cnt;
+    }
+
+    public Posts(long timestamp, String user_name, String user_id, String time_and_date, String image_url, String thumb_image_url, String location, String post_push_id, String caption, int like_cnt, int comment_cnt, int share_cnt) {
         this.timestamp = timestamp;
-    }
-
-    private long timestamp;
-
-    public Posts() {
-    }
-
-    public Posts(String user_name, String user_id, String time_and_date, String image_url, String thumb_image_url, String location, String post_push_id, String caption, long timestamp) {
-
         this.user_name = user_name;
         this.user_id = user_id;
         this.time_and_date = time_and_date;
@@ -103,6 +130,8 @@ public class Posts {
         this.location = location;
         this.post_push_id = post_push_id;
         this.caption = caption;
-        this.timestamp = timestamp;
+        this.like_cnt = like_cnt;
+        this.comment_cnt = comment_cnt;
+        this.share_cnt = share_cnt;
     }
 }

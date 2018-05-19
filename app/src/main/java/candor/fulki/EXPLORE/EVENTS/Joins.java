@@ -1,7 +1,6 @@
-package candor.fulki.HOME;
+package candor.fulki.EXPLORE.EVENTS;
 
-public class Likes {
-
+public class Joins {
 
 
     String id;
@@ -10,10 +9,10 @@ public class Likes {
     String notification_id;
     String timestamp;
 
-    public Likes() {
+    public Joins() {
     }
 
-    public Likes(String id, String name, String thumb_image, String notification_id, String timestamp) {
+    public Joins(String id, String name, String thumb_image, String notification_id, String timestamp) {
 
         this.id = id;
         this.name = name;
@@ -62,5 +61,4 @@ public class Likes {
     public void setTime_stamp(String timestamp) {
         this.timestamp = timestamp;
     }
-
 }
