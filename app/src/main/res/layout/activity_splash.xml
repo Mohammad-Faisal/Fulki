@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".GENERAL.MainActivity"
+    android:background="@color/Black">
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="splash_image"
+        android:src="@drawable/splash_background"
+        android:scaleType="centerCrop"
+        android:alpha="0.3"
+        />
+
+    <TextView
+        android:textColor="@color/White"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="161dp"
+        android:fontFamily="@font/averia_serif_libre_bold"
+        android:text="Flare"
+        android:textAlignment="center"
+        android:textSize="70sp"
+        tools:fontFamily="@font/bungee" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="102dp"
+        android:fontFamily="@font/averia_serif_libre_bold"
+        android:text="lets do something good :)"
+        android:textAlignment="center"
+        android:textColor="@color/White"
+        android:textSize="17sp"
+        android:textStyle="bold" />
+
+</RelativeLayout>

@@ -1,0 +1,259 @@
+package candor.fulki.HOME;
+
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.util.Pair;
+import android.support.v7.widget.RecyclerView;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageButton;
+import android.widget.TextView;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QuerySnapshot;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+
+import java.util.Date;
+import java.util.List;
+
+import candor.fulki.GENERAL.Functions;
+import candor.fulki.GENERAL.GetTimeAgo;
+import candor.fulki.NOTIFICATION.Notifications;
+import candor.fulki.PROFILE.ProfileActivity;
+import candor.fulki.R;
+import de.hdodenhof.circleimageview.CircleImageView;
+
+/**
+ * Created by Mohammad Faisal on 1/29/2018.
+ */
+
+public class PostCommentAdapter extends RecyclerView.Adapter<PostCommentAdapter.PostCommentViewHolder> {
+
+
+
+    private static final String TAG= "PostCommentAdapter";
+    private List<Comments> mCommentList;
+    DatabaseReference mRootRef = FirebaseDatabase.getInstance().getReference();
+    Context context;
+    Activity activity;
+    boolean isLiked = false;
+
+    //Image Loading
+    public ImageLoader imageLoader;
+    public DisplayImageOptions postImageOptions;
+    public DisplayImageOptions userImageOptions;
+
+    FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
+
+    // ---- CONSTRUCTOR --//
+    public PostCommentAdapter(List<Comments> mCommentList , Context context , Activity activity){
+        this.mCommentList = mCommentList;
+        this.context = context;
+        this.activity = activity;
+
+        //image loader initialization
+        //Image loader initialization for offline feature
+        ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(context)
+                .threadPoolSize(5)
+                .threadPriority(Thread.MIN_PRIORITY + 2)
+                .defaultDisplayImageOptions(DisplayImageOptions.createSimple())
+                .build();
+
+        userImageOptions = new DisplayImageOptions.Builder()
+                .showImageOnLoading(R.drawable.ic_blank_profile)
+                .showImageForEmptyUri(R.drawable.ic_blank_profile)
+                .showImageOnFail(R.drawable.ic_blank_profile)
+                .cacheInMemory(true)
+                .cacheOnDisk(true)
+                .considerExifParams(true)
+                .build();
+        imageLoader = ImageLoader.getInstance();
+        imageLoader.init(config);
+
+
+    }
+
+    @Override
+    public PostCommentAdapter.PostCommentViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View v;
+        v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_comment, parent , false);
+        return new PostCommentAdapter.PostCommentViewHolder(v);
+    }
+
+    @Override
+    public void onBindViewHolder(final PostCommentAdapter.PostCommentViewHolder holder, int position) {
+        Comments c = mCommentList.get(position);
+        holder.commentText.setText(c.getComment());
+        final String mCurrentCommenterID = c.getUid();  //who has posted the comment
+        final String mUserID  = FirebaseAuth.getInstance().getCurrentUser().getUid();  //currently je logged in
+        final String mCommentId  = c.getCommentId();
+        final String mPostID = c.getPostID();
+        final String mTimeStamp = c.getTime_stamp();
+
+
+        //setting comment time ago
+        GetTimeAgo ob = new GetTimeAgo();
+        long time = Long.parseLong(mTimeStamp);
+        String time_ago = ob.getTimeAgo(time ,context);
+        holder.commentTimeAgo.setText(time_ago);
+
+
+        //setting user details
+        FirebaseFirestore.getInstance().collection("users").document(mCurrentCommenterID).get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                String mUserName = task.getResult().getString("name");
+                String mUserImage = task.getResult().getString("thumb_image");
+                holder.setUserImage(mUserImage);
+                holder.setPostUserName(mUserName);
+            } else {
+
+                Log.d(TAG, "onComplete: " + task.getException().toString());
+            }
+        });
+        //setting like count
+        FirebaseFirestore.getInstance().collection("comment_likes/" + mPostID + "/"+mCommentId).addSnapshotListener((documentSnapshots, e) -> {
+            if (!documentSnapshots.isEmpty()) {
+                int count = documentSnapshots.size();
+                String cnt = Integer.toString(count);
+                if (count == 1) {
+                    holder.commentLoveCount.setText(cnt );
+                } else {
+                    holder.commentLoveCount.setText(cnt );
+                }
+
+            } else {
+                holder.commentLoveCount.setText("0");
+            }
+        });
+        //setting the current state of comment like
+        FirebaseFirestore.getInstance().collection("comment_likes/" + mPostID + "/"+mCommentId).document(mUserID).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    if (task.getResult().exists()) {
+                        isLiked= true;
+                        holder.commentLove.setBackgroundResource(R.drawable.ic_love_full);
+                    } else {
+                        isLiked= false;
+                        holder.commentLove.setBackgroundResource(R.drawable.ic_love_empty);
+                    }
+                } else {
+                    isLiked = false;
+                    Log.w(TAG, "onComplete: ", task.getException());
+                    holder.commentLove.setBackgroundResource(R.drawable.ic_love_empty);
+                }
+            }
+        });
+
+
+
+        holder.commentLove.setOnClickListener(v -> {
+            if(!isLiked){
+                isLiked = true;
+                holder.commentLove.setBackgroundResource(R.drawable.ic_love_full);
+                Functions f = new Functions();
+
+                //building comment
+                String time_stamp = String.valueOf(new Date().getTime());
+                DocumentReference ref = FirebaseFirestore.getInstance().collection("notifications/"+mCurrentCommenterID+"/notificatinos").document();
+                String likeNotificatoinPushID = ref.getId();
+                Likes mLikes = new Likes(mUserID , likeNotificatoinPushID);
+                Notifications pushNoti = new Notifications( "comment_like" ,mUserID , mCurrentCommenterID, mPostID ,likeNotificatoinPushID , time_stamp,"n"  );
+
+                firebaseFirestore.collection("notifications/"+mCurrentCommenterID+"/notificatinos").document(likeNotificatoinPushID).set(pushNoti);
+                firebaseFirestore.collection("posts/"+mPostID+"/notifications").document(likeNotificatoinPushID).set(pushNoti);
+                firebaseFirestore.collection("comment_likes/" + mPostID + "/"+mCommentId).document(mUserID).set(mLikes);
+
+            }else{
+                isLiked = false;
+                holder.commentLove.setBackgroundResource(R.drawable.ic_love_empty);
+                firebaseFirestore.collection("comment_likes/" + mPostID + "/"+mCommentId).document(mUserID).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if (task.isSuccessful()) {
+                            DocumentSnapshot document = task.getResult();
+                            if (document.exists()) {
+                                String likeNotificatoinPushID = document.getString("notificationID");
+                                firebaseFirestore.collection("comment_likes/" + mPostID + "/"+mCommentId).document(mUserID).delete();
+                                firebaseFirestore.collection("notifications/"+mCurrentCommenterID+"/notificatinos").document(likeNotificatoinPushID).delete();
+                                firebaseFirestore.collection("posts/"+mPostID+"/notifications").document(likeNotificatoinPushID).delete();
+                            } else {
+                                Log.d(TAG, "No such document");
+                            }
+                        } else {
+                            Log.d(TAG, "get failed with ", task.getException());
+                        }
+
+
+                    }
+                });
+            }
+        });
+        holder.commentImage.setOnClickListener(view -> {
+            Intent showPostIntent = new Intent(context  , ProfileActivity.class);
+            showPostIntent.putExtra("userID" , mCurrentCommenterID);
+            Pair< View , String > pair1 = Pair.create(holder.itemView.findViewById(R.id.comment_item_image) ,"profile_image");
+            Pair< View , String > pair2 = Pair.create(holder.itemView.findViewById(R.id.comment_item_name) ,"profile_name");
+            ActivityOptionsCompat optionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation(activity ,pair1 , pair2 );
+            context.startActivity(showPostIntent , optionsCompat.toBundle());
+        });
+        holder.commentName.setOnClickListener(view -> {
+            Intent showPostIntent = new Intent(context  , ProfileActivity.class);
+            showPostIntent.putExtra("userID" , mCurrentCommenterID);
+            Pair< View , String > pair1 = Pair.create(holder.itemView.findViewById(R.id.comment_item_image) ,"profile_image");
+            Pair< View , String > pair2 = Pair.create(holder.itemView.findViewById(R.id.comment_item_name) ,"profile_name");
+            ActivityOptionsCompat optionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation(activity ,pair1 , pair2 );
+            context.startActivity(showPostIntent , optionsCompat.toBundle());
+        });
+    }
+
+
+    @Override
+    public int getItemCount() {
+        return mCommentList.size();
+    }
+
+
+    public class PostCommentViewHolder  extends RecyclerView.ViewHolder{
+        public TextView commentText;
+        public CircleImageView commentImage;
+        public TextView commentName;
+        public ImageButton commentLove;
+        public TextView commentLoveCount;
+        public TextView commentTimeAgo;
+        public PostCommentViewHolder(View itemView) {
+            super(itemView);
+            commentText = itemView.findViewById(R.id.comment_item_text);
+            commentImage = itemView.findViewById(R.id.comment_item_image);
+            commentName = itemView.findViewById(R.id.comment_item_name);
+            commentLove = itemView.findViewById(R.id.comment_love);
+            commentLoveCount = itemView.findViewById(R.id.comment_love_count);
+            commentTimeAgo = itemView.findViewById(R.id.comment_item_time_ago);
+        }
+        public void setUserImage(String image_url) {
+            imageLoader.displayImage(image_url, commentImage, userImageOptions);
+        }
+        public void setPostUserName(String userName) {
+            commentName.setText(userName);
+        }
+    }
+
+
+
+}
