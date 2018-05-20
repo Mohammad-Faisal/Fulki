@@ -290,12 +290,13 @@ public class ProfileSettingsActivity extends AppCompatActivity implements Adapte
 
         Map< String, Object> userMap = getAllData();
 
-        firebaseFirestore.collection("users").document().update(userMap).addOnCompleteListener(new OnCompleteListener<Void>() {
+        firebaseFirestore.collection("users").document().set(userMap).addOnCompleteListener(new OnCompleteListener<Void>() {
             public static final String TAG ="Update account process " ;
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if(task.isSuccessful()){
 
+                    //algolia index creation
                     Client client = new Client( "YWTL46QL1P" , "fcdc55274ed56d6fb92f51c0d0fc46a0" );
                     Index index = client.getIndex("users");
                     List<JSONObject> userList = new ArrayList<>();
@@ -336,7 +337,6 @@ public class ProfileSettingsActivity extends AppCompatActivity implements Adapte
         }else if(mGender==0){
             genderString = "female";
         }
-        Log.d(TAG, "setData:  "+ thumbImageUrlString);
         if(nameString.equals("")){
             Toast.makeText(this, "Name field can't be empty !", Toast.LENGTH_SHORT).show();
             return false;
@@ -360,11 +360,20 @@ public class ProfileSettingsActivity extends AppCompatActivity implements Adapte
         userMap.put("email" , emailString);
         userMap.put("timestamp" , String.valueOf(new Date().getTime()));
         userMap.put("district" , "");
-        userMap.put("lat" , "");
-        userMap.put("lng" , "");
+        userMap.put("lat" , 0);
+        userMap.put("lng" , 0);
         userMap.put("rating" , "");
         userMap.put("user_id" , mUserID);
         userMap.put("device_id" , deviceTokenID);
+
+
+         Map< String, String> categoryMap = new HashMap<>();
+        categoryMap.put("user_name" , nameString);
+        categoryMap.put("user_id" , mUserID);
+        categoryMap.put("thumb_image" , thumbImageUrlString);
+        firebaseFirestore.collection(bloodString).document(mUserID).set(categoryMap);
+
+
         return userMap;
     }
 

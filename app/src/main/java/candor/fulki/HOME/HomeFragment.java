@@ -55,9 +55,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 import static android.app.Activity.RESULT_OK;
 
-/**
- * A simple {@link Fragment} subclass.
- */
+
 public class HomeFragment extends Fragment {
 
 
@@ -108,6 +106,8 @@ public class HomeFragment extends Fragment {
             recyclerView.setNestedScrollingEnabled(false);
             mHomeAdapter = new HomeAdapter(recyclerView, posts,getActivity(), getContext());
             recyclerView.setAdapter(mHomeAdapter);
+
+
 
 
 

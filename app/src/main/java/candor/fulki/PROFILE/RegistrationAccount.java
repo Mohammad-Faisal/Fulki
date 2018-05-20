@@ -214,7 +214,7 @@ public class RegistrationAccount extends AppCompatActivity {
 
 
                                         String deviceTokenID = FirebaseInstanceId.getInstance().getToken();
-                                        Map < String, String> userMap = new HashMap<>();
+                                        Map < String, Object> userMap = new HashMap<>();
 
                                         userMap.put("name" , name1);
                                         userMap.put("user_name" , userName1);
@@ -231,9 +231,9 @@ public class RegistrationAccount extends AppCompatActivity {
                                         userMap.put("email" , "");
                                         userMap.put("timestamp" , "");
                                         userMap.put("district" , "");
-                                        userMap.put("lat" , "");
-                                        userMap.put("lng" , "");
-                                        userMap.put("rating" , "0");
+                                        userMap.put("lat" , 0);
+                                        userMap.put("lng" , 0);
+                                        userMap.put("rating" , 0);
                                         userMap.put("user_id" , mUserID);
                                         userMap.put("device_id" , deviceTokenID);
 

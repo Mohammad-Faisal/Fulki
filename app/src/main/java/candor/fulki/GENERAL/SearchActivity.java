@@ -91,7 +91,7 @@ public class SearchActivity extends AppCompatActivity {
                 Index index = client.getIndex("users");
                 Query query = new Query(s.toString())
                         .setAttributesToRetrieve("name", "user_name" , "thumb_image" , "division" , "contact_no" , "blood_group" , "user_id")
-                        .setHitsPerPage(50);
+                        .setHitsPerPage(10);
                 index.searchAsync(query, (content, error) -> {
                     try {
                         JSONArray hits = content.getJSONArray("hits");

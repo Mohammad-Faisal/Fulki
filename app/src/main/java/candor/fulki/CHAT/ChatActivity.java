@@ -232,22 +232,14 @@ public class ChatActivity extends AppCompatActivity {
         });
 
         //chat er add button er kaj kortesi
-        mSendMessage.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                sendmessage();
-            }
-        });
+        mSendMessage.setOnClickListener(view -> sendmessage());
 
 
         //------------- REFRESHING THE ITEMS----------//
-        mSwipeRefreshlayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                mCurrentPage++;
-                itemPosition = 0;
-                loadMoreMessages();
-            }
+        mSwipeRefreshlayout.setOnRefreshListener(() -> {
+            mCurrentPage++;
+            itemPosition = 0;
+            loadMoreMessages();
         });
 
     }

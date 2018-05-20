@@ -74,6 +74,11 @@
         <item name="android:windowIsFloating">true</item>
     </style>
 
+    <style name="fullscreen">
+        <item  name="android:windowActionBar">false</item>
+
+    </style>
+
 
 
 
