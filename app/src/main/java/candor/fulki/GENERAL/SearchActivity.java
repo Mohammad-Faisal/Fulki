@@ -1,5 +1,6 @@
 package candor.fulki.GENERAL;
 
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -7,9 +8,12 @@ import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.algolia.search.saas.AlgoliaException;
@@ -35,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 
 import candor.fulki.PROFILE.ListPeopleAdapter;
+import candor.fulki.PROFILE.ProfileSettingsActivity;
 import candor.fulki.PROFILE.ShowPleopleListActivity;
 import candor.fulki.PROFILE.UserBasic;
 import candor.fulki.R;
@@ -53,6 +58,34 @@ public class SearchActivity extends AppCompatActivity {
     private LinearLayoutManager mLinearLayout;
     private ListPeopleAdapter mPeopleAdapter;
 
+    String districtString = "All Bangladesh";
+    String categoryString = "All Category";
+    TextView mDistrict;
+    TextView mCategory;
+
+
+    //district filtering
+    private ValueAdapter districtValueAdapter;
+    AlertDialog districtAlertDialog;
+    private ArrayList<String> mStringList;
+    private static final String[] districts={
+            "Barguna" , "Barisal" , "Bhola",    "Jhalokati",  "Patuakhali", "Pirojpur",
+            "Bandarban","Brahmanbaria",   "Chandpur", "Chittagong", "Comilla",    "Cox's Bazar","Feni",     "Khagrachhari","Lakshmipur", "Noakhali", "Rangamati",
+            "Dhaka",    "Faridpur" , "Gazipur",  "Gopalganj",  "Kishoreganj","Madaripur",  "Manikganj","Munshiganj",  "Narayanganj","Narsingdi","Rajbari","Shariatpur","Tangail",
+            "Bagerhat", "Chuadanga",      "Jessore",  "Jhenaidah",  "Khulna",     "Kushtia",    "Magura",   "Meherpur",    "Narail",     "Satkhira",
+            "Jamalpur", "Mymensingh",     "Netrakona","Sherpur",
+            "Bogra",    "Chapainawabganj","Joypurhat","Naogaon",    "Natore",     "Pabna",      "Rajshahi", "Sirajganj",
+            "Dinajpur", "Gaibandha",      "Kurigram", "Lalmonirhat","Nilphamari", "Panchagarh", "Rangpur",  "Thakurgaon",
+            "Habiganj", "Moulvibazar",    "Sunamganj","Sylhet"
+    };
+
+    private static final String[] categories = {
+        "Child Marrige" , "Violence" , "Environment" , "Women Empowerment","Education"
+    };
+
+    private ArrayList<String> mStringListCategory;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,10 +94,19 @@ public class SearchActivity extends AppCompatActivity {
 
         firebaseFirestore = FirebaseFirestore.getInstance();
 
+
         getSupportActionBar().setTitle("Search people");
         getSupportActionBar().setHomeButtonEnabled(true);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.FLAG_LOCAL_FOCUS_MODE);
 
+        mDistrict = findViewById(R.id.search_activity_district);
+        mCategory  = findViewById(R.id.search_activity_category);
+        initDistrictData();
+        initCategoryData();
+
+
+        mDistrict.setText("All Bangladesh");
+        mCategory.setText("All Category");
         mSearchBoxText = findViewById(R.id.search_text_input);
         //mSearchBoxText.addTextChangedListener(filterTextWatcher);
 
@@ -90,7 +132,7 @@ public class SearchActivity extends AppCompatActivity {
 
                 Index index = client.getIndex("users");
                 Query query = new Query(s.toString())
-                        .setAttributesToRetrieve("name", "user_name" , "thumb_image" , "division" , "contact_no" , "blood_group" , "user_id")
+                        .setAttributesToRetrieve("name", "user_name" , "thumb_image" , "district" , "contact_no" , "blood_group" , "user_id")
                         .setHitsPerPage(10);
                 index.searchAsync(query, (content, error) -> {
                     try {
@@ -101,10 +143,22 @@ public class SearchActivity extends AppCompatActivity {
                             JSONObject jsonObject = hits.getJSONObject(i);
                             Log.d(TAG, "afterTextChanged:  "+jsonObject.toString());
                             UserBasic userBasic = new UserBasic();
-                            userBasic.setmUserName(jsonObject.getString("name"));
-                            userBasic.setmUserID(jsonObject.getString("user_id"));
-                            userBasic.setmUserThumbImage(jsonObject.getString("thumb_image"));
-                            userBasicList.add(userBasic);
+                            if(districtString.equals("All Bangladesh")){
+                                userBasic.setmUserName(jsonObject.getString("name"));
+                                userBasic.setmUserID(jsonObject.getString("user_id"));
+                                userBasic.setmUserThumbImage(jsonObject.getString("thumb_image"));
+                                userBasicList.add(userBasic);
+                            }else{
+                                String district = jsonObject.getString("district");
+                                Log.d(TAG, "afterTextChanged:  district string is not empty and its value is "+districtString);
+                                if(districtString.equals(district)){
+                                    userBasic.setmUserName(jsonObject.getString("name"));
+                                    userBasic.setmUserID(jsonObject.getString("user_id"));
+                                    userBasic.setmUserThumbImage(jsonObject.getString("thumb_image"));
+                                    userBasicList.add(userBasic);
+                                }
+                            }
+
                         }
 
                         Log.d(TAG, "afterTextChanged:    "+userBasicList.size());
@@ -124,19 +178,109 @@ public class SearchActivity extends AppCompatActivity {
 
             }
 
-
-
-
-
-
-
-
-
         });
-
-
-
     }
+
+
+    private void initDistrictData() {
+
+        mStringList=new ArrayList<String>();
+
+        for(int i=0;i<districts.length;i++){
+            mStringList.add(districts[i]);
+        }
+
+
+        mDistrict.setOnClickListener(v -> {
+
+            districtValueAdapter=new ValueAdapter(mStringList,SearchActivity.this);
+            districtAlertDialog = new AlertDialog.Builder(SearchActivity.this).create();
+            LayoutInflater inflater = getLayoutInflater();
+            View convertView = inflater.inflate(R.layout.custom_district_list, null);
+            final EditText editText=convertView.findViewById(R.id.distric_list_search_text);
+            final ListView lv =  convertView.findViewById(R.id.distric_list_listview);
+            districtAlertDialog.setView(convertView);
+            districtAlertDialog.setCancelable(false);
+
+            lv.setAdapter(districtValueAdapter);
+            districtAlertDialog.show();
+            editText.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    districtValueAdapter.getFilter().filter(s);
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+
+                }
+            });
+
+            lv.setOnItemClickListener((parent, view, position, id) -> {
+                mDistrict.setText(lv.getItemAtPosition(position).toString());
+                districtString = lv.getItemAtPosition(position).toString();
+                Log.d(TAG, "initDistrictData:    found a district  "+lv.getItemAtPosition(position).toString());
+                districtAlertDialog.dismiss();
+            });
+        });
+    }
+
+    private void initCategoryData() {
+
+        mStringListCategory=new ArrayList<String>();
+
+        for(int i=0;i<categories.length;i++){
+            mStringListCategory.add(categories[i]);
+        }
+
+
+        mCategory.setOnClickListener(v -> {
+
+            districtValueAdapter=new ValueAdapter(mStringListCategory,SearchActivity.this);
+            districtAlertDialog = new AlertDialog.Builder(SearchActivity.this).create();
+            LayoutInflater inflater = getLayoutInflater();
+            View convertView = inflater.inflate(R.layout.custom_district_list, null);
+            final EditText editText=convertView.findViewById(R.id.distric_list_search_text);
+            editText.setVisibility(View.GONE);
+            final ListView lv =  convertView.findViewById(R.id.distric_list_listview);
+            districtAlertDialog.setView(convertView);
+            districtAlertDialog.setCancelable(false);
+
+            lv.setAdapter(districtValueAdapter);
+            districtAlertDialog.show();
+            editText.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    districtValueAdapter.getFilter().filter(s);
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+
+                }
+            });
+
+            lv.setOnItemClickListener((parent, view, position, id) -> {
+                mCategory.setText(lv.getItemAtPosition(position).toString());
+                categoryString = lv.getItemAtPosition(position).toString();
+                Log.d(TAG, "initDistrictData:    found a district  "+lv.getItemAtPosition(position).toString());
+                districtAlertDialog.dismiss();
+            });
+        });
+    }
+
+
+
 
 
 

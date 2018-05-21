@@ -153,12 +153,15 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
 
         //setting if it is shared or not
         String location = post.getLocation();
-        if(location.equals("default")){
+        if(location.equals("")){
             holder.setPostLocaiton("");
             holder.postLocaiton.setVisibility(View.GONE);
+
+
         }else{
             holder.postLocaiton.setVisibility(View.VISIBLE);
             holder.setPostLocaiton("shared by "+location);
+
         }
 
 

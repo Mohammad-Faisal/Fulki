@@ -121,9 +121,9 @@ public class ProfileSettingsActivity extends AppCompatActivity implements Adapte
     AlertDialog districtAlertDialog;
     private ArrayList<String> mStringList;
     private static final String[] districts={
-            "Barguna",  "Barisal",        "Bhola",    "Jhalokati",  "Patuakhali", "Pirojpur",
+             "Barguna" , "Barisal" , "Bhola",    "Jhalokati",  "Patuakhali", "Pirojpur",
             "Bandarban","Brahmanbaria",   "Chandpur", "Chittagong", "Comilla",    "Cox's Bazar","Feni",     "Khagrachhari","Lakshmipur", "Noakhali", "Rangamati",
-            "Dhaka",    "Faridpur",       "Gazipur",  "Gopalganj",  "Kishoreganj","Madaripur",  "Manikganj","Munshiganj",  "Narayanganj","Narsingdi","Rajbari","Shariatpur","Tangail",
+            "Dhaka",    "Faridpur" , "Gazipur",  "Gopalganj",  "Kishoreganj","Madaripur",  "Manikganj","Munshiganj",  "Narayanganj","Narsingdi","Rajbari","Shariatpur","Tangail",
             "Bagerhat", "Chuadanga",      "Jessore",  "Jhenaidah",  "Khulna",     "Kushtia",    "Magura",   "Meherpur",    "Narail",     "Satkhira",
             "Jamalpur", "Mymensingh",     "Netrakona","Sherpur",
             "Bogra",    "Chapainawabganj","Joypurhat","Naogaon",    "Natore",     "Pabna",      "Rajshahi", "Sirajganj",
@@ -354,18 +354,28 @@ public class ProfileSettingsActivity extends AppCompatActivity implements Adapte
     }
 
     private void uploadImage(){
+
+        mProgress = new ProgressDialog(ProfileSettingsActivity.this);
+        mProgress.setTitle("Saving Data.......");
+        mProgress.setMessage("please wait while we upload your image");
+        mProgress.setCanceledOnTouchOutside(false);
+        mProgress.show();
+
         imageFilePath.putFile(imageUri)
                 .addOnSuccessListener(taskSnapshot -> {
                     Uri downloadUrlImage = taskSnapshot.getDownloadUrl();
                     mainImageUrlString =  downloadUrlImage.toString();
                     UploadTask uploadThumbTask = thumbFilePath.putBytes(thumb_byte);
                     uploadThumbTask.addOnFailureListener(exception -> {
+                        mProgress.dismiss();
                         Toast.makeText(ProfileSettingsActivity.this, "Some error occured. check your internet connection", Toast.LENGTH_SHORT).show();
                         Log.w("Thumb  Photo Upload:  " , exception);
                     }).addOnSuccessListener(taskSnapshot1 -> {
+
                         Uri downloadUrlThumb = taskSnapshot1.getDownloadUrl();
                         thumbImageUrlString  = downloadUrlThumb.toString();
                         Log.d(TAG, "uploadImage:    is succesfull ");
+                        mProgress.dismiss();
                         upload();
                     });
                 })

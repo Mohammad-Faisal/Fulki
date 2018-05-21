@@ -20,6 +20,7 @@ import candor.fulki.CHAT.InboxActivity;
 import candor.fulki.EXPLORE.EVENTS.CreateEventActivity;
 import candor.fulki.GENERAL.MainActivity;
 import candor.fulki.GENERAL.SearchActivity;
+import candor.fulki.HOME.HomeActivity;
 import candor.fulki.MapsActivity;
 import candor.fulki.NOTIFICATION.NotificationActivity;
 import candor.fulki.PROFILE.ProfileActivity;
@@ -37,7 +38,7 @@ public class ExploreActivity extends AppCompatActivity {
             = item -> {
         switch (item.getItemId()) {
             case R.id.navigation_home:
-                Intent mainIntent = new Intent(ExploreActivity.this , MainActivity.class);
+                Intent mainIntent = new Intent(ExploreActivity.this , HomeActivity.class);
                 startActivity(mainIntent);
                 finish();
                 //setFragment(mHomeFragment);

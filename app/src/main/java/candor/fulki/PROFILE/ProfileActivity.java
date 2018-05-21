@@ -418,19 +418,16 @@ public class ProfileActivity extends AppCompatActivity {
                 .orderBy("timestamp" , Query.Direction.DESCENDING)
                 .startAfter(lastVisible)
                 .limit(3);
-        nextQuery.addSnapshotListener(ProfileActivity.this , new EventListener<QuerySnapshot>() {
-            @Override
-            public void onEvent(QuerySnapshot documentSnapshots, FirebaseFirestoreException e) {
-                if(!documentSnapshots.isEmpty()){
-                    lastVisible = documentSnapshots.getDocuments().get(documentSnapshots.size()-1);
-                    for(DocumentChange doc: documentSnapshots.getDocumentChanges()){
-                        if(doc.getType() == DocumentChange.Type.ADDED){
-                            Posts singlePosts = doc.getDocument().toObject(Posts.class);
-                            String uid = singlePosts.getUser_id();
-                            if(uid.equals(mCurProfileId)){
-                                posts.add(singlePosts);
-                                mProfilePostAdapter.notifyDataSetChanged();
-                            }
+        nextQuery.addSnapshotListener(ProfileActivity.this , (documentSnapshots, e) -> {
+            if(!documentSnapshots.isEmpty()){
+                lastVisible = documentSnapshots.getDocuments().get(documentSnapshots.size()-1);
+                for(DocumentChange doc: documentSnapshots.getDocumentChanges()){
+                    if(doc.getType() == DocumentChange.Type.ADDED){
+                        Posts singlePosts = doc.getDocument().toObject(Posts.class);
+                        String uid = singlePosts.getUser_id();
+                        if(uid.equals(mCurProfileId)){
+                            posts.add(singlePosts);
+                            mProfilePostAdapter.notifyDataSetChanged();
                         }
                     }
                 }
@@ -440,19 +437,6 @@ public class ProfileActivity extends AppCompatActivity {
 
     @Override
     protected void onResume() {
-
-/*
-        ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(ProfileActivity.this).build();
-        userImageOptions = new DisplayImageOptions.Builder()
-                .showImageOnLoading(R.drawable.ic_blank_profile)
-                .showImageForEmptyUri(R.drawable.ic_blank_profile)
-                .showImageOnFail(R.drawable.ic_blank_profile)
-                .cacheInMemory(true)
-                .cacheOnDisk(true)
-                .considerExifParams(true)
-                .build();
-        imageLoader = ImageLoader.getInstance();
-        imageLoader.init(config);*/
         super.onResume();
     }
 
