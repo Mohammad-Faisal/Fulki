@@ -11,7 +11,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -28,9 +27,7 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
-import candor.fulki.CHAT.Meeting.MeetingRooms;
-import candor.fulki.CHAT.Meeting.MeetingRoomsAdapter;
-import candor.fulki.HOME.Ratings;
+import candor.fulki.EXPLORE.PEOPLE.Ratings;
 import candor.fulki.R;
 
 public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventsViewHolder> {

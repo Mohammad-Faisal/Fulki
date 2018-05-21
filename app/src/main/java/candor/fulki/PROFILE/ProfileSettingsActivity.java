@@ -1,7 +1,6 @@
 package candor.fulki.PROFILE;
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -19,9 +18,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
 import android.text.Editable;
-import android.text.InputType;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -29,30 +26,21 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Spinner;
-import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.algolia.search.saas.Client;
 import com.algolia.search.saas.Index;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.ServerValue;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.firestore.ServerTimestamp;
 import com.google.firebase.firestore.WriteBatch;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.storage.FirebaseStorage;
@@ -79,7 +67,7 @@ import candor.fulki.GENERAL.Functions;
 import candor.fulki.GENERAL.MainActivity;
 import candor.fulki.GENERAL.ValueAdapter;
 import candor.fulki.HOME.HomeActivity;
-import candor.fulki.HOME.Ratings;
+import candor.fulki.EXPLORE.PEOPLE.Ratings;
 import candor.fulki.R;
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -493,9 +481,10 @@ public class ProfileSettingsActivity extends AppCompatActivity implements Adapte
                 startActivity(homeIntent);
                 mProgress.dismiss();
                 finish();
-                Log.d(TAG, "aditinoal data upload is successful");
+                Log.d(TAG, "first time data upload is successful");
 
             }).addOnFailureListener(e -> {
+                mProgress.dismiss();
                 Log.d(TAG, "  aditional data upload not succesful");
             });
 

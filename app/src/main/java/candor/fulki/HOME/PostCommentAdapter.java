@@ -21,10 +21,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.WriteBatch;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -33,6 +30,7 @@ import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import java.util.Date;
 import java.util.List;
 
+import candor.fulki.EXPLORE.PEOPLE.Ratings;
 import candor.fulki.GENERAL.Functions;
 import candor.fulki.GENERAL.GetTimeAgo;
 import candor.fulki.GENERAL.MainActivity;

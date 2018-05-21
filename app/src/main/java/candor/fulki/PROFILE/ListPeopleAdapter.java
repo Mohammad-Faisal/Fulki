@@ -15,11 +15,14 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
@@ -31,7 +34,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import candor.fulki.HOME.Ratings;
+import candor.fulki.CHAT.ChatActivity;
+import candor.fulki.EXPLORE.PEOPLE.Ratings;
 import candor.fulki.NOTIFICATION.Notifications;
 import candor.fulki.R;
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -81,10 +85,34 @@ public class ListPeopleAdapter extends RecyclerView.Adapter<ListPeopleAdapter.Li
         if(mUserID == mListUserID)ownProfile = true;
 
 
+        firebaseFirestore.collection("ratings").document(mListUserID).addSnapshotListener(new EventListener<DocumentSnapshot>() {
+            @Override
+            public void onEvent(DocumentSnapshot documentSnapshot, FirebaseFirestoreException e) {
+                if(e!=null){
+                    Log.d(TAG, "onEvent: some error occured whgile getching rating data");
+                }else{
+                    if(documentSnapshot.exists()){
+                        String rating = documentSnapshot.get("rating").toString();
+                        holder.userRatingText.setText("rating  "+rating);
+                    }
+                }
+            }
+        });
+
+
+
         holder.setImage(mListUserThumbImage , context , R.drawable.ic_blank_profile);
         holder.setName(mListUserName);
         holder.setFollowBtn( mListUserID);
 
+
+        holder.msgBtn.setOnClickListener(v -> {
+            holder.addRating(mUserID , 1);
+            holder.addRating(mListUserID , 1);
+            Intent chatIntent = new Intent(activity , ChatActivity.class);
+            chatIntent.putExtra("user_id" , mListUserID);
+            context.startActivity(chatIntent);
+        });
 
         holder.userNameText.setOnClickListener(v -> {
             holder.addRating(mUserID , 1);
@@ -116,9 +144,8 @@ public class ListPeopleAdapter extends RecyclerView.Adapter<ListPeopleAdapter.Li
                 holder.addRating(mListUserID , 5);
 
                 followState = true;
-                holder.followBtn.setText("following");
-                holder.followBtn.setTextColor(context.getResources().getColor(R.color.colorPrimaryy));
-                holder.followBtn.setBackgroundColor(context.getResources().getColor(R.color.White));
+                holder.followBtn.setBackgroundResource(R.drawable.follow_checked);
+
 
                 //  --------- GETTING THE DATE AND TIME ----------//
                 Calendar c1 = Calendar.getInstance();
@@ -163,9 +190,10 @@ public class ListPeopleAdapter extends RecyclerView.Adapter<ListPeopleAdapter.Li
                 holder.addRating(mListUserID , -5);
 
                 followState = false;
-                holder.followBtn.setText("follow");
-                holder.followBtn.setTextColor(context.getResources().getColor(R.color.White));
-                holder.followBtn.setBackgroundColor(context.getResources().getColor(R.color.colorPrimaryy));
+
+                holder.followBtn.setBackgroundResource(R.drawable.user_followings);
+
+
 
 
                 firebaseFirestore.collection("followers/" + mListUserID + "/followers").document(mUserID).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
@@ -196,12 +224,17 @@ public class ListPeopleAdapter extends RecyclerView.Adapter<ListPeopleAdapter.Li
 
         public TextView userNameText;
         public CircleImageView userImage;
-        public Button followBtn;
+        public android.widget.ImageButton followBtn;
+        public android.widget.ImageButton msgBtn;
+        public TextView userRatingText;
+
         public ListPeopleVIewHolder(View itemView) {
             super(itemView);
             userNameText = itemView.findViewById(R.id.item_list_person_name);
             userImage =itemView.findViewById(R.id.item_list_person_image);
             followBtn = itemView.findViewById(R.id.item_list_person_followbtn);
+            msgBtn = itemView.findViewById(R.id.item_list_person_msgwbtn);
+            userRatingText = itemView.findViewById(R.id.item_list_person_rating);
         }
 
         public void setImage(final String imageURL , final Context context , int drawable_id ){
@@ -224,6 +257,7 @@ public class ListPeopleAdapter extends RecyclerView.Adapter<ListPeopleAdapter.Li
             Log.d(TAG, "setFollowBtn:     "+mUserID + "    "+mListUserID);
             if(mUserID.equals(mListUserID)){
                 followBtn.setVisibility(View.GONE);
+                msgBtn.setVisibility(View.GONE);
             }else{
                 FirebaseFirestore.getInstance().collection("followings/" + mUserID + "/followings").document(mListUserID).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                     @Override
@@ -231,14 +265,10 @@ public class ListPeopleAdapter extends RecyclerView.Adapter<ListPeopleAdapter.Li
                         if (task.isSuccessful()) {
                             if (task.getResult().exists()) {
                                 followState = true;
-                                followBtn.setText("following");
-                                followBtn.setTextColor(context.getResources().getColor(R.color.colorPrimaryy));
-                                followBtn.setBackgroundColor(context.getResources().getColor(R.color.White));
+                                followBtn.setBackgroundResource(R.drawable.follow_checked);
                             } else{
                                 followState = false;
-                                followBtn.setText("follow");
-                                followBtn.setTextColor(context.getResources().getColor(R.color.White));
-                                followBtn.setBackgroundColor(context.getResources().getColor(R.color.colorPrimaryy));
+                                followBtn.setBackgroundResource(R.drawable.user_followings);
                             }
                         } else {
                         }

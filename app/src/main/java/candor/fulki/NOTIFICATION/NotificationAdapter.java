@@ -31,19 +31,14 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
-import com.squareup.picasso.Callback;
-import com.squareup.picasso.NetworkPolicy;
-import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
-import candor.fulki.GENERAL.Functions;
 import candor.fulki.GENERAL.GetTimeAgo;
 import candor.fulki.GENERAL.MainActivity;
-import candor.fulki.HOME.Ratings;
+import candor.fulki.EXPLORE.PEOPLE.Ratings;
 import candor.fulki.HOME.ShowPostActivity;
 import candor.fulki.PROFILE.ProfileActivity;
-import candor.fulki.PROFILE.UserBasic;
 import candor.fulki.R;
 import de.hdodenhof.circleimageview.CircleImageView;
 

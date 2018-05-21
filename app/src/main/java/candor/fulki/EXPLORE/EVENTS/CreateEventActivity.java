@@ -8,20 +8,15 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
-import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
@@ -43,11 +38,8 @@ import java.util.Map;
 import java.util.Random;
 
 import candor.fulki.EXPLORE.ExploreActivity;
-import candor.fulki.GENERAL.MainActivity;
-import candor.fulki.HOME.CreatePhotoPostActivity;
 import candor.fulki.HOME.PostFiles;
-import candor.fulki.HOME.Ratings;
-import candor.fulki.PROFILE.ProfileSettingsActivity;
+import candor.fulki.EXPLORE.PEOPLE.Ratings;
 import candor.fulki.R;
 import id.zelory.compressor.Compressor;
 
