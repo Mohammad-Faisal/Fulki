@@ -327,7 +327,7 @@ public class HomeActivity extends AppCompatActivity {
         postMap.put("time_and_date" , cur_time_and_date);
         postMap.put("timestamp" ,timestamp );
         postMap.put("post_push_id" , postPushId);
-        postMap.put("location" , "Dhaka");
+        postMap.put("location" , "");
         postMap.put("like_cnt" , 0);
         postMap.put("comment_cnt" ,0);
         postMap.put("share_cnt" ,0);
@@ -337,6 +337,7 @@ public class HomeActivity extends AppCompatActivity {
         firebaseFirestore.collection("posts").document(postPushId).set(postMap).addOnCompleteListener(task1 -> {
             mProgress.dismiss();
             if(task1.isSuccessful()){
+                addRating(mUserID , 10);
                 mProgress.dismiss();
                 mCreatePostText.setText("");
             }else{
@@ -379,6 +380,25 @@ public class HomeActivity extends AppCompatActivity {
                     }
                 }
             }
+        });
+    }
+
+    private Task<Void> addRating( String mUserID  , int factor) {
+
+        FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
+        Log.d(TAG, "addRating:   function calledd !!!!");
+        final DocumentReference ratingRef = FirebaseFirestore.getInstance().collection("ratings")
+                .document(mUserID);
+        return firebaseFirestore.runTransaction(transaction -> {
+
+            Ratings ratings = transaction.get(ratingRef)
+                    .toObject(Ratings.class);
+            long curRating = ratings.getRating();
+            long nextRating = curRating + factor;
+
+            ratings.setRating(nextRating);
+            transaction.set(ratingRef, ratings);
+            return null;
         });
     }
 

@@ -79,6 +79,7 @@ import candor.fulki.GENERAL.Functions;
 import candor.fulki.GENERAL.MainActivity;
 import candor.fulki.GENERAL.ValueAdapter;
 import candor.fulki.HOME.HomeActivity;
+import candor.fulki.HOME.Ratings;
 import candor.fulki.R;
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -505,7 +506,7 @@ public class ProfileSettingsActivity extends AppCompatActivity implements Adapte
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
                     if(task.isSuccessful()){
-
+                        addRating(mUserID , 8);
                         Intent homeIntent = new Intent(ProfileSettingsActivity.this, HomeActivity.class);
                         startActivity(homeIntent);
                         mProgress.dismiss();
@@ -527,6 +528,26 @@ public class ProfileSettingsActivity extends AppCompatActivity implements Adapte
         ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
         return networkInfo != null && networkInfo.isConnected();
+    }
+
+
+    private Task<Void> addRating( String mUserID  , int factor) {
+
+        FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
+        Log.d(TAG, "addRating:   function calledd !!!!");
+        final DocumentReference ratingRef = FirebaseFirestore.getInstance().collection("ratings")
+                .document(mUserID);
+        return firebaseFirestore.runTransaction(transaction -> {
+
+            Ratings ratings = transaction.get(ratingRef)
+                    .toObject(Ratings.class);
+            long curRating = ratings.getRating();
+            long nextRating = curRating + factor;
+
+            ratings.setRating(nextRating);
+            transaction.set(ratingRef, ratings);
+            return null;
+        });
     }
 
     private boolean setData(){

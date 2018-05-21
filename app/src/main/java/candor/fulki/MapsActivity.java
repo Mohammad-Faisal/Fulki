@@ -60,6 +60,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -77,6 +78,7 @@ import java.util.Map;
 
 import candor.fulki.GENERAL.MainActivity;
 import candor.fulki.HOME.Posts;
+import candor.fulki.HOME.Ratings;
 import candor.fulki.PROFILE.ProfileActivity;
 
 
@@ -529,6 +531,26 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
                 break;
         }
+    }
+
+
+    private Task<Void> addRating(String mUserID  , int factor) {
+
+        FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
+        Log.d(TAG, "addRating:   function calledd !!!!");
+        final DocumentReference ratingRef = FirebaseFirestore.getInstance().collection("ratings")
+                .document(mUserID);
+        return firebaseFirestore.runTransaction(transaction -> {
+
+            Ratings ratings = transaction.get(ratingRef)
+                    .toObject(Ratings.class);
+            long curRating = ratings.getRating();
+            long nextRating = curRating + factor;
+
+            ratings.setRating(nextRating);
+            transaction.set(ratingRef, ratings);
+            return null;
+        });
     }
 
 

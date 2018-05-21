@@ -187,28 +187,27 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
             holder.postLocaiton.setVisibility(View.GONE);
         }else{
             holder.postLocaiton.setVisibility(View.VISIBLE);
-            //holder.setPostLocaiton("shared by "+location);
+            holder.setPostLocaiton("shared by "+location);
         }
 
 
         //setting user details
-        FirebaseFirestore.getInstance().collection("users").document(mCurrentPosterId).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if (task.isSuccessful()) {
-                    mUserName = task.getResult().getString("name");
-                    mUserImage = task.getResult().getString("thumb_image");
-                    holder.setUserImage(mUserImage);
-                    holder.setPostUserName(mUserName);
-                } else {
-                    Log.d(TAG, "onComplete: " + task.getException().toString());
-                }
+        FirebaseFirestore.getInstance().collection("users").document(mCurrentPosterId).get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                mUserName = task.getResult().getString("name");
+                mUserImage = task.getResult().getString("thumb_image");
+                holder.setUserImage(mUserImage);
+                holder.setPostUserName(mUserName);
+            } else {
+                Log.d(TAG, "onComplete: " + task.getException().toString());
             }
         });
 
         //setting user name and user image onclick listener
         holder.postUserImage.setOnClickListener(v -> {
 
+            holder.addRating(mUserID , 1);
+            holder.addRating(post.getUser_id() , 1);
             Intent showPostIntent = new Intent(context  , ProfileActivity.class);
             showPostIntent.putExtra("userID" , mCurrentPosterId);
             Pair< View , String > pair1 = Pair.create(holder.itemView.findViewById(R.id.post_user_single_imagee) ,"profile_image");
@@ -226,6 +225,8 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
             Pair< View , String > pair1 = Pair.create(holder.itemView.findViewById(R.id.post_user_single_imagee) ,"profile_image");
             Pair< View , String > pair2 = Pair.create(holder.itemView.findViewById(R.id.post_user_name) ,"profile_name");
 
+            holder.addRating(mUserID , 1);
+            holder.addRating(post.getUser_id() , 1);
             ActivityOptionsCompat optionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation(activity ,pair1 , pair2 );
             context.startActivity(showPostIntent , optionsCompat.toBundle());
         });
@@ -343,7 +344,8 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
                 //as the user liked this post so i should give him some points
 
                 //holder.addRating();
-                holder.addRatingToMe("like",mUserID);
+                holder.addRating(mUserID , 3);
+                holder.addRating(post.getUser_id() , 1);
 
 
             }
@@ -378,6 +380,10 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
                         }
                     }
                 });
+
+                holder.addRating(mUserID , -3);
+                holder.addRating(post.getUser_id() , -1);
+
             }
         });
 
@@ -385,6 +391,7 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
             Intent showPeopleIntent = new Intent(context , ShowPleopleListActivity.class);
             showPeopleIntent.putExtra("type" , "likes");
             showPeopleIntent.putExtra("user_id" ,postPushID );
+            holder.addRating(mUserID , 2);
             context.startActivity(showPeopleIntent);
         });
 
@@ -458,6 +465,8 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
 
                 writeBatch.commit().addOnSuccessListener(aVoid -> {
                     Log.d(TAG, "liked:   like is successful");
+                    holder.addRating(mUserID , 5);
+                    holder.addRating(post.getUser_id() , 2);
 
                 }).addOnFailureListener(e -> {
                     Log.d(TAG, "liked:   like is not succesful");
@@ -648,6 +657,8 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
                         firebaseFirestore.collection("posts").add(postMap).addOnCompleteListener(task1 -> {
                             if(task1.isSuccessful()){
                                 Toast.makeText(context, "Success !", Toast.LENGTH_SHORT).show();
+                                holder.addRating(mUserID , 5);
+                                holder.addRating(post.getUser_id() , 5);
                             }else{
                                 Toast.makeText(context, "Success !", Toast.LENGTH_SHORT).show();
                             }
@@ -669,6 +680,9 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
             Pair< View , String > pair1 = Pair.create(holder.itemView.findViewById(R.id.post_image) ,"post_image");
             Pair< View , String > pair2 = Pair.create(holder.itemView.findViewById(R.id.post_user_single_imagee) ,"profile_image");
             Pair< View , String > pair3 = Pair.create(holder.itemView.findViewById(R.id.post_user_name) ,"profile_name");
+
+
+            holder.addRating(post.getUser_id() , 1);
 
             ActivityOptionsCompat optionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation(activity ,pair1 , pair2 , pair3);
             context.startActivity(showPostIntent , optionsCompat.toBundle());
@@ -716,8 +730,9 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
         }
 
 
-        private Task<Void> addRatingToMe(String type , String mUserID ) {
+        private Task<Void> addRating( String mUserID  , int factor) {
 
+            FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
             Log.d(TAG, "addRating:   function calledd !!!!");
             final DocumentReference ratingRef = FirebaseFirestore.getInstance().collection("ratings")
                     .document(mUserID);
@@ -726,9 +741,8 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
                 Ratings ratings = transaction.get(ratingRef)
                         .toObject(Ratings.class);
                 long curRating = ratings.getRating();
-                Log.d(TAG, "addRating:   current rating  "+curRating);
-                long nextRating = curRating+1;
-                Log.d(TAG, "addRating:   next rating  :" +nextRating);
+                long nextRating = curRating + factor;
+
                 ratings.setRating(nextRating);
                 transaction.set(ratingRef, ratings);
                 return null;

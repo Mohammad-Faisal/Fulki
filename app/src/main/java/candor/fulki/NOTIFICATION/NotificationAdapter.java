@@ -9,6 +9,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.util.Pair;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +25,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
@@ -38,6 +40,7 @@ import java.util.List;
 import candor.fulki.GENERAL.Functions;
 import candor.fulki.GENERAL.GetTimeAgo;
 import candor.fulki.GENERAL.MainActivity;
+import candor.fulki.HOME.Ratings;
 import candor.fulki.HOME.ShowPostActivity;
 import candor.fulki.PROFILE.ProfileActivity;
 import candor.fulki.PROFILE.UserBasic;
@@ -50,6 +53,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapter.NotificationViewHolder> {
 
+    private static final String TAG = "NotificationAdapter";
     private List<Notifications> mNotificationList;
     private List<String> mNotificationIDs;
     DatabaseReference mRootRef = FirebaseDatabase.getInstance().getReference();
@@ -146,29 +150,23 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
                 }
             });
 
-            holder.notificationImage.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Intent profileIntent = new Intent(context , ProfileActivity.class);
-                    profileIntent.putExtra("userID" , userID);
-                    context.startActivity(profileIntent);
-                }
+            holder.notificationImage.setOnClickListener(view -> {
+                Intent profileIntent = new Intent(context , ProfileActivity.class);
+                profileIntent.putExtra("userID" , userID);
+                context.startActivity(profileIntent);
             });
 
-            holder.itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Intent profileIntent = new Intent(context , ProfileActivity.class);
-                    profileIntent.putExtra("userID" , userID);
-                    context.startActivity(profileIntent);
-                    holder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.White));
-                    mRootRef.child("notifications").child(MainActivity.mUserID).child(notiID).child("seen").setValue("y").addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                        }
-                    });
+            holder.itemView.setOnClickListener(view -> {
+                Intent profileIntent = new Intent(context , ProfileActivity.class);
+                profileIntent.putExtra("userID" , userID);
+                context.startActivity(profileIntent);
+                holder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.White));
+                mRootRef.child("notifications").child(MainActivity.mUserID).child(notiID).child("seen").setValue("y").addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                    }
+                });
 
-                }
             });
         }
         else if (type.equals("comment")  || type.equals("like")  || type.equals("share") || type.equals("comment_like")){
@@ -316,6 +314,27 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         public void setImage(String imageURL , final Context context , int drawable_id ){
             imageLoader.displayImage(imageURL, notificationImage, userImageOptions);
         }
+
+
+        private Task<Void> addRating(String mUserID  , int factor) {
+
+            FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
+            Log.d(TAG, "addRating:   function calledd !!!!");
+            final DocumentReference ratingRef = FirebaseFirestore.getInstance().collection("ratings")
+                    .document(mUserID);
+            return firebaseFirestore.runTransaction(transaction -> {
+
+                Ratings ratings = transaction.get(ratingRef)
+                        .toObject(Ratings.class);
+                long curRating = ratings.getRating();
+                long nextRating = curRating + factor;
+
+                ratings.setRating(nextRating);
+                transaction.set(ratingRef, ratings);
+                return null;
+            });
+        }
+
     }
 
 

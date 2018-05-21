@@ -259,7 +259,7 @@ public class CreatePhotoPostActivity extends AppCompatActivity {
                             postMap.put("time_and_date" , cur_time_and_date);
                             postMap.put("timestamp" ,timestamp );
                             postMap.put("post_push_id" , postPushId);
-                            postMap.put("location" , "default");
+                            postMap.put("location" , "");
                             postMap.put("like_cnt" , 0);
                             postMap.put("comment_cnt" ,0);
                             postMap.put("share_cnt" ,0);
@@ -272,6 +272,7 @@ public class CreatePhotoPostActivity extends AppCompatActivity {
                                 public void onComplete(@NonNull Task<Void> task) {
                                     mProgress.dismiss();
                                     if(task.isSuccessful()){
+                                        addRating(mUserID , 15);
                                         Toast.makeText(CreatePhotoPostActivity.this, "Success !", Toast.LENGTH_SHORT).show();
                                         Intent mainIntent = new Intent(CreatePhotoPostActivity.this , MainActivity.class);
                                         startActivity(mainIntent);
@@ -285,15 +286,32 @@ public class CreatePhotoPostActivity extends AppCompatActivity {
                         }
                     });
                 })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception exception) {
-                        mProgress.dismiss();
-                        Toast.makeText(CreatePhotoPostActivity.this, "Some error occured. check your internet connection", Toast.LENGTH_SHORT).show();
-                        Log.w("Main Photo Upload   :  " , exception);
-                    }
+                .addOnFailureListener(exception -> {
+                    mProgress.dismiss();
+                    Toast.makeText(CreatePhotoPostActivity.this, "Some error occured. check your internet connection", Toast.LENGTH_SHORT).show();
+                    Log.w("Main Photo Upload   :  " , exception);
                 });
 
+    }
+
+
+    private Task<Void> addRating( String mUserID  , int factor) {
+
+        FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
+        Log.d(TAG, "addRating:   function calledd !!!!");
+        final DocumentReference ratingRef = FirebaseFirestore.getInstance().collection("ratings")
+                .document(mUserID);
+        return firebaseFirestore.runTransaction(transaction -> {
+
+            Ratings ratings = transaction.get(ratingRef)
+                    .toObject(Ratings.class);
+            long curRating = ratings.getRating();
+            long nextRating = curRating + factor;
+
+            ratings.setRating(nextRating);
+            transaction.set(ratingRef, ratings);
+            return null;
+        });
     }
 
 

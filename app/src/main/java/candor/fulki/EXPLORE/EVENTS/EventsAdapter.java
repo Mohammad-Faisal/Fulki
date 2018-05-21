@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,8 +13,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
@@ -26,15 +30,18 @@ import java.util.List;
 
 import candor.fulki.CHAT.Meeting.MeetingRooms;
 import candor.fulki.CHAT.Meeting.MeetingRoomsAdapter;
+import candor.fulki.HOME.Ratings;
 import candor.fulki.R;
 
 public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventsViewHolder> {
 
 
+    private static final String TAG = "EventsAdapter";
     private List<Events> eventsList;
     DatabaseReference mRootRef = FirebaseDatabase.getInstance().getReference();
     Context context;
     Activity activity;
+    String mUserID = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
 
 
@@ -70,6 +77,7 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventsView
         holder.setImage(thumb_image_url , context);
 
         holder.eventCard.setOnClickListener(v -> {
+            holder.addRating(mUserID , 1);
             Intent showEventIntent = new Intent( context ,ShowEventActivity.class);
             showEventIntent.putExtra("event_id"  , eventID);
             context.startActivity(showEventIntent);
@@ -151,6 +159,25 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventsView
                     }
                 });
             }
+        }
+
+        private Task<Void> addRating(String mUserID  , int factor) {
+
+            FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
+            Log.d(TAG, "addRating:   function calledd !!!!");
+            final DocumentReference ratingRef = FirebaseFirestore.getInstance().collection("ratings")
+                    .document(mUserID);
+            return firebaseFirestore.runTransaction(transaction -> {
+
+                Ratings ratings = transaction.get(ratingRef)
+                        .toObject(Ratings.class);
+                long curRating = ratings.getRating();
+                long nextRating = curRating + factor;
+
+                ratings.setRating(nextRating);
+                transaction.set(ratingRef, ratings);
+                return null;
+            });
         }
 
 

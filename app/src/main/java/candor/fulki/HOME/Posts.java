@@ -13,7 +13,7 @@ public class Posts {
     private String time_and_date;
     private String image_url;
     private String thumb_image_url;
-    private String location;
+    private String location;  //works as shared by flag
     private String post_push_id;
     private String caption;
     private int like_cnt;

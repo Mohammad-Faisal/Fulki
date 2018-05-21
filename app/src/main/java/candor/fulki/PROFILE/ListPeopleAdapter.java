@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import candor.fulki.HOME.Ratings;
 import candor.fulki.NOTIFICATION.Notifications;
 import candor.fulki.R;
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -86,6 +87,8 @@ public class ListPeopleAdapter extends RecyclerView.Adapter<ListPeopleAdapter.Li
 
 
         holder.userNameText.setOnClickListener(v -> {
+            holder.addRating(mUserID , 1);
+            holder.addRating(mListUserID , 2);
             Intent showPostIntent = new Intent(context  , ProfileActivity.class);
             showPostIntent.putExtra("userID" , mListUserID);
             Pair< View , String > pair1 = Pair.create(holder.itemView.findViewById(R.id.item_list_person_image) ,"profile_image");
@@ -94,6 +97,8 @@ public class ListPeopleAdapter extends RecyclerView.Adapter<ListPeopleAdapter.Li
             context.startActivity(showPostIntent , optionsCompat.toBundle());
         });
         holder.userImage.setOnClickListener(v -> {
+            holder.addRating(mUserID , 1);
+            holder.addRating(mListUserID , 2);
             Intent showPostIntent = new Intent(context  , ProfileActivity.class);
             showPostIntent.putExtra("userID" , mListUserID);
             Pair< View , String > pair1 = Pair.create(holder.itemView.findViewById(R.id.item_list_person_image) ,"profile_image");
@@ -105,6 +110,10 @@ public class ListPeopleAdapter extends RecyclerView.Adapter<ListPeopleAdapter.Li
 
         holder.followBtn.setOnClickListener(v -> {
             if(!followState){   //currently not following after click i will follow this person
+
+
+                holder.addRating(mUserID , 15);
+                holder.addRating(mListUserID , 5);
 
                 followState = true;
                 holder.followBtn.setText("following");
@@ -148,6 +157,10 @@ public class ListPeopleAdapter extends RecyclerView.Adapter<ListPeopleAdapter.Li
 
 
             }else{  //currently following this person after clickhin i will not fololw
+
+
+                holder.addRating(mUserID , -15);
+                holder.addRating(mListUserID , -5);
 
                 followState = false;
                 holder.followBtn.setText("follow");
@@ -232,6 +245,26 @@ public class ListPeopleAdapter extends RecyclerView.Adapter<ListPeopleAdapter.Li
                     }
                 });
             }
+        }
+
+
+        private Task<Void> addRating(String mUserID  , int factor) {
+
+            FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
+            Log.d(TAG, "addRating:   function calledd !!!!");
+            final DocumentReference ratingRef = FirebaseFirestore.getInstance().collection("ratings")
+                    .document(mUserID);
+            return firebaseFirestore.runTransaction(transaction -> {
+
+                Ratings ratings = transaction.get(ratingRef)
+                        .toObject(Ratings.class);
+                long curRating = ratings.getRating();
+                long nextRating = curRating + factor;
+
+                ratings.setRating(nextRating);
+                transaction.set(ratingRef, ratings);
+                return null;
+            });
         }
 
 

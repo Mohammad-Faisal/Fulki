@@ -132,6 +132,7 @@ public class ShowPostActivity extends AppCompatActivity {
 
 
         postLikeCount.setOnClickListener(v -> {
+            addRating(mUserID , 1);
             Intent showPeopleIntent = new Intent(ShowPostActivity.this , ShowPleopleListActivity.class);
             showPeopleIntent.putExtra("type" , "likes");
             showPeopleIntent.putExtra("user_id" ,mPostID );
@@ -228,6 +229,10 @@ public class ShowPostActivity extends AppCompatActivity {
         postLikeButton.setOnLikeListener(new OnLikeListener() {
             @Override
             public void liked(LikeButton likeButton) {
+
+                addRating(mUserID , 3);
+                addRating( mPostOwnerID , 1);
+
                 //building like
                 postLikeButton.setLiked(true);
                 Functions f = new Functions();
@@ -269,15 +274,24 @@ public class ShowPostActivity extends AppCompatActivity {
             }
             @Override
             public void unLiked(LikeButton likeButton) {
+                addRating(mUserID , -3);
+                addRating( mPostOwnerID , -1);
                postLikeButton.setLiked(false);
                 firebaseFirestore.collection("likes/" + mPostID + "/likes").document(mUserID).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                         if(task.isSuccessful()){
                             String likeNotificatoinPushID = task.getResult().getString("notificationID");
+
+                            WriteBatch writeBatch = FirebaseFirestore.getInstance().batch();
+                            writeBatch.delete(firebaseFirestore.collection("likes/" + mPostID + "/likes").document(mUserID));
+                            writeBatch.delete(firebaseFirestore.collection("notifications/"+mPostOwnerID+"/notificatinos").document(likeNotificatoinPushID));
+                            writeBatch.delete(firebaseFirestore.collection("posts/"+mPostID+"/notifications").document(likeNotificatoinPushID));
+                            writeBatch.commit();
+                            /*
                             firebaseFirestore.collection("likes/" + mPostID + "/likes").document(mUserID).delete();
                             firebaseFirestore.collection("notifications/"+mPostOwnerID+"/notificatinos").document(likeNotificatoinPushID).delete();
-                            firebaseFirestore.collection("posts/"+mPostID+"/notifications").document(likeNotificatoinPushID).delete();
+                            firebaseFirestore.collection("posts/"+mPostID+"/notifications").document(likeNotificatoinPushID).delete();*/
                         }
                     }
                 });
@@ -322,6 +336,10 @@ public class ShowPostActivity extends AppCompatActivity {
         final TextView commentBox = findViewById(R.id.comment_write);
         ImageButton commentPost = findViewById(R.id.comment_post);
         commentPost.setOnClickListener(view -> {
+
+            addRating(mUserID , 5);
+            addRating( mPostOwnerID , 2);
+
             String time_stamp = String.valueOf(new Date().getTime());
 
             DocumentReference notiRef = FirebaseFirestore.getInstance().collection("notifications/"+mPostOwnerID+"/notificatinos").document();
@@ -368,12 +386,9 @@ public class ShowPostActivity extends AppCompatActivity {
 
         Bitmap bitmap = BitmapFactory.decodeResource(getResources(),
                 R.drawable.ic_person_icon);
-        Palette.from(bitmap).generate(new Palette.PaletteAsyncListener() {
-            @Override
-            public void onGenerated(Palette palette) {
-                collapsingToolbarLayout.setContentScrimColor(palette.getMutedColor(R.attr.colorPrimary));
-                collapsingToolbarLayout.setStatusBarScrimColor(palette.getMutedColor(R.attr.colorPrimaryDark));
-            }
+        Palette.from(bitmap).generate(palette -> {
+            collapsingToolbarLayout.setContentScrimColor(palette.getMutedColor(R.attr.colorPrimary));
+            collapsingToolbarLayout.setStatusBarScrimColor(palette.getMutedColor(R.attr.colorPrimaryDark));
         });
     }
 
@@ -382,6 +397,27 @@ public class ShowPostActivity extends AppCompatActivity {
         collapsingToolbarLayout.setCollapsedTitleTextAppearance(R.style.collapsedappbar);
         collapsingToolbarLayout.setExpandedTitleTextAppearance(R.style.expandedappbar);
     }
+
+
+    private Task<Void> addRating(String mUserID  , int factor) {
+
+        FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
+        Log.d(TAG, "addRating:   function calledd !!!!");
+        final DocumentReference ratingRef = FirebaseFirestore.getInstance().collection("ratings")
+                .document(mUserID);
+        return firebaseFirestore.runTransaction(transaction -> {
+
+            Ratings ratings = transaction.get(ratingRef)
+                    .toObject(Ratings.class);
+            long curRating = ratings.getRating();
+            long nextRating = curRating + factor;
+
+            ratings.setRating(nextRating);
+            transaction.set(ratingRef, ratings);
+            return null;
+        });
+    }
+
 
 
    /* @Override

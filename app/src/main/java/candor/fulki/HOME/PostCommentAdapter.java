@@ -25,6 +25,7 @@ import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.WriteBatch;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
@@ -170,6 +171,9 @@ public class PostCommentAdapter extends RecyclerView.Adapter<PostCommentAdapter.
                 holder.commentLove.setBackgroundResource(R.drawable.ic_love_full);
                 Functions f = new Functions();
 
+                holder.addRating(mUserID , 3);
+                holder.addRating(mCurrentCommenterID , 1);
+
                 //building comment
                 String time_stamp = String.valueOf(new Date().getTime());
                 DocumentReference ref = FirebaseFirestore.getInstance().collection("notifications/"+mCurrentCommenterID+"/notificatinos").document();
@@ -177,11 +181,26 @@ public class PostCommentAdapter extends RecyclerView.Adapter<PostCommentAdapter.
                 Likes mLikes = new Likes(mUserID , MainActivity.mUserName , MainActivity.mUserThumbImage ,likeNotificatoinPushID , time_stamp);
                 Notifications pushNoti = new Notifications( "comment_like" ,mUserID , mCurrentCommenterID, mPostID ,likeNotificatoinPushID , time_stamp,"n"  );
 
-                firebaseFirestore.collection("notifications/"+mCurrentCommenterID+"/notificatinos").document(likeNotificatoinPushID).set(pushNoti);
+                WriteBatch writeBatch = FirebaseFirestore.getInstance().batch();
+                writeBatch.set(firebaseFirestore.collection("posts/"+mPostID+"/notifications").document(likeNotificatoinPushID),pushNoti);
+                writeBatch.set(firebaseFirestore.collection("notifications/"+mCurrentCommenterID+"/notificatinos").document(likeNotificatoinPushID),pushNoti);
+                writeBatch.set(firebaseFirestore.collection("comment_likes/" + mPostID + "/"+mCommentId).document(mUserID), mLikes);
+                writeBatch.commit().addOnCompleteListener(task -> {
+                    if(task.isSuccessful()){
+                        Log.d(TAG, "onComplete:    comment love is successfull");
+                    }else{
+                        Log.d(TAG, "onComplete:   comment love is not succesful");
+                    }
+                });
+
+              /*  firebaseFirestore.collection("notifications/"+mCurrentCommenterID+"/notificatinos").document(likeNotificatoinPushID).set(pushNoti);
                 firebaseFirestore.collection("posts/"+mPostID+"/notifications").document(likeNotificatoinPushID).set(pushNoti);
-                firebaseFirestore.collection("comment_likes/" + mPostID + "/"+mCommentId).document(mUserID).set(mLikes);
+                firebaseFirestore.collection("comment_likes/" + mPostID + "/"+mCommentId).document(mUserID).set(mLikes);*/
 
             }else{
+
+                holder.addRating(mUserID , -3);
+                holder.addRating(mCurrentCommenterID , -1);
                 isLiked = false;
                 holder.commentLove.setBackgroundResource(R.drawable.ic_love_empty);
                 firebaseFirestore.collection("comment_likes/" + mPostID + "/"+mCommentId).document(mUserID).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
@@ -190,10 +209,27 @@ public class PostCommentAdapter extends RecyclerView.Adapter<PostCommentAdapter.
                         if (task.isSuccessful()) {
                             DocumentSnapshot document = task.getResult();
                             if (document.exists()) {
+
+                                WriteBatch writeBatch = FirebaseFirestore.getInstance().batch();
                                 String likeNotificatoinPushID = document.getString("notificationID");
-                                firebaseFirestore.collection("comment_likes/" + mPostID + "/"+mCommentId).document(mUserID).delete();
+                                writeBatch.delete(firebaseFirestore.collection("comment_likes/" + mPostID + "/"+mCommentId).document(mUserID));
+                                writeBatch.delete(firebaseFirestore.collection("notifications/"+mCurrentCommenterID+"/notificatinos").document(likeNotificatoinPushID));
+                                writeBatch.delete(firebaseFirestore.collection("posts/"+mPostID+"/notifications").document(likeNotificatoinPushID));
+                                writeBatch.commit().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        if(task.isSuccessful()){
+                                            Log.d(TAG, "onComplete:     comment love delete successful");
+                                        }else{
+                                            Log.d(TAG, "onComplete:   comment delete is not succesful");
+                                        }
+                                    }
+                                });
+
+                               /* firebaseFirestore.collection("comment_likes/" + mPostID + "/"+mCommentId).document(mUserID).delete();
                                 firebaseFirestore.collection("notifications/"+mCurrentCommenterID+"/notificatinos").document(likeNotificatoinPushID).delete();
                                 firebaseFirestore.collection("posts/"+mPostID+"/notifications").document(likeNotificatoinPushID).delete();
+                            */
                             } else {
                                 Log.d(TAG, "No such document");
                             }
@@ -207,6 +243,8 @@ public class PostCommentAdapter extends RecyclerView.Adapter<PostCommentAdapter.
             }
         });
         holder.commentImage.setOnClickListener(view -> {
+            holder.addRating(mUserID , 1);
+            holder.addRating(mCurrentCommenterID , 1);
             Intent showPostIntent = new Intent(context  , ProfileActivity.class);
             showPostIntent.putExtra("userID" , mCurrentCommenterID);
             Pair< View , String > pair1 = Pair.create(holder.itemView.findViewById(R.id.comment_item_image) ,"profile_image");
@@ -215,6 +253,8 @@ public class PostCommentAdapter extends RecyclerView.Adapter<PostCommentAdapter.
             context.startActivity(showPostIntent , optionsCompat.toBundle());
         });
         holder.commentName.setOnClickListener(view -> {
+            holder.addRating(mUserID , 1);
+            holder.addRating(mCurrentCommenterID , 1);
             Intent showPostIntent = new Intent(context  , ProfileActivity.class);
             showPostIntent.putExtra("userID" , mCurrentCommenterID);
             Pair< View , String > pair1 = Pair.create(holder.itemView.findViewById(R.id.comment_item_image) ,"profile_image");
@@ -253,6 +293,26 @@ public class PostCommentAdapter extends RecyclerView.Adapter<PostCommentAdapter.
         public void setPostUserName(String userName) {
             commentName.setText(userName);
         }
+
+        private Task<Void> addRating( String mUserID  , int factor) {
+
+            FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
+            Log.d(TAG, "addRating:   function calledd !!!!");
+            final DocumentReference ratingRef = FirebaseFirestore.getInstance().collection("ratings")
+                    .document(mUserID);
+            return firebaseFirestore.runTransaction(transaction -> {
+
+                Ratings ratings = transaction.get(ratingRef)
+                        .toObject(Ratings.class);
+                long curRating = ratings.getRating();
+                long nextRating = curRating + factor;
+
+                ratings.setRating(nextRating);
+                transaction.set(ratingRef, ratings);
+                return null;
+            });
+        }
+
     }
 
 

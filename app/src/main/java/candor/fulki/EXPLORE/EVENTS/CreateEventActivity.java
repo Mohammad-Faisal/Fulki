@@ -46,6 +46,7 @@ import candor.fulki.EXPLORE.ExploreActivity;
 import candor.fulki.GENERAL.MainActivity;
 import candor.fulki.HOME.CreatePhotoPostActivity;
 import candor.fulki.HOME.PostFiles;
+import candor.fulki.HOME.Ratings;
 import candor.fulki.PROFILE.ProfileSettingsActivity;
 import candor.fulki.R;
 import id.zelory.compressor.Compressor;
@@ -167,6 +168,9 @@ public class CreateEventActivity extends AppCompatActivity {
 
 
 
+
+
+
         //uploading the main image
         imageFilePath.putFile(imageUri)
                 .addOnSuccessListener(taskSnapshot -> {
@@ -205,6 +209,9 @@ public class CreateEventActivity extends AppCompatActivity {
                         postMap.put("discussion_cnt","0");
                         postMap.put("clap_cnt" , "0");
                         postMap.put("love_cnt" , "0");
+
+
+                        addRating(mUserID , 30);
 
                         //setting the path to file so that later we can delete this post
                         PostFiles postFiles = new PostFiles("event_images/"+mUserID+"/"+randomName+".jpg" ,"event_thumb_images/"+mUserID+"/"+randomName+".jpg", eventPushId);
@@ -288,6 +295,26 @@ public class CreateEventActivity extends AppCompatActivity {
         thumb_bitmap.compress(Bitmap.CompressFormat.JPEG, 30, baos);
         final byte[] thumb_byte = baos.toByteArray();
         return thumb_byte;
+    }
+
+
+    private Task<Void> addRating( String mUserID  , int factor) {
+
+        FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
+        Log.d(TAG, "addRating:   function calledd !!!!");
+        final DocumentReference ratingRef = FirebaseFirestore.getInstance().collection("ratings")
+                .document(mUserID);
+        return firebaseFirestore.runTransaction(transaction -> {
+
+            Ratings ratings = transaction.get(ratingRef)
+                    .toObject(Ratings.class);
+            long curRating = ratings.getRating();
+            long nextRating = curRating + factor;
+
+            ratings.setRating(nextRating);
+            transaction.set(ratingRef, ratings);
+            return null;
+        });
     }
 
 }

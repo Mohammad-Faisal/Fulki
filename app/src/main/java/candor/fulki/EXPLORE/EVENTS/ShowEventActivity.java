@@ -45,6 +45,7 @@ import candor.fulki.GENERAL.MainActivity;
 import candor.fulki.HOME.Comments;
 import candor.fulki.HOME.Likes;
 import candor.fulki.HOME.PostCommentAdapter;
+import candor.fulki.HOME.Ratings;
 import candor.fulki.HOME.ShowPostActivity;
 import candor.fulki.NOTIFICATION.Notifications;
 import candor.fulki.PROFILE.ShowPleopleListActivity;
@@ -93,6 +94,7 @@ public class ShowEventActivity extends AppCompatActivity {
 
         LinearLayout mLinear = findViewById(R.id.event_people_list_linear);
         mLinear.setOnClickListener(v -> {
+            addRating(mUserID , 1);
             Intent showPeopleIntent = new Intent(ShowEventActivity.this , ShowPleopleListActivity.class);
             showPeopleIntent.putExtra("type" , "joins");
             showPeopleIntent.putExtra("user_id" ,eventID );
@@ -104,6 +106,7 @@ public class ShowEventActivity extends AppCompatActivity {
         setJoinButtonState();
         loadComments();
         eventJoinButton.setOnClickListener(v -> {
+
             Log.d(TAG, "onCreate:  join button clicked !!!!!!");
             if(joinState == 1){
                 eventJoinButton.setEnabled(false);
@@ -117,6 +120,10 @@ public class ShowEventActivity extends AppCompatActivity {
     }
 
     public void postComment(){
+
+        addRating(mUserID , 5);
+        addRating(moderatorID , 2);
+
         String time_stamp = String.valueOf(new Date().getTime());
 
         DocumentReference ref = FirebaseFirestore.getInstance().collection("notifications/"+moderatorID+"/notificatinos").document();
@@ -170,6 +177,9 @@ public class ShowEventActivity extends AppCompatActivity {
 
     public void join(){
 
+        addRating(mUserID , 15);
+        addRating(moderatorID , 3);
+
         String time_stamp = String.valueOf(new Date().getTime());
         DocumentReference ref = FirebaseFirestore.getInstance().collection("notifications/"+moderatorID+"/notificatinos").document();
         String joinNotificatoinPushID = ref.getId();
@@ -204,6 +214,10 @@ public class ShowEventActivity extends AppCompatActivity {
     public void cancelJoin(){
         firebaseFirestore.collection("joins/" + eventID + "/joins").document(mUserID).get().addOnCompleteListener(task -> {
             if(task.isSuccessful()){
+
+                addRating(mUserID , -15);
+                addRating(moderatorID , -3);
+
                 eventJoinButton.setEnabled(true);
                 String joinNotificatoinPushID = task.getResult().getString("notificationID");
                 WriteBatch writeBatch  = firebaseFirestore.batch();
@@ -312,4 +326,26 @@ public class ShowEventActivity extends AppCompatActivity {
             }
         });
     }
+
+
+    private Task<Void> addRating(String mUserID  , int factor) {
+
+        FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
+        Log.d(TAG, "addRating:   function calledd !!!!");
+        final DocumentReference ratingRef = FirebaseFirestore.getInstance().collection("ratings")
+                .document(mUserID);
+        return firebaseFirestore.runTransaction(transaction -> {
+
+            Ratings ratings = transaction.get(ratingRef)
+                    .toObject(Ratings.class);
+            long curRating = ratings.getRating();
+            long nextRating = curRating + factor;
+
+            ratings.setRating(nextRating);
+            transaction.set(ratingRef, ratings);
+            return null;
+        });
+    }
+
+
 }

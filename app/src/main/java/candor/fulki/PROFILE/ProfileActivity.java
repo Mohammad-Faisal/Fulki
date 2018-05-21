@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -47,8 +48,10 @@ import candor.fulki.CHAT.InboxActivity;
 import candor.fulki.EXPLORE.ExploreActivity;
 import candor.fulki.GENERAL.MainActivity;
 import candor.fulki.GENERAL.SearchActivity;
+import candor.fulki.HOME.HomeActivity;
 import candor.fulki.HOME.HomeAdapter;
 import candor.fulki.HOME.Posts;
+import candor.fulki.HOME.Ratings;
 import candor.fulki.MapsActivity;
 import candor.fulki.NOTIFICATION.NotificationActivity;
 import candor.fulki.NOTIFICATION.Notifications;
@@ -61,6 +64,7 @@ import static candor.fulki.GENERAL.MainActivity.mUserThumbImage;
 public class ProfileActivity extends AppCompatActivity {
 
 
+    private static final String TAG = "ProfileActivity";
 
     String mUserID = "";
 
@@ -101,7 +105,7 @@ public class ProfileActivity extends AppCompatActivity {
             = item -> {
         switch (item.getItemId()) {
             case R.id.navigation_home:
-                Intent mainIntent = new Intent(ProfileActivity.this , MainActivity.class);
+                Intent mainIntent = new Intent(ProfileActivity.this , HomeActivity.class);
                 startActivity(mainIntent);
                 finish();
                 //setFragment(mHomeFragment);
@@ -202,18 +206,22 @@ public class ProfileActivity extends AppCompatActivity {
         }
 
         cardFollowers.setOnClickListener(v -> {
+            addRating(mUserID , 1);
             Intent followersIntent = new Intent(ProfileActivity.this ,ShowPleopleListActivity.class);
             followersIntent.putExtra("type" , "followers");
             followersIntent.putExtra("user_id" , mCurProfileId);
             startActivity(followersIntent);
         });
         cardFollowings.setOnClickListener(v -> {
+            addRating(mUserID,1);
             Intent followersIntent = new Intent(ProfileActivity.this ,ShowPleopleListActivity.class);
             followersIntent.putExtra("type" , "followings");
             followersIntent.putExtra("user_id" , mCurProfileId);
             startActivity(followersIntent);
         });
         sendMessage.setOnClickListener(v -> {
+            addRating(mUserID ,1);
+            addRating(mCurProfileId , 1);
             Intent chatIntent = new Intent(ProfileActivity.this  , ChatActivity.class);
             chatIntent.putExtra("user_id" , mUserID);
             startActivity(chatIntent);
@@ -295,6 +303,9 @@ public class ProfileActivity extends AppCompatActivity {
 
                     if(!followState){   //currently not following after click i will follow this person
 
+                        addRating(mUserID , 15);
+                        addRating(mCurProfileId , 5);
+
                         followState = true;
                         mProfileFollow.setText("following");
                         mProfileFollow.setTextColor(getResources().getColor(R.color.colorPrimaryy));
@@ -334,6 +345,10 @@ public class ProfileActivity extends AppCompatActivity {
                         firebaseFirestore.collection("followers/" + mCurProfileId + "/followers").document(mUserID).set(followerData);
 
                     }else{  //currently following this person after clickhin i will not fololw
+
+                        addRating(mUserID , 15);
+                        addRating(mCurProfileId , 5);
+
                         followState = false;
                         mProfileFollow.setText("follow");
                         mProfileFollow.setTextColor(getResources().getColor(R.color.White));
@@ -523,6 +538,26 @@ public class ProfileActivity extends AppCompatActivity {
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+
+    private Task<Void> addRating(String mUserID  , int factor) {
+
+        FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
+        Log.d(TAG, "addRating:   function calledd !!!!");
+        final DocumentReference ratingRef = FirebaseFirestore.getInstance().collection("ratings")
+                .document(mUserID);
+        return firebaseFirestore.runTransaction(transaction -> {
+
+            Ratings ratings = transaction.get(ratingRef)
+                    .toObject(Ratings.class);
+            long curRating = ratings.getRating();
+            long nextRating = curRating + factor;
+
+            ratings.setRating(nextRating);
+            transaction.set(ratingRef, ratings);
+            return null;
+        });
     }
 
 
