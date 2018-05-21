@@ -206,36 +206,39 @@ public class ShowEventActivity extends AppCompatActivity {
     public void cancelJoin(){
         firebaseFirestore.collection("joins/" + eventID + "/joins").document(mUserID).get().addOnCompleteListener(task -> {
             if(task.isSuccessful()){
-
-                addRating(mUserID , -15);
-                addRating(moderatorID , -3);
-
-                eventJoinButton.setEnabled(true);
-                String joinNotificatoinPushID = task.getResult().getString("notificationID");
-                WriteBatch writeBatch  = firebaseFirestore.batch();
-                DocumentReference notificatinoRef = firebaseFirestore.collection("notifications/"+moderatorID+"/notificatinos").document(joinNotificatoinPushID);
-                writeBatch.delete(notificatinoRef);
-                DocumentReference joinRef = firebaseFirestore.collection("joins/"+eventID+"/joins").document(mUserID);
-                writeBatch.delete(joinRef);
-
-                Log.d(TAG, "canceljoin:  join notification   "+ joinNotificatoinPushID);
-                Log.d(TAG, "cancelJoin: event id    " +eventID);
-
-                writeBatch.commit().addOnCompleteListener(task1 -> {
-                    if(task1.isSuccessful()){
-                        Log.d(TAG, "onComplete:  join cancel is successful");
-                        joinState=0;
-                        joinState = 0;
-                        eventJoinButton.setText("Join");
-                        eventJoinButton.setBackgroundColor(getResources().getColor(R.color.colorPrimaryy));
+                if(task.getResult().exists()){
+                    String joinNotificatoinPushID = task.getResult().getString("notificationID");
+                    WriteBatch writeBatch  = firebaseFirestore.batch();
+                    if(joinNotificatoinPushID!=null){
                         eventJoinButton.setEnabled(true);
+                        addRating(mUserID , -15);
+                        addRating(moderatorID , -3);
+                        DocumentReference notificatinoRef = firebaseFirestore.collection("notifications/"+moderatorID+"/notificatinos").document(joinNotificatoinPushID);
+                        writeBatch.delete(notificatinoRef);
                     }
-                }).addOnFailureListener(e -> {
+                    DocumentReference joinRef = firebaseFirestore.collection("joins/"+eventID+"/joins").document(mUserID);
+                    writeBatch.delete(joinRef);
+                    writeBatch.commit().addOnCompleteListener(task1 -> {
+                        if(task1.isSuccessful()){
+                            Log.d(TAG, "onComplete:  join cancel is successful");
+                            joinState=0;
+                            joinState = 0;
+                            eventJoinButton.setText("Join");
+                            eventJoinButton.setBackgroundColor(getResources().getColor(R.color.colorPrimaryy));
+                            eventJoinButton.setEnabled(true);
+                        }
+                    }).addOnFailureListener(e -> {
+                        eventJoinButton.setEnabled(true);
+                        Log.e(TAG, "onFailure: join cancel is not successful   :   ",e.getCause() );
+                    });
+                }else{
                     eventJoinButton.setEnabled(true);
-                    Log.e(TAG, "onFailure: join cancel is not successful   :   ",e.getCause() );
-                });
+                }
+            }else{
+                eventJoinButton.setEnabled(true);
             }
         });
+        eventJoinButton.setEnabled(true);
     }
 
     public void setDetails(){

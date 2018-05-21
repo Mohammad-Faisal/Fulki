@@ -100,7 +100,7 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".PROFILE.ShowPleopleListActivity"
-            android:parentActivityName=".PROFILE.ProfileActivity"
+            
             android:screenOrientation="portrait" />
         <activity
             android:name=".GENERAL.SearchActivity"

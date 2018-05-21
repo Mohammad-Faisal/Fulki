@@ -153,6 +153,13 @@ public class ShowPostActivity extends AppCompatActivity {
                         String postTime = task.getResult().getString("time_and_date");
                         String postOwnerID = task.getResult().getString("user_id");
 
+                        if(postImage.equals("default")){
+                            postImageView.setVisibility(View.GONE);
+                            toolbar.setVisibility(View.GONE);
+                            collapsingToolbarLayout.setVisibility(View.GONE);
+                        }
+
+
 
                         mPostOwnerID = postOwnerID;
                         postDateTime.setText(postTime);
@@ -279,17 +286,16 @@ public class ShowPostActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                         if(task.isSuccessful()){
-                            String likeNotificatoinPushID = task.getResult().getString("notificationID");
-
-                            WriteBatch writeBatch = FirebaseFirestore.getInstance().batch();
-                            writeBatch.delete(firebaseFirestore.collection("likes/" + mPostID + "/likes").document(mUserID));
-                            writeBatch.delete(firebaseFirestore.collection("notifications/"+mPostOwnerID+"/notificatinos").document(likeNotificatoinPushID));
-                            writeBatch.delete(firebaseFirestore.collection("posts/"+mPostID+"/notifications").document(likeNotificatoinPushID));
-                            writeBatch.commit();
-                            /*
-                            firebaseFirestore.collection("likes/" + mPostID + "/likes").document(mUserID).delete();
-                            firebaseFirestore.collection("notifications/"+mPostOwnerID+"/notificatinos").document(likeNotificatoinPushID).delete();
-                            firebaseFirestore.collection("posts/"+mPostID+"/notifications").document(likeNotificatoinPushID).delete();*/
+                            if(task.getResult().exists()){
+                                String likeNotificatoinPushID = task.getResult().getString("notificationID");
+                                WriteBatch writeBatch = FirebaseFirestore.getInstance().batch();
+                                if(likeNotificatoinPushID!=null){
+                                    writeBatch.delete(firebaseFirestore.collection("notifications/"+mPostOwnerID+"/notificatinos").document(likeNotificatoinPushID));
+                                    writeBatch.delete(firebaseFirestore.collection("posts/"+mPostID+"/notifications").document(likeNotificatoinPushID));
+                                }
+                                writeBatch.delete(firebaseFirestore.collection("likes/" + mPostID + "/likes").document(mUserID));
+                                writeBatch.commit();
+                            }
                         }
                     }
                 });

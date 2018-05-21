@@ -63,7 +63,7 @@ public class ShowPleopleListActivity extends AppCompatActivity {
         Log.d(TAG, "onCreate:  found user id :   " + userID);
 
         getSupportActionBar().setTitle(type);
-        getSupportActionBar().setHomeButtonEnabled(true);
+        //getSupportActionBar().setHomeButtonEnabled(true);
 
 
         mPeopleAdapter = new ListPeopleAdapter(userList , ShowPleopleListActivity.this , ShowPleopleListActivity.this);

@@ -359,7 +359,9 @@ public class ProfileActivity extends AppCompatActivity {
                                 if(task.isSuccessful()){
                                     if(task.getResult().exists()){
                                         String  followNotificatoinPushID = task.getResult().getString("notificationID");
-                                        firebaseFirestore.collection("notifications/"+mCurProfileId+"/notificatinos").document(followNotificatoinPushID).delete();
+                                        if(followNotificatoinPushID!=null){
+                                            firebaseFirestore.collection("notifications/"+mCurProfileId+"/notificatinos").document(followNotificatoinPushID).delete();
+                                        }
                                         firebaseFirestore.collection("followings/" + mUserID + "/followings").document(mCurProfileId).delete();
                                         firebaseFirestore.collection("followers/" + mCurProfileId + "/followers").document(mUserID).delete();
                                     }
@@ -371,30 +373,29 @@ public class ProfileActivity extends AppCompatActivity {
                 });
 
             firebaseFirestore = FirebaseFirestore.getInstance();
-            Query nextQuery = firebaseFirestore.collection("posts").orderBy("timestamp" , Query.Direction.DESCENDING).limit(3);
+            Query nextQuery = firebaseFirestore.collection("posts").orderBy("timestamp" , Query.Direction.DESCENDING).limit(3).whereEqualTo("user_id", mCurProfileId);
             nextQuery.addSnapshotListener(ProfileActivity.this , (documentSnapshots, e) -> {
-                if(!documentSnapshots.isEmpty()){
-                    if(isFirstPageLoad==true){
-                        lastVisible = documentSnapshots.getDocuments().get(documentSnapshots.size()-1);
-                    }
-                    for(DocumentChange doc: documentSnapshots.getDocumentChanges()){
-                        if(doc.getType() == DocumentChange.Type.ADDED){
-                            Posts singlePosts = doc.getDocument().toObject(Posts.class);
-                            String uid = singlePosts.getUser_id();
-                            if(isFirstPageLoad){
-                                if(uid.equals(mCurProfileId)){
-                                    posts.add(singlePosts);
-                                }
-                            }else{
-                                if(uid.equals(mCurProfileId)){
-                                    posts.add(0, singlePosts);
-                                }
-                            }
-                            mProfilePostAdapter.notifyDataSetChanged();
+                if(documentSnapshots!=null){
+                    if(!documentSnapshots.isEmpty()){
+                        if(isFirstPageLoad==true){
+                            lastVisible = documentSnapshots.getDocuments().get(documentSnapshots.size()-1);
                         }
+                        for(DocumentChange doc: documentSnapshots.getDocumentChanges()){
+                            if(doc.getType() == DocumentChange.Type.ADDED){
+                                Posts singlePosts = doc.getDocument().toObject(Posts.class);
+                                String uid = singlePosts.getUser_id();
+                                Log.d(TAG, "onCreate:  found user id   "+ uid);
+                                if(isFirstPageLoad){
+                                        posts.add(singlePosts);
+                                }else{
+                                        posts.add(0, singlePosts);
+                                }
+                                mProfilePostAdapter.notifyDataSetChanged();
+                            }
+                        }
+                        isFirstPageLoad = false;
                     }
                 }
-                isFirstPageLoad = false;
             });
 
 
@@ -417,17 +418,19 @@ public class ProfileActivity extends AppCompatActivity {
         Query nextQuery = firebaseFirestore.collection("posts")
                 .orderBy("timestamp" , Query.Direction.DESCENDING)
                 .startAfter(lastVisible)
+                .whereEqualTo("user_id" , mCurProfileId)
                 .limit(5);
         nextQuery.addSnapshotListener(ProfileActivity.this , (documentSnapshots, e) -> {
-            if(!documentSnapshots.isEmpty()){
-                lastVisible = documentSnapshots.getDocuments().get(documentSnapshots.size()-1);
-                for(DocumentChange doc: documentSnapshots.getDocumentChanges()){
-                    if(doc.getType() == DocumentChange.Type.ADDED){
-                        Posts singlePosts = doc.getDocument().toObject(Posts.class);
-                        String uid = singlePosts.getUser_id();
-                        if(uid.equals(mCurProfileId)){
+            if(documentSnapshots!=null){
+                if(!documentSnapshots.isEmpty()){
+                    lastVisible = documentSnapshots.getDocuments().get(documentSnapshots.size()-1);
+                    for(DocumentChange doc: documentSnapshots.getDocumentChanges()){
+                        if(doc.getType() == DocumentChange.Type.ADDED){
+                            Posts singlePosts = doc.getDocument().toObject(Posts.class);
+                            String uid = singlePosts.getUser_id();
                             posts.add(singlePosts);
                             mProfilePostAdapter.notifyDataSetChanged();
+
                         }
                     }
                 }
@@ -444,26 +447,10 @@ public class ProfileActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-
-        /*ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(ProfileActivity.this).build();
-        userImageOptions = new DisplayImageOptions.Builder()
-                .showImageOnLoading(R.drawable.ic_blank_profile)
-                .showImageForEmptyUri(R.drawable.ic_blank_profile)
-                .showImageOnFail(R.drawable.ic_blank_profile)
-                .cacheInMemory(true)
-                .cacheOnDisk(true)
-                .considerExifParams(true)
-                .build();
-        imageLoader = ImageLoader.getInstance();
-        imageLoader.init(config);
-*/
-        //mAuth.addAuthStateListener(mAuthStateListener);
     }
     @Override
     protected void onStop() {
         super.onStop();
-        //imageLoader.destroy();
-        //mAuth.removeAuthStateListener(mAuthStateListener);
     }
 
 

@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Parcelable;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -72,6 +73,7 @@ public class HomeActivity extends AppCompatActivity {
     private static final String TAG = "Home Activity";
     private static final int RC_SIGN_IN = 1;
     private static final int RC_CHECK_PERMISSION_LOCATION = 2;
+    private static final String SAVED_LAYOUT_MANAGER = "home recycler";
 
 
     public  String mUserID = "";
@@ -85,7 +87,8 @@ public class HomeActivity extends AppCompatActivity {
     private List< Posts> posts;
     private FirebaseFirestore firebaseFirestore;
     private HomeAdapter mHomeAdapter;
-    private DocumentSnapshot lastVisible;
+    LinearLayoutManager mLinearManager;
+    private DocumentSnapshot lastVisible = null;
     private boolean isFirstPageLoad = true;
     private ProgressDialog mProgress;
     EditText mCreatePostText;
@@ -96,6 +99,8 @@ public class HomeActivity extends AppCompatActivity {
     //image loader
     ImageLoader imageLoader;
     DisplayImageOptions userImageOptions;
+    public ImageLoaderConfiguration config;
+    public DisplayImageOptions postImageOptions;
 
 
 
@@ -149,6 +154,8 @@ public class HomeActivity extends AppCompatActivity {
         setContentView(R.layout.activity_home);
 
 
+        Log.d(TAG, "onCreate:   called !!!!!!!!!!!");
+
 
         getSupportActionBar().setTitle("  Flare");
         Toolbar toolbar = findViewById(R.id.toolbar_main);
@@ -172,103 +179,73 @@ public class HomeActivity extends AppCompatActivity {
         mNavigation.setIconSize(25, 25);
         mNavigation.setTextSize(7);
 
+        //setupImageLoader();
 
 
         getSupportActionBar().setTitle("   Fulki");
         getSupportActionBar().setElevation(1);
+        mUserID = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
-        mAuth = FirebaseAuth.getInstance();
-        mAuthStateListener = firebaseAuth -> {
-            final FirebaseUser mUser = firebaseAuth.getCurrentUser();
-            if (mUser != null) {
-                mUserID = mUser.getUid();
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ){
-                    checkPermission();
+        if (mUserID != null) {
+
+
+
+            firebaseFirestore =FirebaseFirestore.getInstance();
+            Map< String, Object> device_id = new HashMap<>();
+            String deviceTokenID = FirebaseInstanceId.getInstance().getToken();
+            device_id.put("user_id" , mUserID);
+            device_id.put("device_id" , deviceTokenID);
+            firebaseFirestore.collection("device_ids").document(mUserID).set(device_id);
+
+
+            mUserImage = MainActivity.mUserImage;
+            mUserName = MainActivity.mUserName;
+            mUserThumbImage = MainActivity.mUserThumbImage;
+
+
+            setupImageLoader();
+            imageLoader.displayImage(mUserThumbImage, imageView, userImageOptions);
+            imageLoader.destroy();
+
+
+            //setting up the recyclerview
+            posts = new ArrayList<>();
+            recyclerView = findViewById(R.id.home_recycler_view);
+            mLinearManager = new LinearLayoutManager(HomeActivity.this);
+            recyclerView.setLayoutManager(mLinearManager);
+            recyclerView.setNestedScrollingEnabled(false);
+            mHomeAdapter = new HomeAdapter(recyclerView, posts,HomeActivity.this, HomeActivity.this);
+            recyclerView.setAdapter(mHomeAdapter);
+
+
+            mCreatePostImage.setOnClickListener(v -> {
+                if(TextPost){
+                    uploadTextPost();
+
+                } else{
+                    BringImagePicker();
                 }
-                FirebaseFirestore db = FirebaseFirestore.getInstance();
-                DocumentReference docRef = db.collection("users").document(mUserID);
-                docRef.get().addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        DocumentSnapshot document = task.getResult();
-                        if (!document.exists()) {
-                            Intent regIntent = new Intent(HomeActivity.this, ProfileSettingsActivity.class);
-                            startActivity(regIntent);
-                            finish();
-                        }else{
+            });
 
 
-                            firebaseFirestore =FirebaseFirestore.getInstance();
-                            Map< String, Object> device_id = new HashMap<>();
-                            String deviceTokenID = FirebaseInstanceId.getInstance().getToken();
-                            device_id.put("user_id" , mUserID);
-                            device_id.put("device_id" , deviceTokenID);
-                            firebaseFirestore.collection("device_ids").document(mUserID).set(device_id);
+            firebaseFirestore = FirebaseFirestore.getInstance();
 
+            loadFirstPosts();
 
-
-
-                            mUserImage = task.getResult().getString("image");
-                            mUserName = task.getResult().getString("name");
-                            mUserThumbImage = task.getResult().getString("thumb_image");
-                            mUserImage = task.getResult().getString("image");
-
-                            MainActivity.mUserImage = mUserImage;
-                            MainActivity.mUserName = mUserName;
-                            MainActivity.mUserThumbImage = mUserThumbImage;
-                            MainActivity.mUserImage =  mUserImage;
-
-
-                            imageLoader.displayImage(mUserThumbImage, imageView, userImageOptions);
-
-
-                            //setting up the recyclerview
-                            posts = new ArrayList<>();
-                            recyclerView = findViewById(R.id.home_recycler_view);
-                            recyclerView.setLayoutManager(new LinearLayoutManager(HomeActivity.this));
-                            recyclerView.setNestedScrollingEnabled(false);
-                            mHomeAdapter = new HomeAdapter(recyclerView, posts,HomeActivity.this, HomeActivity.this);
-                            recyclerView.setAdapter(mHomeAdapter);
-
-
-                            mCreatePostImage.setOnClickListener(v -> {
-                                if(TextPost){
-                                    uploadTextPost();
-
-                                } else{
-                                    BringImagePicker();
-                                }
-                            });
-
-
-                            loadFirstPosts();
-
-                            //load more posts
-                            recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-                                @Override
-                                public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                                    Boolean reachedBottom = !recyclerView.canScrollVertically(1);
-                                    if(reachedBottom){
-                                        loadMorePost();
-                                    }
-                                }
-                            });
-                        }
-                    } else {
-                        Log.d(TAG, "get failed with ", task.getException());
+            /*recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                @Override
+                public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                    Boolean reachedBottom = !recyclerView.canScrollVertically(1);
+                    if(reachedBottom){
+                        Log.d(TAG, "onScrolled:      reached bottom ");
+                        loadMorePost();
                     }
-                });
-            }else {
-                startActivityForResult(
-                        AuthUI.getInstance()
-                                .createSignInIntentBuilder()
-                                .setIsSmartLockEnabled(false)
-                                .setAvailableProviders(
-                                        Arrays.asList(
-                                                new IdpConfig.Builder(AuthUI.PHONE_VERIFICATION_PROVIDER).build()))
-                                .build(),
-                        RC_SIGN_IN);
-            }
-        };
+                }
+            });*/
+
+
+
+        }
     }
 
     public void uploadTextPost(){
@@ -323,27 +300,31 @@ public class HomeActivity extends AppCompatActivity {
 
     public void loadFirstPosts(){
 
-        firebaseFirestore = FirebaseFirestore.getInstance();
-        Query nextQuery = firebaseFirestore.collection("posts").orderBy("timestamp" , Query.Direction.DESCENDING).limit(5);
+        Query nextQuery = firebaseFirestore.collection("posts").orderBy("timestamp" , Query.Direction.DESCENDING).limit(30);
         nextQuery.addSnapshotListener(HomeActivity.this , (documentSnapshots, e) -> {
-            if(!documentSnapshots.isEmpty()){
-                if(isFirstPageLoad==true){
-                    lastVisible = documentSnapshots.getDocuments().get(documentSnapshots.size()-1);
-                }
-                for(DocumentChange doc: documentSnapshots.getDocumentChanges()){
-                    if(doc.getType() == DocumentChange.Type.ADDED){
-                        Posts singlePosts = doc.getDocument().toObject(Posts.class);
-                        if(isFirstPageLoad){
-                            posts.add(singlePosts);
-
-                        }else{
-                            posts.add(0, singlePosts);
-                        }
-                        mHomeAdapter.notifyDataSetChanged();
+            if(documentSnapshots!=null){
+                if(!documentSnapshots.isEmpty()){
+                    if(isFirstPageLoad==true){
+                        lastVisible = documentSnapshots.getDocuments().get(documentSnapshots.size()-1);
                     }
+                    for(DocumentChange doc: documentSnapshots.getDocumentChanges()){
+                        if(doc.getType() == DocumentChange.Type.ADDED){
+                            Posts singlePosts = doc.getDocument().toObject(Posts.class);
+                            String uid = singlePosts.getUser_id();
+                            Log.d(TAG, "onCreate:  found user id   "+ uid);
+                            if(isFirstPageLoad){
+                                posts.add(singlePosts);
+                            }else{
+                                posts.add(0, singlePosts);
+                            }
+                            mHomeAdapter.notifyDataSetChanged();
+                        }
+                    }
+                    isFirstPageLoad = false;
                 }
+            }else{
+                Log.d(TAG, "onCreate:   document snapshot is null");
             }
-            isFirstPageLoad = false;
         });
     }
 
@@ -359,8 +340,10 @@ public class HomeActivity extends AppCompatActivity {
                 for(DocumentChange doc: documentSnapshots.getDocumentChanges()){
                     if(doc.getType() == DocumentChange.Type.ADDED){
                         Posts singlePosts = doc.getDocument().toObject(Posts.class);
-                        posts.add(singlePosts);
-                        mHomeAdapter.notifyDataSetChanged();
+                        String uid = singlePosts.getUser_id();
+                            posts.add(singlePosts);
+                            mHomeAdapter.notifyDataSetChanged();
+
                     }
                 }
             }
@@ -462,66 +445,18 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
+
     @Override
     protected void onResume() {
-
-
-        ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(HomeActivity.this).build();
-        userImageOptions = new DisplayImageOptions.Builder()
-                .showImageOnLoading(R.drawable.ic_blank_profile)
-                .showImageForEmptyUri(R.drawable.ic_blank_profile)
-                .showImageOnFail(R.drawable.ic_blank_profile)
-                .cacheInMemory(true)
-                .cacheOnDisk(true)
-                .considerExifParams(true)
-                .build();
-        imageLoader = ImageLoader.getInstance();
-        imageLoader.init(config);
         super.onResume();
     }
-
-
     @Override
     protected void onStart() {
         super.onStart();
-        //isFirstPageLoad = false;
-        ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(HomeActivity.this).build();
-        userImageOptions = new DisplayImageOptions.Builder()
-                .showImageOnLoading(R.drawable.ic_blank_profile)
-                .showImageForEmptyUri(R.drawable.ic_blank_profile)
-                .showImageOnFail(R.drawable.ic_blank_profile)
-                .cacheInMemory(true)
-                .cacheOnDisk(true)
-                .considerExifParams(true)
-                .build();
-        imageLoader = ImageLoader.getInstance();
-        imageLoader.init(config);
-
-        mAuth.addAuthStateListener(mAuthStateListener);
     }
     @Override
     protected void onStop() {
         super.onStop();
-        //imageLoader.destroy();
-
-        String timestamp = String.valueOf(new Date().getTime());
-        Map< String, Object> time_stamp = new HashMap<>();
-        time_stamp.put("user_id" , mUserID);
-        firebaseFirestore =FirebaseFirestore.getInstance();
-        firebaseFirestore.collection("time_stamps").document(mUserID).set(time_stamp);
-
-        mAuth.removeAuthStateListener(mAuthStateListener);
-    }
-    public void checkPermission(){
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                ){//Can add more as per requirement
-
-            ActivityCompat.requestPermissions(this,
-                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
-                    RC_CHECK_PERMISSION_LOCATION);
-
-        }
     }
 
     public void BringImagePicker() {
@@ -530,5 +465,27 @@ public class HomeActivity extends AppCompatActivity {
                 .setAspectRatio(10, 8)
                 .setMinCropResultSize(512 , 512)
                 .start(HomeActivity.this);
+    }
+
+    private void setupImageLoader(){
+        //Image loader initialization for offline feature
+        config = new ImageLoaderConfiguration.Builder(HomeActivity.this)
+                .threadPoolSize(5)
+                .threadPriority(Thread.MIN_PRIORITY + 2)
+                .defaultDisplayImageOptions(DisplayImageOptions.createSimple())
+                .build();
+
+
+        postImageOptions = new DisplayImageOptions.Builder()
+                .showImageOnLoading(R.drawable.ic_camera_icon)
+                .showImageForEmptyUri(R.drawable.ic_camera_icon)
+                .showImageOnFail(R.drawable.ic_camera_icon)
+                .cacheInMemory(true)
+                .cacheOnDisk(true)
+                .considerExifParams(true)
+                .build();
+
+        imageLoader = ImageLoader.getInstance();
+        imageLoader.init(config);
     }
 }

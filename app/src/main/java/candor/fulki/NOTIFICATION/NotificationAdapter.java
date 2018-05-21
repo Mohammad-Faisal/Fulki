@@ -7,6 +7,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.util.Pair;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.util.Log;
@@ -14,6 +15,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -117,9 +119,13 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         final String notiID =notiItem.getNotification_id();
         String seen_status = notiItem.getSeen();
         if(seen_status.equals("n")){
-            holder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.Grey));
+            holder.notificatinoLinear.setBackgroundColor(context.getColor(R.color.halkagrey));
+            //holder.notificationCard.setCardBackgroundColor(R.color);
+            //holder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.colorPrimaryy));
         }else{
-            holder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.White));
+            holder.notificatinoLinear.setBackgroundColor(context.getColor(R.color.White));
+            //holder.notificationCard.setCardBackgroundColor(R.color.Grey);
+            //holder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.White));
         }
 
         if(type.equals("follow")){
@@ -164,10 +170,10 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
 
             });
         }
-        else if (type.equals("comment")  || type.equals("like")  || type.equals("share") || type.equals("comment_like")){
+        else if (type.equals("comment")  || type.equals("like")  || type.equals("share") || type.equals("comment_like") || type.equals("comment_event")){
 
 
-            if(type.equals("comment")){
+            if(type.equals("comment") || type.equals("comment_event")){
                 holder.notificationIcon.setImageResource(R.drawable.ic_comment_black);
             }else if(type.equals("like")){
                 holder.notificationIcon.setImageResource(R.drawable.ic_love_full);
@@ -184,34 +190,35 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
 
 
 
-            FirebaseFirestore.getInstance().collection("users").document(userID).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                @Override
-                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                    if (task.isSuccessful()) {
-                        String userName = task.getResult().getString("name");
-                        String userThumbImage = task.getResult().getString("thumb_image");
-                        holder.setImage(userThumbImage , context , R.drawable.ic_blank_profile);
+            FirebaseFirestore.getInstance().collection("users").document(userID).get().addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    String userName = task.getResult().getString("name");
+                    String userThumbImage = task.getResult().getString("thumb_image");
+                    holder.setImage(userThumbImage , context , R.drawable.ic_blank_profile);
 
-                        //setting time ago for comment
-                        GetTimeAgo ob = new GetTimeAgo();
-                        long time = Long.parseLong(online);
-                        String time_ago = ob.getTimeAgo(time ,context);
-                        holder.notificationTime.setText( time_ago);
+                    //setting time ago for comment
+                    GetTimeAgo ob = new GetTimeAgo();
+                    long time = Long.parseLong(online);
+                    String time_ago = ob.getTimeAgo(time ,context);
+                    holder.notificationTime.setText( time_ago);
 
 
-                        //setting comment
-                        String sourceString = "default notification";
-                        if(type.equals("comment")){
-                            sourceString =  "<b>" + userName + "<b>" + "  has Commented on your post";
-                        } else if(type.equals("like")) {
-                            sourceString =  "<b>" + userName + "<b>" + "  has Liked your post";
-                        }else if( type.equals("share")){
-                            sourceString =  "<b>" + userName + "<b>" + "  has Shared your post";
-                        }else{
-                            sourceString =  "<b>" + userName + "<b>" + "  has liked your comment !";
-                        }
-                        holder.notificationText.setText(Html.fromHtml(sourceString));
+                    Log.d(TAG, "onBindViewHolder:   found type    "+type);
+
+                    //setting comment
+                    String sourceString = "default notification";
+                    if(type.equals("comment")){
+                        sourceString =   userName + "  has Commented on your post";
+                    } else if(type.equals("like")) {
+                        sourceString =  "<b>" + userName + "<b>" + "  has Liked your post";
+                    }else if( type.equals("share")){
+                        sourceString =  "<b>" + userName + "<b>" + "  has Shared your post";
+                    }else if(type.equals("event_comment")) {
+                        sourceString = "<b>" + userName + "<b>" + "  has Commented on your event";
+                    }else {
+                        sourceString =  "<b>" + userName + "<b>" + "  has liked your comment !";
                     }
+                    holder.notificationText.setText(Html.fromHtml(sourceString));
                 }
             });
 
@@ -280,6 +287,49 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
             });*/
         }else if(type.equals("join")){
 
+            final String userID = notiItem.getNotification_from();
+            final String online = notiItem.getTime_stamp();
+            final String eventID = notiItem.getContent_id();
+
+
+
+            FirebaseFirestore.getInstance().collection("users").document(userID).get().addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    String userName = task.getResult().getString("name");
+                    String userThumbImage = task.getResult().getString("thumb_image");
+                    holder.setImage(userThumbImage , context , R.drawable.ic_blank_profile);
+
+                    //setting time ago for comment
+                    GetTimeAgo ob = new GetTimeAgo();
+                    long time = Long.parseLong(online);
+                    String time_ago = ob.getTimeAgo(time ,context);
+                    holder.notificationTime.setText( time_ago);
+                    String sourceString =  "<b>" + userName + "<b>" + "  has Joined your event";
+                    holder.notificationText.setText(Html.fromHtml(sourceString));
+                }
+            });
+
+            holder.notificationImage.setOnClickListener(view -> {
+                Intent profileIntent = new Intent(context , ProfileActivity.class);
+                profileIntent.putExtra("userID" , userID);
+                context.startActivity(profileIntent);
+            });
+
+            holder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.White));
+            firebaseFirestore.collection("notifications/"+mUserID+"/notificatinos").document(notiID).update("seen" , "y").addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+
+                }
+            });
+            Intent showPostIntent = new Intent(context , ShowPostActivity.class);
+            showPostIntent.putExtra("event_id" , eventID);
+            Pair< View , String > pair1 = Pair.create(holder.itemView.findViewById(R.id.item_notification_image) ,"profile_image");
+            ActivityOptionsCompat optionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation(activity ,pair1 );
+            context.startActivity(showPostIntent , optionsCompat.toBundle());
+
+
+
         }else if(type.equals("comment_event")){
 
         }
@@ -297,6 +347,8 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         public CircleImageView notificationImage;
         public TextView notificationTime;
         public ImageView notificationIcon;
+        public CardView notificationCard;
+        private LinearLayout notificatinoLinear;
 
         public NotificationViewHolder(View itemView) {
             super(itemView);
@@ -304,6 +356,8 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
             notificationText = itemView.findViewById(R.id.item_notification_details);
             notificationTime = itemView.findViewById(R.id.item_notification_time_ago);
             notificationIcon = itemView.findViewById(R.id.item_notificaion_icon);
+            notificationCard = itemView.findViewById(R.id.item_notification_card);
+            notificatinoLinear = itemView.findViewById(R.id.item_notification_linear);
         }
 
         public void setImage(String imageURL , final Context context , int drawable_id ){

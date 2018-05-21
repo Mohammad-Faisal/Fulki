@@ -188,13 +188,8 @@ public class ListPeopleAdapter extends RecyclerView.Adapter<ListPeopleAdapter.Li
 
                 holder.addRating(mUserID , -15);
                 holder.addRating(mListUserID , -5);
-
                 followState = false;
-
                 holder.followBtn.setBackgroundResource(R.drawable.user_followings);
-
-
-
 
                 firebaseFirestore.collection("followers/" + mListUserID + "/followers").document(mUserID).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                     @Override
@@ -202,7 +197,9 @@ public class ListPeopleAdapter extends RecyclerView.Adapter<ListPeopleAdapter.Li
                         if(task.isSuccessful()){
                             if(task.getResult().exists()){
                                 String  followNotificatoinPushID = task.getResult().getString("notificationID");
-                                firebaseFirestore.collection("notifications/"+mListUserID+"/notificatinos").document(followNotificatoinPushID).delete();
+                                if(followNotificatoinPushID!=null){
+                                    firebaseFirestore.collection("notifications/"+mListUserID+"/notificatinos").document(followNotificatoinPushID).delete();
+                                }
                                 firebaseFirestore.collection("followings/" + mUserID + "/followings").document(mListUserID).delete();
                                 firebaseFirestore.collection("followers/" + mListUserID + "/followers").document(mUserID).delete();
                             }

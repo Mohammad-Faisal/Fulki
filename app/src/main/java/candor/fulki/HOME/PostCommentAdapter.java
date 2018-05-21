@@ -210,9 +210,13 @@ public class PostCommentAdapter extends RecyclerView.Adapter<PostCommentAdapter.
 
                                 WriteBatch writeBatch = FirebaseFirestore.getInstance().batch();
                                 String likeNotificatoinPushID = document.getString("notificationID");
+
+
+                                if(likeNotificatoinPushID!=null){
+                                    writeBatch.delete(firebaseFirestore.collection("posts/"+mPostID+"/notifications").document(likeNotificatoinPushID));
+                                    writeBatch.delete(firebaseFirestore.collection("notifications/"+mCurrentCommenterID+"/notificatinos").document(likeNotificatoinPushID));
+                                }
                                 writeBatch.delete(firebaseFirestore.collection("comment_likes/" + mPostID + "/"+mCommentId).document(mUserID));
-                                writeBatch.delete(firebaseFirestore.collection("notifications/"+mCurrentCommenterID+"/notificatinos").document(likeNotificatoinPushID));
-                                writeBatch.delete(firebaseFirestore.collection("posts/"+mPostID+"/notifications").document(likeNotificatoinPushID));
                                 writeBatch.commit().addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
@@ -223,11 +227,6 @@ public class PostCommentAdapter extends RecyclerView.Adapter<PostCommentAdapter.
                                         }
                                     }
                                 });
-
-                               /* firebaseFirestore.collection("comment_likes/" + mPostID + "/"+mCommentId).document(mUserID).delete();
-                                firebaseFirestore.collection("notifications/"+mCurrentCommenterID+"/notificatinos").document(likeNotificatoinPushID).delete();
-                                firebaseFirestore.collection("posts/"+mPostID+"/notifications").document(likeNotificatoinPushID).delete();
-                            */
                             } else {
                                 Log.d(TAG, "No such document");
                             }

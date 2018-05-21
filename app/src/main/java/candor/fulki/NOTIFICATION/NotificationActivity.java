@@ -95,7 +95,7 @@ public class NotificationActivity extends AppCompatActivity {
         mNavigation.setIconSize(25, 25);
         mNavigation.setTextSize(7);
 
-        getSupportActionBar().setTitle("  Flare");
+        getSupportActionBar().setTitle("  Notifications");
 
 
         if(FirebaseAuth.getInstance().getCurrentUser() != null){
@@ -113,7 +113,7 @@ public class NotificationActivity extends AppCompatActivity {
 
             FirebaseFirestore firebaseFirestore;
             firebaseFirestore = FirebaseFirestore.getInstance();
-            Query nextQuery = firebaseFirestore.collection("notifications/"+mUserID+"/notificatinos").orderBy("time_stamp" , Query.Direction.DESCENDING);
+            Query nextQuery = firebaseFirestore.collection("notifications/"+mUserID+"/notificatinos").orderBy("time_stamp" , Query.Direction.DESCENDING).limit(100);
             nextQuery.addSnapshotListener((documentSnapshots, e) -> {
                 for(DocumentChange doc: documentSnapshots.getDocumentChanges()){
                     if(doc.getType() == DocumentChange.Type.ADDED){

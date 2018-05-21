@@ -123,9 +123,7 @@ public class MainActivity extends AppCompatActivity {
                 final FirebaseUser mUser = firebaseAuth.getCurrentUser();
                 if (mUser != null) {
                     mUserID = mUser.getUid();
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ){
-                        checkPermission();
-                    }
+
                     FirebaseFirestore db = FirebaseFirestore.getInstance();
                     DocumentReference docRef = db.collection("users").document(mUserID);
                     docRef.get().addOnCompleteListener(task -> {
@@ -136,6 +134,11 @@ public class MainActivity extends AppCompatActivity {
                                 startActivity(regIntent);
                                 finish();
                             }else{
+
+                                mUserImage = task.getResult().getString("image");
+                                mUserName = task.getResult().getString("name");
+                                mUserThumbImage = task.getResult().getString("thumb_image");
+                                mUserImage = task.getResult().getString("image");
 
                                 Intent homeIntent = new Intent(MainActivity.this , HomeActivity.class);
                                 startActivity(homeIntent);

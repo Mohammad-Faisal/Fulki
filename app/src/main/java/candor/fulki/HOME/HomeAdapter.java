@@ -40,6 +40,9 @@ import com.like.OnLikeListener;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.NetworkPolicy;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -149,15 +152,14 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
         holder.setPostCaption(post.getCaption());
         holder.setPostDateTime(post.getTime_and_date());
 
-        holder.setImage(post.getImage_url(), 1);
+        //holder.setImagePicasso(post.getImage_url() , context ,  holder.postImage );
+        holder.setUserImage(post.getImage_url(), holder.postImage);
 
         //setting if it is shared or not
         String location = post.getLocation();
         if(location.equals("")){
             holder.setPostLocaiton("");
             holder.postLocaiton.setVisibility(View.GONE);
-
-
         }else{
             holder.postLocaiton.setVisibility(View.VISIBLE);
             holder.setPostLocaiton("shared by "+location);
@@ -170,7 +172,7 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
             if (task.isSuccessful()) {
                 mUserName = task.getResult().getString("name");
                 mUserImage = task.getResult().getString("thumb_image");
-                holder.setUserImage(mUserImage);
+                holder.setUserImage(mUserImage , holder.postUserImage);
                 holder.setPostUserName(mUserName);
             } else {
                 Log.d(TAG, "onComplete: " + task.getException().toString());
@@ -288,38 +290,36 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
 
                 //building like
                 String time_stamp = String.valueOf(new Date().getTime());
+                WriteBatch writeBatch  = firebaseFirestore.batch();
                 DocumentReference ref = FirebaseFirestore.getInstance().collection("notifications/"+mCurrentPosterId+"/notificatinos").document();
                 String likeNotificatoinPushID = ref.getId();
 
-
-                Likes mLikes = new Likes(mUserID , MainActivity.mUserName , MainActivity.mUserThumbImage ,likeNotificatoinPushID , time_stamp);
-                Notifications pushNoti = new Notifications( "like" ,mUserID , post.getUser_id() , postPushID ,likeNotificatoinPushID , time_stamp,"n"  );
-
+                    Likes mLikes = new Likes(mUserID , MainActivity.mUserName , MainActivity.mUserThumbImage ,likeNotificatoinPushID , time_stamp);
+                    Notifications pushNoti = new Notifications( "like" ,mUserID , post.getUser_id() , postPushID ,likeNotificatoinPushID , time_stamp,"n"  );
 
 
-                WriteBatch writeBatch  = firebaseFirestore.batch();
+                    DocumentReference notificatinoRef = firebaseFirestore.collection("notifications/"+post.getUser_id()+"/notificatinos").document(likeNotificatoinPushID);
+                    writeBatch.set(notificatinoRef, pushNoti);
 
-                DocumentReference notificatinoRef = firebaseFirestore.collection("notifications/"+post.getUser_id()+"/notificatinos").document(likeNotificatoinPushID);
-                writeBatch.set(notificatinoRef, pushNoti);
+                    DocumentReference postNotificatinoRef =  firebaseFirestore.collection("posts/"+postPushID+"/notifications").document(likeNotificatoinPushID);
+                    writeBatch.set(postNotificatinoRef, pushNoti);
 
-                DocumentReference postNotificatinoRef =  firebaseFirestore.collection("posts/"+postPushID+"/notifications").document(likeNotificatoinPushID);
-                writeBatch.set(postNotificatinoRef, pushNoti);
+                    DocumentReference postLikeRef =  firebaseFirestore.collection("likes/" + postPushID + "/likes").document(mUserID); //.set(mLikes);
+                    writeBatch.set(postLikeRef, mLikes);
 
-                DocumentReference postLikeRef =  firebaseFirestore.collection("likes/" + postPushID + "/likes").document(mUserID); //.set(mLikes);
-                writeBatch.set(postLikeRef, mLikes);
+                    writeBatch.commit().addOnSuccessListener(aVoid -> {
+                        Log.d(TAG, "liked:   like is successful");
 
-                writeBatch.commit().addOnSuccessListener(aVoid -> {
-                    Log.d(TAG, "liked:   like is successful");
+                    }).addOnFailureListener(e -> {
+                        Log.d(TAG, "liked:   like is not succesful");
+                    });
 
-                }).addOnFailureListener(e -> {
-                    Log.d(TAG, "liked:   like is not succesful");
-                });
+                    //as the user liked this post so i should give him some points
 
-                //as the user liked this post so i should give him some points
+                    //holder.addRating();
+                    holder.addRating(mUserID , 3);
+                    holder.addRating(post.getUser_id() , 1);
 
-                //holder.addRating();
-                holder.addRating(mUserID , 3);
-                holder.addRating(post.getUser_id() , 1);
 
 
             }
@@ -330,27 +330,28 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
                     @Override
                     public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                         if(task.isSuccessful()){
-                            String likeNotificatoinPushID = task.getResult().getString("notificationID");
+                            if(task.getResult().exists()){
 
+                                String likeNotificatoinPushID = task.getResult().getString("notificationID");
+                                WriteBatch writeBatch  = firebaseFirestore.batch();
 
-                            WriteBatch writeBatch  = firebaseFirestore.batch();
+                                if(likeNotificatoinPushID != null){
+                                    DocumentReference notificatinoRef = firebaseFirestore.collection("notifications/"+post.getUser_id()+"/notificatinos").document(likeNotificatoinPushID);
+                                    writeBatch.delete(notificatinoRef);
+                                    DocumentReference postNotificatinoRef =  firebaseFirestore.collection("posts/"+postPushID+"/notifications").document(likeNotificatoinPushID);
+                                    writeBatch.delete(postNotificatinoRef);
+                                }
+                                DocumentReference postLikeRef =  firebaseFirestore.collection("likes/" + postPushID + "/likes").document(mUserID); //.set(mLikes);
+                                writeBatch.delete(postLikeRef);
 
-                            DocumentReference notificatinoRef = firebaseFirestore.collection("notifications/"+post.getUser_id()+"/notificatinos").document(likeNotificatoinPushID);
-                            writeBatch.delete(notificatinoRef);
+                                writeBatch.commit().addOnSuccessListener(aVoid -> {
+                                    Log.d(TAG, "liked:   unlike is successful");
 
-                            DocumentReference postNotificatinoRef =  firebaseFirestore.collection("posts/"+postPushID+"/notifications").document(likeNotificatoinPushID);
-                            writeBatch.delete(postNotificatinoRef);
+                                }).addOnFailureListener(e -> {
+                                    Log.d(TAG, "liked:   unlike is not succesful");
+                                });
 
-                            DocumentReference postLikeRef =  firebaseFirestore.collection("likes/" + postPushID + "/likes").document(mUserID); //.set(mLikes);
-                            writeBatch.delete(postLikeRef);
-
-
-                            writeBatch.commit().addOnSuccessListener(aVoid -> {
-                                Log.d(TAG, "liked:   unlike is successful");
-
-                            }).addOnFailureListener(e -> {
-                                Log.d(TAG, "liked:   unlike is not succesful");
-                            });
+                            }
                         }
                     }
                 });
@@ -750,9 +751,14 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
             postLocaiton.setText(location);
         }
 
-        public void setUserImage(String image_url) {
+        public void setUserImage(String image_url , ImageView imageView) {
             mUserImage = image_url;
-            imageLoader.displayImage(image_url, postUserImage, userImageOptions);
+            if(image_url.equals("default")){
+                postImage.setVisibility(View.GONE);
+            }else{
+                imageLoader.displayImage(image_url, imageView, userImageOptions);
+            }
+
         }
 
         public void setImage(final String image_url, int type) {
@@ -761,8 +767,28 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
             }else{
                 imageLoader.displayImage(image_url, postImage, postImageOptions);
             }
-
         }
+
+        public void setImagePicasso(final String imageURL , final Context context , ImageView imageView ){
+            Log.d(TAG, "setImagePicasso:    found image url  "+imageURL);
+            if(imageURL.equals("default")){
+                postImage.setVisibility(View.GONE);
+            }
+            else{
+                Picasso.with(context).load(imageURL).networkPolicy(NetworkPolicy.OFFLINE)
+                        .placeholder(R.drawable.ic_camera_icon).into(imageView, new Callback() {
+                    @Override
+                    public void onSuccess() {
+                        //do nothing if an image is found offline
+                    }
+                    @Override
+                    public void onError() {
+                        Picasso.with(context).load(imageURL).placeholder(R.drawable.ic_blank_profile).into(imageView);
+                    }
+                });
+            }
+        }
+
 
     }
 }
