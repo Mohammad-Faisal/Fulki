@@ -24,6 +24,7 @@ import candor.fulki.CHAT.InboxActivity;
 import candor.fulki.EXPLORE.ExploreActivity;
 import candor.fulki.GENERAL.MainActivity;
 import candor.fulki.GENERAL.SearchActivity;
+import candor.fulki.HOME.HomeActivity;
 import candor.fulki.MapsActivity;
 import candor.fulki.PROFILE.ProfileActivity;
 import candor.fulki.PROFILE.ProfileSettingsActivity;
@@ -45,7 +46,7 @@ public class NotificationActivity extends AppCompatActivity {
             = item -> {
         switch (item.getItemId()) {
             case R.id.navigation_home:
-                Intent mainIntent = new Intent(NotificationActivity.this , MainActivity.class);
+                Intent mainIntent = new Intent(NotificationActivity.this , HomeActivity.class);
                 startActivity(mainIntent);
                 finish();
                 //setFragment(mHomeFragment);
@@ -95,8 +96,6 @@ public class NotificationActivity extends AppCompatActivity {
         mNavigation.setTextSize(7);
 
         getSupportActionBar().setTitle("  Flare");
-
-
 
 
         if(FirebaseAuth.getInstance().getCurrentUser() != null){

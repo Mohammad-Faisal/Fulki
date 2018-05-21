@@ -86,7 +86,7 @@ public class HomeActivity extends AppCompatActivity {
     private FirebaseFirestore firebaseFirestore;
     private HomeAdapter mHomeAdapter;
     private DocumentSnapshot lastVisible;
-    private boolean isFirstPageLoad = false;
+    private boolean isFirstPageLoad = true;
     private ProgressDialog mProgress;
     EditText mCreatePostText;
     private ImageButton mCreatePostImage;
@@ -240,13 +240,7 @@ public class HomeActivity extends AppCompatActivity {
                             });
 
 
-                            //loadFirstPosts();
-
-                            //pagination
-                            if(!isFirstPageLoad) {
-                                isFirstPageLoad = true;
-                                loadFirstPosts();
-                            }
+                            loadFirstPosts();
 
                             //load more posts
                             recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -254,14 +248,10 @@ public class HomeActivity extends AppCompatActivity {
                                 public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                                     Boolean reachedBottom = !recyclerView.canScrollVertically(1);
                                     if(reachedBottom){
-                                        if(isFirstPageLoad){
-                                            Log.d(TAG, "onScrolled:  scroll ended !!!!");
-                                            loadMorePost();
-                                        }
+                                        loadMorePost();
                                     }
                                 }
                             });
-
                         }
                     } else {
                         Log.d(TAG, "get failed with ", task.getException());
@@ -332,19 +322,28 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     public void loadFirstPosts(){
+
         firebaseFirestore = FirebaseFirestore.getInstance();
         Query nextQuery = firebaseFirestore.collection("posts").orderBy("timestamp" , Query.Direction.DESCENDING).limit(5);
         nextQuery.addSnapshotListener(HomeActivity.this , (documentSnapshots, e) -> {
             if(!documentSnapshots.isEmpty()){
-                lastVisible = documentSnapshots.getDocuments().get(documentSnapshots.size()-1);
+                if(isFirstPageLoad==true){
+                    lastVisible = documentSnapshots.getDocuments().get(documentSnapshots.size()-1);
+                }
                 for(DocumentChange doc: documentSnapshots.getDocumentChanges()){
                     if(doc.getType() == DocumentChange.Type.ADDED){
                         Posts singlePosts = doc.getDocument().toObject(Posts.class);
-                        posts.add(singlePosts);
+                        if(isFirstPageLoad){
+                            posts.add(singlePosts);
+
+                        }else{
+                            posts.add(0, singlePosts);
+                        }
                         mHomeAdapter.notifyDataSetChanged();
                     }
                 }
             }
+            isFirstPageLoad = false;
         });
     }
 

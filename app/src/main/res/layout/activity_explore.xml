@@ -41,10 +41,10 @@
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_alignParentBottom="true"
-        android:background="#312F2E"
+        android:background="@color/White"
         app:elevation="10dp"
-        app:itemIconTint="@color/White"
-        app:itemTextColor="@color/White"
+        app:itemIconTint="@color/Black"
+        app:itemTextColor="@color/Black"
         app:menu="@menu/navigation" />
 
     <android.support.design.widget.FloatingActionButton

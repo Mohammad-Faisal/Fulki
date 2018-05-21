@@ -417,7 +417,7 @@ public class ProfileActivity extends AppCompatActivity {
         Query nextQuery = firebaseFirestore.collection("posts")
                 .orderBy("timestamp" , Query.Direction.DESCENDING)
                 .startAfter(lastVisible)
-                .limit(3);
+                .limit(5);
         nextQuery.addSnapshotListener(ProfileActivity.this , (documentSnapshots, e) -> {
             if(!documentSnapshots.isEmpty()){
                 lastVisible = documentSnapshots.getDocuments().get(documentSnapshots.size()-1);

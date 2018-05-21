@@ -84,11 +84,6 @@ public class PeopleFragment extends Fragment {
                         basic.setmUserName(doc.getDocument().getString("user_name"));
                         basic.setmUserThumbImage(doc.getDocument().getString("thumb_image"));
                         userList.add(basic);
-                        userList.add(basic);
-                        userList.add(basic);
-                        userList.add(basic);
-                        userList.add(basic);
-                        userList.add(basic);
                         mPeopleAdapter.notifyDataSetChanged();
                     }
                 }
