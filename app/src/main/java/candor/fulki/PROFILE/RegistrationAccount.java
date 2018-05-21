@@ -105,171 +105,150 @@ public class RegistrationAccount extends AppCompatActivity {
         firebaseFirestore = FirebaseFirestore.getInstance();
         mUserID = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
-        mRegMale.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mGender = 1; //male
-                mRegMale.setBackgroundResource(R.drawable.textview_selected);
-                mRegFemale.setBackgroundResource(R.drawable.textview_not_selected);
-            }
+        mRegMale.setOnClickListener(v -> {
+            mGender = 1; //male
+            mRegMale.setBackgroundResource(R.drawable.textview_selected);
+            mRegFemale.setBackgroundResource(R.drawable.textview_not_selected);
         });
 
-        mRegFemale.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mGender = 0 ;//female
-                mRegMale.setBackgroundResource(R.drawable.textview_not_selected);
-                mRegFemale.setBackgroundResource(R.drawable.textview_selected);
-            }
+        mRegFemale.setOnClickListener(v -> {
+            mGender = 0 ;//female
+            mRegMale.setBackgroundResource(R.drawable.textview_not_selected);
+            mRegFemale.setBackgroundResource(R.drawable.textview_selected);
         });
 
 
 
-        mRegPhoto.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Functions functions = new Functions();
-                functions.BringImagePicker(RegistrationAccount.this);
-            }
+        mRegPhoto.setOnClickListener(v -> {
+            Functions functions = new Functions();
+            functions.BringImagePicker(RegistrationAccount.this);
         });
 
-        mRegCamera.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                checkPermissionStorage();
-            }
-        });
+        mRegCamera.setOnClickListener(v -> checkPermissionStorage());
 
 
-        mRegSave.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        mRegSave.setOnClickListener(v -> {
 
-                //now saving the data to firestore
-                String name = mRegName.getText().toString();
-                String userName = mRegUserName.getText().toString();
-                String gender = "others";
+            //now saving the data to firestore
+            String name = mRegName.getText().toString();
+            String userName = mRegUserName.getText().toString();
+            String gender = "others";
 
 
 
 
-                if(imageUri==null){
-                    Toast.makeText(RegistrationAccount.this, "please select and image", Toast.LENGTH_SHORT).show();
-                }else if(name==null){
-                    Toast.makeText(RegistrationAccount.this, "please give us your name", Toast.LENGTH_SHORT).show();
-                }else if(userName==null) {
-                    Toast.makeText(RegistrationAccount.this, "please give us your user name", Toast.LENGTH_SHORT).show();
-                }else if(mGender==2){
-                    Toast.makeText(RegistrationAccount.this, "Please Select your gender", Toast.LENGTH_SHORT).show();
-                }else if(userName.length()<6){
-                    mRegUserName.setError("username not specified !");
-                    Toast.makeText(RegistrationAccount.this, "User Name must be atleast 6 charactersr", Toast.LENGTH_SHORT).show();
-                } else{
+            if(imageUri==null){
+                Toast.makeText(RegistrationAccount.this, "please select and image", Toast.LENGTH_SHORT).show();
+            }else if(name==null){
+                Toast.makeText(RegistrationAccount.this, "please give us your name", Toast.LENGTH_SHORT).show();
+            }else if(userName==null) {
+                Toast.makeText(RegistrationAccount.this, "please give us your user name", Toast.LENGTH_SHORT).show();
+            }else if(mGender==2){
+                Toast.makeText(RegistrationAccount.this, "Please Select your gender", Toast.LENGTH_SHORT).show();
+            }else if(userName.length()<6){
+                mRegUserName.setError("username not specified !");
+                Toast.makeText(RegistrationAccount.this, "User Name must be atleast 6 charactersr", Toast.LENGTH_SHORT).show();
+            } else{
 
 
 
-                    mProgress = new ProgressDialog(RegistrationAccount.this);
-                    mProgress.setTitle("Saving Data.......");
-                    mProgress.setMessage("please wait while we create your account");
-                    mProgress.setCanceledOnTouchOutside(false);
-                    mProgress.show();
+                mProgress = new ProgressDialog(RegistrationAccount.this);
+                mProgress.setTitle("Saving Data.......");
+                mProgress.setMessage("please wait while we create your account");
+                mProgress.setCanceledOnTouchOutside(false);
+                mProgress.show();
 
 
-                    //uploading the main image
-                    imageFilePath.putFile(imageUri)
-                            .addOnSuccessListener(taskSnapshot -> {
-                                Uri downloadUrlImage = taskSnapshot.getDownloadUrl();
-                                mainImageUrl =  downloadUrlImage.toString();
+                //uploading the main image
+                imageFilePath.putFile(imageUri)
+                        .addOnSuccessListener(taskSnapshot -> {
+                            Uri downloadUrlImage = taskSnapshot.getDownloadUrl();
+                            mainImageUrl =  downloadUrlImage.toString();
 
 
-                                //uploading the thumb image
-                                UploadTask uploadThumbTask = thumbFilePath.putBytes(thumb_byte);
-                                uploadThumbTask.addOnFailureListener(new OnFailureListener() {
-                                    @Override
-                                    public void onFailure(@NonNull Exception exception) {
-                                        Toast.makeText(RegistrationAccount.this, "Some error occured. check your internet connection", Toast.LENGTH_SHORT).show();
-                                        Log.w("Thumb  Photo Upload:  " , exception);
-                                    }
-                                }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                                    @Override
-                                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                                        // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
-                                        Uri downloadUrlThumb = taskSnapshot.getDownloadUrl();
-                                        thumbImageUrl  = downloadUrlThumb.toString();
-
-
-
-
-                                        //now saving the data to firestore
-                                        String name1 = mRegName.getText().toString();
-                                        String userName1 = mRegUserName.getText().toString();
-                                        String gender1 = "others";
-
-
-                                        if(mGender==1){
-                                            gender1 = "male";
-                                        }else if(mGender==0){
-                                            gender1 = "female";
-                                        }
-
-
-                                        String deviceTokenID = FirebaseInstanceId.getInstance().getToken();
-                                        Map < String, Object> userMap = new HashMap<>();
-
-                                        userMap.put("name" , name1);
-                                        userMap.put("user_name" , userName1);
-                                        userMap.put("gender" , gender1);
-                                        userMap.put("image" , mainImageUrl);
-                                        userMap.put("thumb_image",thumbImageUrl);
-
-
-                                        userMap.put("bio" , "");
-                                        userMap.put("division", "Select One");
-                                        userMap.put("blood_group", "Select One");
-                                        userMap.put("birth_date" , "");
-                                        userMap.put("contact_no" , "");
-                                        userMap.put("email" , "");
-                                        userMap.put("timestamp" , "");
-                                        userMap.put("district" , "");
-                                        userMap.put("lat" , 0);
-                                        userMap.put("lng" , 0);
-                                        userMap.put("rating" , 0);
-                                        userMap.put("user_id" , mUserID);
-                                        userMap.put("device_id" , deviceTokenID);
-
-
-                                        firebaseFirestore.collection("users").document(mUserID).set(userMap).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                            public static final String TAG ="registration process " ;
-
-                                            @Override
-                                            public void onComplete(@NonNull Task<Void> task) {
-                                                if(task.isSuccessful()){
-
-                                                    Intent mainIntent = new Intent(RegistrationAccount.this, MainActivity.class);
-                                                    startActivity(mainIntent);
-                                                    mProgress.dismiss();
-                                                    finish();
-
-                                                }else{
-                                                    mProgress.dismiss();
-                                                    String error = task.getException().getMessage();
-                                                    Toast.makeText(RegistrationAccount.this, "Some error occured. check your internet connection", Toast.LENGTH_SHORT).show();
-                                                    Log.d(TAG, "onComplete: "+ error);
-                                                }
-                                            }
-                                        });
-                                    }
-                                });
-
-
-                            })
-                            .addOnFailureListener(exception -> {
-                                mProgress.dismiss();
+                            //uploading the thumb image
+                            UploadTask uploadThumbTask = thumbFilePath.putBytes(thumb_byte);
+                            uploadThumbTask.addOnFailureListener(exception -> {
                                 Toast.makeText(RegistrationAccount.this, "Some error occured. check your internet connection", Toast.LENGTH_SHORT).show();
-                                Log.w("Main Photo Upload   :  " , exception);
+                                Log.w("Thumb  Photo Upload:  " , exception);
+                            }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                                @Override
+                                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                    // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
+                                    Uri downloadUrlThumb = taskSnapshot.getDownloadUrl();
+                                    thumbImageUrl  = downloadUrlThumb.toString();
+
+
+
+
+                                    //now saving the data to firestore
+                                    String name1 = mRegName.getText().toString();
+                                    String userName1 = mRegUserName.getText().toString();
+                                    String gender1 = "others";
+
+
+                                    if(mGender==1){
+                                        gender1 = "male";
+                                    }else if(mGender==0){
+                                        gender1 = "female";
+                                    }
+
+
+                                    String deviceTokenID = FirebaseInstanceId.getInstance().getToken();
+                                    Map < String, Object> userMap = new HashMap<>();
+
+                                    userMap.put("name" , name1);
+                                    userMap.put("user_name" , userName1);
+                                    userMap.put("user_id" , mUserID);
+                                    userMap.put("gender" , gender1);
+                                    userMap.put("image" , mainImageUrl);
+                                    userMap.put("thumb_image",thumbImageUrl);
+                                    userMap.put("bio" , "");
+                                    userMap.put("division", "Select One");
+                                    userMap.put("blood_group", "Select One");
+                                    userMap.put("birth_date" , "");
+                                    userMap.put("contact_no" , "");
+                                    userMap.put("email" , "");
+                                    userMap.put("timestamp" , "");
+                                    userMap.put("district" , "");
+                                    userMap.put("lat" , 0);
+                                    userMap.put("lng" , 0);
+                                    userMap.put("rating" , 0);
+                                    userMap.put("device_id" , deviceTokenID);
+
+
+
+                                    firebaseFirestore.collection("users").document(mUserID).set(userMap).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        public static final String TAG ="registration process " ;
+
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            if(task.isSuccessful()){
+
+                                                Intent mainIntent = new Intent(RegistrationAccount.this, MainActivity.class);
+                                                startActivity(mainIntent);
+                                                mProgress.dismiss();
+                                                finish();
+
+                                            }else{
+                                                mProgress.dismiss();
+                                                String error = task.getException().getMessage();
+                                                Toast.makeText(RegistrationAccount.this, "Some error occured. check your internet connection", Toast.LENGTH_SHORT).show();
+                                                Log.d(TAG, "onComplete: "+ error);
+                                            }
+                                        }
+                                    });
+                                }
                             });
 
-                }
+
+                        })
+                        .addOnFailureListener(exception -> {
+                            mProgress.dismiss();
+                            Toast.makeText(RegistrationAccount.this, "Some error occured. check your internet connection", Toast.LENGTH_SHORT).show();
+                            Log.w("Main Photo Upload   :  " , exception);
+                        });
+
             }
         });
     }

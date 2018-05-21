@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:contentDescription="splash_image"
-        android:src="@drawable/splash_background"
+        android:src="@drawable/fulki_logo"
         android:scaleType="centerCrop"
         android:alpha="0.3"
         />

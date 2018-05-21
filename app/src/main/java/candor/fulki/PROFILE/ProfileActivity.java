@@ -188,9 +188,18 @@ public class ProfileActivity extends AppCompatActivity {
         firebaseFirestore = FirebaseFirestore.getInstance();
 
 
-        CardView cardFollowers = findViewById(R.id.card_a);
-        CardView cardFollowings = findViewById(R.id.card_b);
 
+
+        android.widget.LinearLayout cardFollowers = findViewById(R.id.profile_followers_linear);
+        android.widget.LinearLayout cardFollowings = findViewById(R.id.profile_followings_linear);
+        android.widget.LinearLayout sendMessage = findViewById(R.id.profile_send_message_linear);
+        TextView mProfileSendMessage = findViewById(R.id.profile_send_message_text);
+
+        if(ownProfile){
+            mProfileSendMessage.setText("save a note");
+        }else{
+            mProfileSendMessage.setText("send message");
+        }
 
         cardFollowers.setOnClickListener(v -> {
             Intent followersIntent = new Intent(ProfileActivity.this ,ShowPleopleListActivity.class);
@@ -204,10 +213,7 @@ public class ProfileActivity extends AppCompatActivity {
             followersIntent.putExtra("user_id" , mCurProfileId);
             startActivity(followersIntent);
         });
-
-
-
-        mProfileName.setOnClickListener(v -> {
+        sendMessage.setOnClickListener(v -> {
             Intent chatIntent = new Intent(ProfileActivity.this  , ChatActivity.class);
             chatIntent.putExtra("user_id" , mUserID);
             startActivity(chatIntent);
@@ -256,18 +262,20 @@ public class ProfileActivity extends AppCompatActivity {
                 mProfileFollow.setText("Edit Profile");
             }
 
+            //follower and following count setting
             FirebaseFirestore.getInstance().collection("followings/" + mCurProfileId + "/followings").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                 @Override
                 public void onComplete(@NonNull Task<QuerySnapshot> task) {
                     int followings_cnt = task.getResult().size();
-                    mProfileFollowingsCnt.setText(followings_cnt+"");
+                    mProfileFollowingsCnt.setText(followings_cnt+" following");
                 }
             });
             FirebaseFirestore.getInstance().collection("followers/" + mCurProfileId + "/followers").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                 @Override
                 public void onComplete(@NonNull Task<QuerySnapshot> task) {
                     int followers_cnt = task.getResult().size();
-                    mProfileFollowersCnt.setText(""+followers_cnt);
+                    if(followers_cnt<2)mProfileFollowersCnt.setText(""+followers_cnt+" follower");
+                    else mProfileFollowersCnt.setText(""+followers_cnt+" followers");
                 }
             });
 

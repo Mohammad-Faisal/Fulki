@@ -179,7 +179,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
         subList1.add("child marriage");
-        subList1.add("child education");
+        subList1.add("violence");
         subList1.add("environment");
         subList1.add("women empowerment");
         subList1.add("education");
@@ -194,7 +194,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
         category_key.put("child marriage" , "child_marrige");
-        category_key.put("child education" , "child_education");
+        category_key.put("violence" , "violence");
         category_key.put("environment" , "environment");
         category_key.put("education" , "education");
         category_key.put("women empowerment" , "women_empowerment");
@@ -265,7 +265,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             return false;
         });
     }
-
 
 
     private void changeinlocationdata(){
@@ -447,6 +446,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
         return networkInfo != null && networkInfo.isConnected();
     }
+
     public String getUid() {
         return FirebaseAuth.getInstance().getCurrentUser().getUid();
     }

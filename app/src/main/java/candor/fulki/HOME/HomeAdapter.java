@@ -78,6 +78,7 @@ import candor.fulki.GENERAL.MainActivity;
 import candor.fulki.NOTIFICATION.Notifications;
 import candor.fulki.PROFILE.ProfileActivity;
 import candor.fulki.PROFILE.ShowPleopleListActivity;
+import candor.fulki.PROFILE.Users;
 import candor.fulki.R;
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -338,6 +339,13 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
                 }).addOnFailureListener(e -> {
                     Log.d(TAG, "liked:   like is not succesful");
                 });
+
+                //as the user liked this post so i should give him some points
+
+                //holder.addRating();
+                holder.addRatingToMe("like",mUserID);
+
+
             }
             @Override
             public void unLiked(LikeButton likeButton) {
@@ -637,14 +645,11 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
 
 
                         //we are posting the shared post as a new post but for like comment count we didnt change the postPushId of the post
-                        firebaseFirestore.collection("posts").add(postMap).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
-                            @Override
-                            public void onComplete(@NonNull Task<DocumentReference> task) {
-                                if(task.isSuccessful()){
-                                    Toast.makeText(context, "Success !", Toast.LENGTH_SHORT).show();
-                                }else{
-                                    Toast.makeText(context, "Success !", Toast.LENGTH_SHORT).show();
-                                }
+                        firebaseFirestore.collection("posts").add(postMap).addOnCompleteListener(task1 -> {
+                            if(task1.isSuccessful()){
+                                Toast.makeText(context, "Success !", Toast.LENGTH_SHORT).show();
+                            }else{
+                                Toast.makeText(context, "Success !", Toast.LENGTH_SHORT).show();
                             }
                         });
 
@@ -655,24 +660,19 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
                     }
                 }
             });
-
         });
 
-        holder.postImage.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent showPostIntent = new Intent(context  , ShowPostActivity.class);
-                showPostIntent.putExtra("postID" , postPushID);
+        holder.postImage.setOnClickListener(v -> {
+            Intent showPostIntent = new Intent(context  , ShowPostActivity.class);
+            showPostIntent.putExtra("postID" , postPushID);
 
-                Pair< View , String > pair1 = Pair.create(holder.itemView.findViewById(R.id.post_image) ,"post_image");
-                Pair< View , String > pair2 = Pair.create(holder.itemView.findViewById(R.id.post_user_single_imagee) ,"profile_image");
-                Pair< View , String > pair3 = Pair.create(holder.itemView.findViewById(R.id.post_user_name) ,"profile_name");
+            Pair< View , String > pair1 = Pair.create(holder.itemView.findViewById(R.id.post_image) ,"post_image");
+            Pair< View , String > pair2 = Pair.create(holder.itemView.findViewById(R.id.post_user_single_imagee) ,"profile_image");
+            Pair< View , String > pair3 = Pair.create(holder.itemView.findViewById(R.id.post_user_name) ,"profile_name");
 
-                ActivityOptionsCompat optionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation(activity ,pair1 , pair2 , pair3);
-                context.startActivity(showPostIntent , optionsCompat.toBundle());
-            }
+            ActivityOptionsCompat optionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation(activity ,pair1 , pair2 , pair3);
+            context.startActivity(showPostIntent , optionsCompat.toBundle());
         });
-
 
     }
 
@@ -714,6 +714,27 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
             postShareButton = view.findViewById(R.id.post_share_button);
             postShareCount = view.findViewById(R.id.post_share_cnt);
         }
+
+
+        private Task<Void> addRatingToMe(String type , String mUserID ) {
+
+            Log.d(TAG, "addRating:   function calledd !!!!");
+            final DocumentReference ratingRef = FirebaseFirestore.getInstance().collection("ratings")
+                    .document(mUserID);
+            return firebaseFirestore.runTransaction(transaction -> {
+
+                Ratings ratings = transaction.get(ratingRef)
+                        .toObject(Ratings.class);
+                long curRating = ratings.getRating();
+                Log.d(TAG, "addRating:   current rating  "+curRating);
+                long nextRating = curRating+1;
+                Log.d(TAG, "addRating:   next rating  :" +nextRating);
+                ratings.setRating(nextRating);
+                transaction.set(ratingRef, ratings);
+                return null;
+            });
+        }
+
 
 
         public void setPostCaption(String Caption) {

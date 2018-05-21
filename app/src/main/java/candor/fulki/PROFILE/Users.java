@@ -5,25 +5,30 @@ package candor.fulki.PROFILE;
  */
 
 public class Users {
-    private String name;
-    private String id;
-    private String location;
-    private String image;
-    private  String thumb_image;
-    private String bio;
-    private String blood_group;
-    private String date_of_birth;
-    private String device_id;
-    private String email;
-    private  String phone_number;
-    private  long online;
+
+
+    String  name;
+    String user_name;
+    String user_id;
+    String bio;
+    String gender;
+    String profession;
+
+    String division;
+    String district;
+
+    String blood_group;
+    String birth_date;
+    String contact_no;
+    String image;
+    String thumb_image;
 
 
     public Users() {
     }
 
-
     public String getName() {
+
         return name;
     }
 
@@ -31,12 +36,84 @@ public class Users {
         this.name = name;
     }
 
-    public String getLocation() {
-        return location;
+    public String getUser_name() {
+        return user_name;
     }
 
-    public void setLocation(String location) {
-        this.location = location;
+    public void setUser_name(String user_name) {
+        this.user_name = user_name;
+    }
+
+    public String getUser_id() {
+        return user_id;
+    }
+
+    public void setUser_id(String user_id) {
+        this.user_id = user_id;
+    }
+
+    public String getBio() {
+        return bio;
+    }
+
+    public void setBio(String bio) {
+        this.bio = bio;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public String getProfession() {
+        return profession;
+    }
+
+    public void setProfession(String profession) {
+        this.profession = profession;
+    }
+
+    public String getDivision() {
+        return division;
+    }
+
+    public void setDivision(String division) {
+        this.division = division;
+    }
+
+    public String getDistrict() {
+        return district;
+    }
+
+    public void setDistrict(String district) {
+        this.district = district;
+    }
+
+    public String getBlood_group() {
+        return blood_group;
+    }
+
+    public void setBlood_group(String blood_group) {
+        this.blood_group = blood_group;
+    }
+
+    public String getBirth_date() {
+        return birth_date;
+    }
+
+    public void setBirth_date(String birth_date) {
+        this.birth_date = birth_date;
+    }
+
+    public String getContact_no() {
+        return contact_no;
+    }
+
+    public void setContact_no(String contact_no) {
+        this.contact_no = contact_no;
     }
 
     public String getImage() {
@@ -55,82 +132,20 @@ public class Users {
         this.thumb_image = thumb_image;
     }
 
-    public String getBio() {
-        return bio;
-    }
+    public Users(String name, String user_name, String user_id, String bio, String gender, String profession, String division, String district, String blood_group, String birth_date, String contact_no, String image, String thumb_image) {
 
-    public void setBio(String bio) {
-        this.bio = bio;
-    }
-
-    public String getBlood_group() {
-        return blood_group;
-    }
-
-    public void setBlood_group(String blood_group) {
-        this.blood_group = blood_group;
-    }
-
-    public String getDate_of_birth() {
-        return date_of_birth;
-    }
-
-    public void setDate_of_birth(String date_of_birth) {
-        this.date_of_birth = date_of_birth;
-    }
-
-    public String getDevice_id() {
-        return device_id;
-    }
-
-    public void setDevice_id(String device_id) {
-        this.device_id = device_id;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPhone_number() {
-        return phone_number;
-    }
-
-    public void setPhone_number(String phone_number) {
-        this.phone_number = phone_number;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public long getOnline() {
-        return online;
-    }
-
-    public void setOnline(long online) {
-        this.online = online;
-    }
-
-    public Users(String name, String id, String location, String image, String thumb_image, String bio, String blood_group, String date_of_birth, String device_id, String email, String phone_number, long online) {
         this.name = name;
-        this.id = id;
-        this.location = location;
+        this.user_name = user_name;
+        this.user_id = user_id;
+        this.bio = bio;
+        this.gender = gender;
+        this.profession = profession;
+        this.division = division;
+        this.district = district;
+        this.blood_group = blood_group;
+        this.birth_date = birth_date;
+        this.contact_no = contact_no;
         this.image = image;
         this.thumb_image = thumb_image;
-        this.bio = bio;
-        this.blood_group = blood_group;
-        this.date_of_birth = date_of_birth;
-        this.device_id = device_id;
-        this.email = email;
-        this.phone_number = phone_number;
-        this.online = online;
     }
 }

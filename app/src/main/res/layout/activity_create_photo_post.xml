@@ -59,9 +59,9 @@
                 android:id="@+id/create_photo_post_image"
                 android:layout_marginTop="20dp"
                 android:layout_width="375dp"
-                android:layout_height="300dp"
+                android:layout_height="325dp"
                 android:scaleType="fitXY"
-                android:src="@drawable/splash_background"/>
+                android:src="@drawable/fulki_logo"/>
 
 
 

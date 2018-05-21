@@ -96,6 +96,11 @@ public class ChatActivity extends AppCompatActivity {
         mCurrentUserName = "default";
 
 
+        if(mOtherUseID.equals(mCurrentUserID)){
+            //i have to save a note
+        }
+
+
 
         //firebase
         mUser = FirebaseAuth.getInstance().getCurrentUser();

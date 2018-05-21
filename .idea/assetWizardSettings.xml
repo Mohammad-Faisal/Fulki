@@ -34,7 +34,7 @@
                                           <PersistentState>
                                             <option name="values">
                                               <map>
-                                                <entry key="url" value="jar:file:/home/faisal/Desktop/android-studio/plugins/android/lib/android.jar!/images/material_design_icons/communication/ic_location_on_black_24dp.xml" />
+                                                <entry key="url" value="jar:file:/home/faisal/Desktop/android-studio/plugins/android/lib/android.jar!/images/material_design_icons/communication/ic_textsms_black_24dp.xml" />
                                               </map>
                                             </option>
                                           </PersistentState>
@@ -44,9 +44,9 @@
                                   </option>
                                   <option name="values">
                                     <map>
-                                      <entry key="outputName" value="ic_location_grey" />
+                                      <entry key="outputName" value="ic_text_sms" />
                                       <entry key="theme" value="CUSTOM" />
-                                      <entry key="themeColor" value="1d4e64" />
+                                      <entry key="themeColor" value="2f4d7c" />
                                     </map>
                                   </option>
                                 </PersistentState>

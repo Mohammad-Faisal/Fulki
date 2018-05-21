@@ -21,6 +21,7 @@
 
 
             <ImageView
+                android:scaleType="fitXY"
                 android:src="@drawable/ic_person_icon"
                 android:id="@+id/show_event_image"
                 android:layout_width="match_parent"

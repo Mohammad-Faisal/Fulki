@@ -222,74 +222,68 @@ public class CreatePhotoPostActivity extends AppCompatActivity {
 
         //uploading the main image
         imageFilePath.putFile(imageUri)
-                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                    @Override
-                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                        Uri downloadUrlImage = taskSnapshot.getDownloadUrl();
-                        final String mainImageUrl =  downloadUrlImage.toString();
+                .addOnSuccessListener(taskSnapshot -> {
+                    Uri downloadUrlImage = taskSnapshot.getDownloadUrl();
+                    final String mainImageUrl =  downloadUrlImage.toString();
 
 
-                        //uploading the thumb image
-                        UploadTask uploadThumbTask = thumbFilePath.putBytes(thumb_byte);
-                        uploadThumbTask.addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception exception) {
-                                Toast.makeText(CreatePhotoPostActivity.this, "Some error occured. check your internet connection", Toast.LENGTH_SHORT).show();
-                                Log.w("Thumb  Photo Upload:  " , exception);
-                            }
-                        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                            @Override
-                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                                Uri downloadUrlThumb = taskSnapshot.getDownloadUrl();
-                                final String thumbImageUrl  = downloadUrlThumb.toString();
+                    //uploading the thumb image
+                    UploadTask uploadThumbTask = thumbFilePath.putBytes(thumb_byte);
+                    uploadThumbTask.addOnFailureListener(exception -> {
+                        Toast.makeText(CreatePhotoPostActivity.this, "Some error occured. check your internet connection", Toast.LENGTH_SHORT).show();
+                        Log.w("Thumb  Photo Upload:  " , exception);
+                    }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                            Uri downloadUrlThumb = taskSnapshot.getDownloadUrl();
+                            final String thumbImageUrl  = downloadUrlThumb.toString();
 
 
-                                DocumentReference ref = FirebaseFirestore.getInstance().collection("posts").document();
-                                String postPushId = ref.getId();
+                            DocumentReference ref = FirebaseFirestore.getInstance().collection("posts").document();
+                            String postPushId = ref.getId();
 
-                                long timestamp = 1* new Date().getTime();
+                            long timestamp = 1* new Date().getTime();
 
-                                Long tsLong = System.currentTimeMillis()/1000;
-                                String ts = tsLong.toString();
-
-
-                                Map<String , Object> postMap = new HashMap<>();
+                            Long tsLong = System.currentTimeMillis()/1000;
+                            String ts = tsLong.toString();
 
 
-                                postMap.put("user_id" , mUserID);
-                                postMap.put("user_name" , mUserName);
-                                postMap.put("image_url" , mainImageUrl);
-                                postMap.put("thumb_image_url" , thumbImageUrl);
-                                postMap.put("caption" , Caption);
-                                postMap.put("time_and_date" , cur_time_and_date);
-                                postMap.put("timestamp" ,timestamp );
-                                postMap.put("post_push_id" , postPushId);
-                                postMap.put("location" , "default");
-                                postMap.put("like_cnt" , 0);
-                                postMap.put("comment_cnt" ,0);
-                                postMap.put("share_cnt" ,0);
+                            Map<String , Object> postMap = new HashMap<>();
 
-                                //setting the path to file so that later we can delete this post
-                                PostFiles postFiles = new PostFiles("post_images/"+mUserID+"/"+randomName+".jpg" ,"post_thumb_images/"+mUserID+"/"+randomName+".jpg", postPushId);
-                                firebaseFirestore.collection("images").document(mUserID).collection("posts").document(postPushId).set(postFiles);
-                                firebaseFirestore.collection("posts").document(postPushId).set(postMap).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> task) {
-                                        mProgress.dismiss();
-                                        if(task.isSuccessful()){
-                                            Toast.makeText(CreatePhotoPostActivity.this, "Success !", Toast.LENGTH_SHORT).show();
-                                            Intent mainIntent = new Intent(CreatePhotoPostActivity.this , MainActivity.class);
-                                            startActivity(mainIntent);
-                                            finish();
-                                        }else{
-                                            Toast.makeText(CreatePhotoPostActivity.this, "There was an error !", Toast.LENGTH_SHORT).show();
-                                        }
+
+                            postMap.put("user_id" , mUserID);
+                            postMap.put("user_name" , mUserName);
+                            postMap.put("image_url" , mainImageUrl);
+                            postMap.put("thumb_image_url" , thumbImageUrl);
+                            postMap.put("caption" , Caption);
+                            postMap.put("time_and_date" , cur_time_and_date);
+                            postMap.put("timestamp" ,timestamp );
+                            postMap.put("post_push_id" , postPushId);
+                            postMap.put("location" , "default");
+                            postMap.put("like_cnt" , 0);
+                            postMap.put("comment_cnt" ,0);
+                            postMap.put("share_cnt" ,0);
+
+                            //setting the path to file so that later we can delete this post
+                            PostFiles postFiles = new PostFiles("post_images/"+mUserID+"/"+randomName+".jpg" ,"post_thumb_images/"+mUserID+"/"+randomName+".jpg", postPushId);
+                            firebaseFirestore.collection("images").document(mUserID).collection("posts").document(postPushId).set(postFiles);
+                            firebaseFirestore.collection("posts").document(postPushId).set(postMap).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    mProgress.dismiss();
+                                    if(task.isSuccessful()){
+                                        Toast.makeText(CreatePhotoPostActivity.this, "Success !", Toast.LENGTH_SHORT).show();
+                                        Intent mainIntent = new Intent(CreatePhotoPostActivity.this , MainActivity.class);
+                                        startActivity(mainIntent);
+                                        finish();
+                                    }else{
+                                        Toast.makeText(CreatePhotoPostActivity.this, "There was an error !", Toast.LENGTH_SHORT).show();
                                     }
-                                });
+                                }
+                            });
 
-                            }
-                        });
-                    }
+                        }
+                    });
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
