@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.util.Pair;
 import android.support.v7.app.AlertDialog;
@@ -18,10 +19,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
@@ -34,6 +38,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.Transaction;
 import com.google.firebase.firestore.WriteBatch;
 import com.like.LikeButton;
 import com.like.OnLikeListener;
@@ -89,6 +94,7 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
     private LayoutInflater inflater;
     private ProgressDialog mProgress;
 
+    long currentLikesCount , currentCommentsCount, currentSharesCount;
 
 
 
@@ -104,7 +110,7 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
         this.mUserID = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
 
-        ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(context)
+        /*ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(context)
                 .threadPoolSize(5)
                 .threadPriority(Thread.MIN_PRIORITY + 2)
                 .defaultDisplayImageOptions(DisplayImageOptions.createSimple())
@@ -129,7 +135,7 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
                 .considerExifParams(true)
                 .build();
         imageLoader = ImageLoader.getInstance();
-        imageLoader.init(config);
+        imageLoader.init(config);*/
         //imageloader ends here
     }
 
@@ -145,39 +151,51 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
 
         //holder.setIsRecyclable(false);
 
-        ViewHolder viewHolder = holder;
         final Posts post = data.get(position);
+
         final String mCurrentPosterId = post.getUser_id();  //whose post is this
         final String postPushID = post.getPost_push_id();
-        holder.setPostCaption(post.getCaption());
-        holder.setPostDateTime(post.getTime_and_date());
+        final String userThumbImage = post.getUser_thumb_image();
+        final String postImage = post.getPost_image_url();
+        final String userName = post.getUser_name();
+        final String caption = post.getCaption();
+        currentLikesCount  = post.getLike_cnt();
+        currentCommentsCount = post.getComment_cnt();
+        currentSharesCount = post.getShare_cnt();
+        final String timeDate = post.getTime_and_date();
+
+
+
+
+
+        holder.setPostCaption(caption);
+        holder.setPostDateTime(timeDate);
+        holder.setUserImage(userThumbImage , holder.postUserImage);
+        holder.setUserImage(postImage , holder.postImage);
+        holder.setPostUserName(userName);
+        holder.setPostLikeCount(currentLikesCount);
+        holder.setPostUserName(userName);
+        holder.setPostCommentCount(currentCommentsCount);
+
+
+
 
         //holder.setImagePicasso(post.getImage_url() , context ,  holder.postImage );
-        holder.setUserImage(post.getImage_url(), holder.postImage);
+        //holder.setUserImage(post.getPost_image_url(), holder.postImage);
+
 
         //setting if it is shared or not
-        String location = post.getLocation();
+        /*String location = post.getLocation();
         if(location.equals("")){
             holder.setPostLocaiton("");
             holder.postLocaiton.setVisibility(View.GONE);
         }else{
             holder.postLocaiton.setVisibility(View.VISIBLE);
             holder.setPostLocaiton("shared by "+location);
+        }*/
 
-        }
 
 
-        //setting user details
-        FirebaseFirestore.getInstance().collection("users").document(mCurrentPosterId).get().addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                mUserName = task.getResult().getString("name");
-                mUserImage = task.getResult().getString("thumb_image");
-                holder.setUserImage(mUserImage , holder.postUserImage);
-                holder.setPostUserName(mUserName);
-            } else {
-                Log.d(TAG, "onComplete: " + task.getException().toString());
-            }
-        });
 
         //setting user name and user image onclick listener
         holder.postUserImage.setOnClickListener(v -> {
@@ -208,7 +226,7 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
         });
 
         //setting like count
-        FirebaseFirestore.getInstance().collection("likes/" + postPushID + "/likes").addSnapshotListener((documentSnapshots, e) -> {
+        /*FirebaseFirestore.getInstance().collection("likes/" + postPushID + "/likes").addSnapshotListener((documentSnapshots, e) -> {
             if (!documentSnapshots.isEmpty()) {
                 int count = documentSnapshots.size();
                 String cnt = Integer.toString(count);
@@ -222,10 +240,10 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
                 holder.postLikeButton.setLiked(false);
                 holder.setPostLikeCount("0 like");
             }
-        });
+        });*/
 
         //setting comment count
-        FirebaseFirestore.getInstance().collection("comments/" + postPushID + "/comments").addSnapshotListener(new EventListener<QuerySnapshot>() {
+        /*FirebaseFirestore.getInstance().collection("comments/" + postPushID + "/comments").addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(QuerySnapshot documentSnapshots, FirebaseFirestoreException e) {
                 if (!documentSnapshots.isEmpty()) {
@@ -242,10 +260,10 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
                     holder.setPostCommentCount("0 comment");
                 }
             }
-        });
+        });*/
 
         //setting share count
-        FirebaseFirestore.getInstance().collection("shares/" + postPushID + "/shares").addSnapshotListener((documentSnapshots, e) -> {
+        /*FirebaseFirestore.getInstance().collection("shares/" + postPushID + "/shares").addSnapshotListener((documentSnapshots, e) -> {
             if (!documentSnapshots.isEmpty()) {
                 int count = documentSnapshots.size();
                 firebaseFirestore.collection("posts").document(postPushID).update("share_cnt" , count);
@@ -258,7 +276,7 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
             } else {
                 holder.postShareCount.setText("0 share");
             }
-        });
+        });*/
 
 
         //setting the current state of like button
@@ -294,34 +312,29 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
                 DocumentReference ref = FirebaseFirestore.getInstance().collection("notifications/"+mCurrentPosterId+"/notificatinos").document();
                 String likeNotificatoinPushID = ref.getId();
 
-                    Likes mLikes = new Likes(mUserID , MainActivity.mUserName , MainActivity.mUserThumbImage ,likeNotificatoinPushID , time_stamp);
-                    Notifications pushNoti = new Notifications( "like" ,mUserID , post.getUser_id() , postPushID ,likeNotificatoinPushID , time_stamp,"n"  );
+                Likes mLikes = new Likes(mUserID , MainActivity.mUserName , MainActivity.mUserThumbImage ,likeNotificatoinPushID , time_stamp);
+                Notifications pushNoti = new Notifications( "like" ,mUserID , post.getUser_id() , postPushID ,likeNotificatoinPushID , time_stamp,"n"  );
 
 
-                    DocumentReference notificatinoRef = firebaseFirestore.collection("notifications/"+post.getUser_id()+"/notificatinos").document(likeNotificatoinPushID);
-                    writeBatch.set(notificatinoRef, pushNoti);
+                DocumentReference notificatinoRef = firebaseFirestore.collection("notifications/"+post.getUser_id()+"/notificatinos").document(likeNotificatoinPushID);
+                writeBatch.set(notificatinoRef, pushNoti);
 
-                    DocumentReference postNotificatinoRef =  firebaseFirestore.collection("posts/"+postPushID+"/notifications").document(likeNotificatoinPushID);
-                    writeBatch.set(postNotificatinoRef, pushNoti);
+                DocumentReference postNotificatinoRef =  firebaseFirestore.collection("posts/"+postPushID+"/notifications").document(likeNotificatoinPushID);
+                writeBatch.set(postNotificatinoRef, pushNoti);
 
-                    DocumentReference postLikeRef =  firebaseFirestore.collection("likes/" + postPushID + "/likes").document(mUserID); //.set(mLikes);
-                    writeBatch.set(postLikeRef, mLikes);
+                DocumentReference postLikeRef =  firebaseFirestore.collection("likes/" + postPushID + "/likes").document(mUserID); //.set(mLikes);
+                writeBatch.set(postLikeRef, mLikes);
 
-                    writeBatch.commit().addOnSuccessListener(aVoid -> {
-                        Log.d(TAG, "liked:   like is successful");
-
-                    }).addOnFailureListener(e -> {
-                        Log.d(TAG, "liked:   like is not succesful");
-                    });
-
-                    //as the user liked this post so i should give him some points
-
-                    //holder.addRating();
+                writeBatch.commit().addOnSuccessListener(aVoid -> {
+                    Log.d(TAG, "liked:   like is successful");
                     holder.addRating(mUserID , 3);
                     holder.addRating(post.getUser_id() , 1);
+                    holder.addLike(postPushID,1);
+                }).addOnFailureListener(e -> {
+                    Log.d(TAG, "liked:   like is not succesful");
+                });
 
-
-
+                //as the user liked this post so i should give him some points
             }
             @Override
             public void unLiked(LikeButton likeButton) {
@@ -355,10 +368,9 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
                         }
                     }
                 });
-
                 holder.addRating(mUserID , -3);
                 holder.addRating(post.getUser_id() , -1);
-
+                holder.addLike(postPushID,-1);
             }
         });
 
@@ -371,7 +383,7 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
         });
 
         //handling the comment onclick listener
-        holder.postCommentButton.setOnClickListener(v -> {
+        holder.postCommentLinear.setOnClickListener(v -> {
 
            // Dialog commentDialog = new Dialog(context, android.R.style.Theme_Holo_Light_NoActionBar_Fullscreen);
             Dialog commentDialog = new Dialog(context, android.R.style.ThemeOverlay_Material_ActionBar);
@@ -598,7 +610,7 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
         });
 
         //post share functionality
-        holder.postShareButton.setOnClickListener(v -> {
+        /*holder.postShareButton.setOnClickListener(v -> {
             //setting user details
             FirebaseFirestore.getInstance().collection("users").document(mUserID).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                 @Override
@@ -646,7 +658,7 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
                     }
                 }
             });
-        });
+        });*/
 
         holder.postImage.setOnClickListener(v -> {
             Intent showPostIntent = new Intent(context  , ShowPostActivity.class);
@@ -686,6 +698,7 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
         public LikeButton postLikeButton;
         public ImageButton postCommentButton;
         public ImageButton postShareButton;
+        private LinearLayout postCommentLinear;
 
         public ViewHolder(View view) {
             super(view);
@@ -702,6 +715,7 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
             mPostMoreOptions = view.findViewById(R.id.post_more_options);
             postShareButton = view.findViewById(R.id.post_share_button);
             postShareCount = view.findViewById(R.id.post_share_cnt);
+            postCommentLinear = view.findViewById(R.id.item_post_comment_linear);
         }
 
 
@@ -712,15 +726,95 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
             final DocumentReference ratingRef = FirebaseFirestore.getInstance().collection("ratings")
                     .document(mUserID);
             return firebaseFirestore.runTransaction(transaction -> {
-
                 Ratings ratings = transaction.get(ratingRef)
                         .toObject(Ratings.class);
                 long curRating = ratings.getRating();
                 long nextRating = curRating + factor;
-
                 ratings.setRating(nextRating);
                 transaction.set(ratingRef, ratings);
                 return null;
+            });
+        }
+
+        /*private Task<Void> addLike( String mPostID , int factor) {
+            FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
+            Log.d(TAG, "addLike:   function calledd !!!!");
+            final DocumentReference postRef = FirebaseFirestore.getInstance().collection("posts")
+                    .document(mPostID);
+
+
+
+            return firebaseFirestore.runTransaction(transaction -> {
+                Posts post = transaction.get(postRef)
+                        .toObject(Posts.class);
+                long curLikes = post.getLike_cnt();
+                long curComments = post.getComment_cnt();
+                long curShares = post.getShare_cnt();
+                long nextLike = curLikes + factor;
+                currentLikesCount = nextLike;
+                long nextComment = curComments + factor;
+                long nextShare = curShares + factor;
+                HashMap< String ,  Object > updateMap = new HashMap<>();
+                updateMap.put("like_cnt" , nextLike);
+                Log.d(TAG, "after the incrementValue: current likes to be set "+nextLike);
+                transaction.update(postRef, updateMap);
+                return null;
+            });
+        }*/
+
+        //increase the like count by one
+        private void addLike( String mPostID , int factor) {
+            FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
+            Log.d(TAG, "addLike:   function calledd !!!!");
+            final DocumentReference postRef = FirebaseFirestore.getInstance().collection("posts")
+                    .document(mPostID);
+
+             firebaseFirestore.runTransaction(transaction -> {
+                Posts post = transaction.get(postRef)
+                        .toObject(Posts.class);
+                long curLikes = post.getLike_cnt();
+                long curComments = post.getComment_cnt();
+                long curShares = post.getShare_cnt();
+
+                long nextLike = curLikes + factor;
+                 Log.d(TAG, "addLike:     like number is  "+nextLike);
+                long nextComment = curComments + factor;
+                long nextShare = curShares + factor;
+                HashMap< String ,  Object > updateMap = new HashMap<>();
+                updateMap.put("like_cnt" , nextLike);
+                transaction.update(postRef , updateMap);
+                return nextLike;
+            }).addOnSuccessListener(new OnSuccessListener<Long>() {
+                 @Override
+                 public void onSuccess(Long aLong) {
+                     setPostLikeCount(aLong);
+                 }
+             });
+        }
+
+
+        private void addComment( String mPostID , int factor) {
+            FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
+            Log.d(TAG, "addLike:   function calledd !!!!");
+            final DocumentReference postRef = FirebaseFirestore.getInstance().collection("posts")
+                    .document(mPostID);
+
+            firebaseFirestore.runTransaction(transaction -> {
+                Posts post = transaction.get(postRef)
+                        .toObject(Posts.class);
+                long curComments = post.getComment_cnt();
+                long nextComment = curComments + factor;
+
+                Log.d(TAG, "addLike:     comment cnt now  is  "+nextComment);
+                HashMap< String ,  Object > updateMap = new HashMap<>();
+                updateMap.put("comment_cnt" , nextComment);
+                transaction.update(postRef , updateMap);
+                return nextComment;
+            }).addOnSuccessListener(new OnSuccessListener<Long>() {
+                @Override
+                public void onSuccess(Long aLong) {
+                    setPostLikeCount(aLong);
+                }
             });
         }
 
@@ -739,12 +833,20 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
             postDateTime.setText(dateTime);
         }
 
-        public void setPostLikeCount(String cnt) {
-            postLikeCount.setText(cnt);
+        public void setPostLikeCount(long currentLikesCount) {
+            if(currentLikesCount>1){
+                postLikeCount.setText(""+currentLikesCount+" likes");
+            }else{
+                postLikeCount.setText(""+currentLikesCount+" like");
+            }
         }
 
-        public void setPostCommentCount(String cnt) {
-            postCommentCount.setText(cnt);
+        public void setPostCommentCount(long currentCommentsCount) {
+            if(currentCommentsCount>1){
+                postCommentCount.setText(""+currentCommentsCount+" comments");
+            }else{
+                postCommentCount.setText(""+currentCommentsCount+" comment");
+            }
         }
 
         public void setPostLocaiton(String location) {
@@ -753,10 +855,15 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
 
         public void setUserImage(String image_url , ImageView imageView) {
             mUserImage = image_url;
-            if(image_url.equals("default")){
-                postImage.setVisibility(View.GONE);
-            }else{
-                imageLoader.displayImage(image_url, imageView, userImageOptions);
+            if(image_url!=null){
+                if(image_url.equals("default")){
+                    Log.d(TAG, "setUserImage:    visibility gone but caption is  ");
+                    postImage.setVisibility(View.GONE);
+                }else{
+                    ImageLoader imageLoader = ImageLoader.getInstance();
+                    imageLoader.displayImage(image_url, imageView);
+                    //imageLoader.displayImage(image_url, imageView, userImageOptions);
+                }
             }
 
         }

@@ -16,6 +16,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentChange;
@@ -33,12 +34,14 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import candor.fulki.GENERAL.MainActivity;
 import candor.fulki.HOME.Comments;
 import candor.fulki.HOME.PostCommentAdapter;
 import candor.fulki.EXPLORE.PEOPLE.Ratings;
+import candor.fulki.HOME.Posts;
 import candor.fulki.NOTIFICATION.Notifications;
 import candor.fulki.PROFILE.ShowPleopleListActivity;
 import candor.fulki.R;
@@ -59,6 +62,7 @@ public class ShowEventActivity extends AppCompatActivity {
 
     String eventID ;
     String moderatorID;
+    long peopleCount;
     int joinState = 0;
     String mUserID = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
@@ -169,8 +173,7 @@ public class ShowEventActivity extends AppCompatActivity {
 
     public void join(){
 
-        addRating(mUserID , 15);
-        addRating(moderatorID , 3);
+
 
         String time_stamp = String.valueOf(new Date().getTime());
         DocumentReference ref = FirebaseFirestore.getInstance().collection("notifications/"+moderatorID+"/notificatinos").document();
@@ -188,13 +191,15 @@ public class ShowEventActivity extends AppCompatActivity {
         Log.d(TAG, "cancelJoin: event id    " +eventID);
         writeBatch.commit().addOnCompleteListener(task -> {
             if(task.isSuccessful()){
-
                 Log.d(TAG, "onComplete: success join !");
                 joinState=1;
                 joinState = 1;
                 eventJoinButton.setText("Joined");
                 eventJoinButton.setBackgroundColor(getResources().getColor(R.color.colorAccent));
                 eventJoinButton.setEnabled(true);
+                addRating(mUserID , 15);
+                addRating(moderatorID , 3);
+                addPeople(eventID , 1);
             }
         }).addOnFailureListener(e -> {
             eventJoinButton.setEnabled(true);
@@ -211,8 +216,6 @@ public class ShowEventActivity extends AppCompatActivity {
                     WriteBatch writeBatch  = firebaseFirestore.batch();
                     if(joinNotificatoinPushID!=null){
                         eventJoinButton.setEnabled(true);
-                        addRating(mUserID , -15);
-                        addRating(moderatorID , -3);
                         DocumentReference notificatinoRef = firebaseFirestore.collection("notifications/"+moderatorID+"/notificatinos").document(joinNotificatoinPushID);
                         writeBatch.delete(notificatinoRef);
                     }
@@ -224,6 +227,9 @@ public class ShowEventActivity extends AppCompatActivity {
                             joinState=0;
                             joinState = 0;
                             eventJoinButton.setText("Join");
+                            addPeople(eventID, -1);
+                            addRating(mUserID , -15);
+                            addRating(moderatorID , -3);
                             eventJoinButton.setBackgroundColor(getResources().getColor(R.color.colorPrimaryy));
                             eventJoinButton.setEnabled(true);
                         }
@@ -243,7 +249,7 @@ public class ShowEventActivity extends AppCompatActivity {
 
     public void setDetails(){
 
-        FirebaseFirestore.getInstance().collection("joins/" + eventID + "/joins").addSnapshotListener(new EventListener<QuerySnapshot>() {
+        /*FirebaseFirestore.getInstance().collection("joins/" + eventID + "/joins").addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(QuerySnapshot documentSnapshots, FirebaseFirestoreException e) {
                 if (!documentSnapshots.isEmpty()) {
@@ -253,7 +259,7 @@ public class ShowEventActivity extends AppCompatActivity {
                     eventPeopleCnt.setText(""+"0"+" people");
                 }
             }
-        });
+        });*/
 
 
         FirebaseFirestore.getInstance().collection("comments/" + eventID + "/comments").addSnapshotListener((documentSnapshots, e) -> {
@@ -274,9 +280,10 @@ public class ShowEventActivity extends AppCompatActivity {
                     eventLocation.setText(events.getLocation());
                     eventTitle.setText(events.getTitle());
                     eventDescription.setText(events.getDescription());
-
                     moderatorID = events.getModerator_id();
+                    peopleCount = events.getPeople_cnt();
 
+                    setPeopleCount(peopleCount);
                     setImage(events.getImage_url() , eventImage);
                 }
             }
@@ -342,5 +349,28 @@ public class ShowEventActivity extends AppCompatActivity {
         });
     }
 
+    private void setPeopleCount(long cnt){
+        Log.d(TAG, "setPeopleCount:  called "+cnt);
+        eventPeopleCnt.setText(cnt + " people");
+    }
 
+    private void addPeople( String eventID , int factor) {
+        FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
+        Log.d(TAG, "addPeople:   function calledd !!!!");
+        final DocumentReference eventRef = FirebaseFirestore.getInstance().collection("events")
+                .document(eventID);
+
+        firebaseFirestore.runTransaction(transaction -> {
+            Events event = transaction.get(eventRef)
+                    .toObject(Events.class);
+            long curPeople = event.getPeople_cnt();
+            long nextPeople = curPeople + factor;
+
+            Log.d(TAG, "addPeople:     join number is  "+nextPeople);
+            HashMap< String ,  Object > updateMap = new HashMap<>();
+            updateMap.put("people_cnt" , nextPeople);
+            transaction.update(eventRef , updateMap);
+            return nextPeople;
+        }).addOnSuccessListener(aLong -> setPeopleCount(aLong));
+    }
 }

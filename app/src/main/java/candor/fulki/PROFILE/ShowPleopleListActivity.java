@@ -104,11 +104,6 @@ public class ShowPleopleListActivity extends AppCompatActivity {
                         basic.setmUserName(doc.getDocument().getString("name"));
                         basic.setmUserThumbImage(doc.getDocument().getString("thumb_image"));
                         userList.add(basic);
-                        userList.add(basic);
-                        userList.add(basic);
-                        userList.add(basic);
-                        userList.add(basic);
-                        userList.add(basic);
                         mPeopleAdapter.notifyDataSetChanged();
                     }
                 }

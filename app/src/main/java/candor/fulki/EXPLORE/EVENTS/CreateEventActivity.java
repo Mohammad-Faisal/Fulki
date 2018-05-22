@@ -197,10 +197,10 @@ public class CreateEventActivity extends AppCompatActivity {
                         postMap.put("timestamp" ,timestamp);
                         postMap.put("event_push_id" , eventPushId);
                         postMap.put("location" , locationText);
-                        postMap.put("people_cnt" , "0");
-                        postMap.put("discussion_cnt","0");
-                        postMap.put("clap_cnt" , "0");
-                        postMap.put("love_cnt" , "0");
+                        postMap.put("people_cnt" , 0);
+                        postMap.put("discussion_cnt",0);
+                        postMap.put("clap_cnt" , 0);
+                        postMap.put("love_cnt" , 0);
 
 
                         addRating(mUserID , 30);

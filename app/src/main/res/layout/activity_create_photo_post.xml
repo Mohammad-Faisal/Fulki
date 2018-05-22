@@ -22,7 +22,6 @@
             <LinearLayout
                 android:layout_marginRight="10dp"
                 android:layout_marginLeft="10dp"
-                android:layout_marginTop="20dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
@@ -32,6 +31,7 @@
                     android:layout_height="match_parent"
                     />
                 <TextView
+                    android:visibility="gone"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@drawable/textview_information"
@@ -58,14 +58,14 @@
                 android:layout_gravity="center"
                 android:id="@+id/create_photo_post_image"
                 android:layout_marginTop="20dp"
-                android:layout_width="375dp"
-                android:layout_height="325dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:scaleType="fitXY"
                 android:src="@drawable/fulki_logo"/>
 
 
-
             <Button
+                android:layout_marginBottom="5dp"
                 android:textAllCaps="false"
                 android:padding="3dp"
                 android:layout_marginTop="15dp"
@@ -96,7 +96,6 @@
         android:elevation="20dp">
 
         <Button
-            android:visibility="gone"
             android:id="@+id/photo_post_upload"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

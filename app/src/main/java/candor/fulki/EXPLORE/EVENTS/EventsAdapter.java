@@ -60,16 +60,18 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventsView
         Events events = eventsList.get(position);
 
         String title = events.getTitle();
-        String cnt = events.getPeople_cnt();
+        long cnt = events.getPeople_cnt();
         String location = events.getLocation();
         String date = events.getTime_and_date();
         String thumb_image_url = events.getImage_url();
         String eventID = events.getEvent_push_id();
 
+        Log.d(TAG, "onBindViewHolder:    event people count  "+cnt);
+
         holder.eventDate.setText(date);
         holder.eventLocation.setText(location);
         holder.eventTitle.setText(title);
-        holder.setPeopleCnt(eventID);
+        holder.setPeopleCnt(cnt);
         holder.setCommentCnt(eventID);
         holder.setImage(thumb_image_url , context);
 
@@ -108,20 +110,8 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventsView
         }
 
 
-        public void  setPeopleCnt(String eventID){
-
-            FirebaseFirestore.getInstance().collection("joins/" + eventID + "/joins").addSnapshotListener(new EventListener<QuerySnapshot>() {
-                @Override
-                public void onEvent(QuerySnapshot documentSnapshots, FirebaseFirestoreException e) {
-                    if (!documentSnapshots.isEmpty()) {
-                        int count = documentSnapshots.size();
-                        eventPeopleCnt.setText(""+count+" people");
-                    } else {
-                        eventPeopleCnt.setText(""+"0"+" people");
-                    }
-                }
-            });
-
+        public void  setPeopleCnt(long cnt){
+            eventPeopleCnt.setText(cnt+" people");
         }
 
 

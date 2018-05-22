@@ -39,7 +39,7 @@
         </LinearLayout>
 
         <LinearLayout
-            android:weightSum="2"
+            android:weightSum="3"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
@@ -55,6 +55,13 @@
                 android:background="@drawable/background_message_text"
                 android:textAlignment="center"
                 android:id="@+id/search_activity_category"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="40dp" />
+            <TextView
+                android:background="@drawable/background_message_text"
+                android:textAlignment="center"
+                android:id="@+id/search_activity_blood"
                 android:layout_weight="1"
                 android:layout_width="0dp"
                 android:layout_height="40dp" />

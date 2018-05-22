@@ -16,7 +16,7 @@
             android:orientation="vertical">
 
 
-            <include layout="@layout/profile_top_bar"></include>
+            <include layout="@layout/top_bar_profile"></include>
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/profile_badges_recycler"

@@ -46,6 +46,7 @@ import candor.fulki.R;
 import id.zelory.compressor.Compressor;
 
 import static candor.fulki.GENERAL.MainActivity.mUserName;
+import static candor.fulki.GENERAL.MainActivity.mUserThumbImage;
 
 public class CreatePhotoPostActivity extends AppCompatActivity {
 
@@ -177,7 +178,8 @@ public class CreatePhotoPostActivity extends AppCompatActivity {
         // Handle item selection
         switch (item.getItemId()) {
             case R.id.action_search:
-                post();
+                finish();
+                //post();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -233,25 +235,26 @@ public class CreatePhotoPostActivity extends AppCompatActivity {
 
                             DocumentReference ref = FirebaseFirestore.getInstance().collection("posts").document();
                             String postPushId = ref.getId();
-
                             long timestamp = 1* new Date().getTime();
-
                             Long tsLong = System.currentTimeMillis()/1000;
                             String ts = tsLong.toString();
-
-
                             Map<String , Object> postMap = new HashMap<>();
+
 
 
                             postMap.put("user_id" , mUserID);
                             postMap.put("user_name" , mUserName);
-                            postMap.put("image_url" , mainImageUrl);
-                            postMap.put("thumb_image_url" , thumbImageUrl);
+                            postMap.put("user_thumb_image" , mUserThumbImage);
+
+                            postMap.put("post_image_url" , mainImageUrl);
+                            postMap.put("post_thumb_image_url" , thumbImageUrl);
+
                             postMap.put("caption" , Caption);
                             postMap.put("time_and_date" , cur_time_and_date);
                             postMap.put("timestamp" ,timestamp );
                             postMap.put("post_push_id" , postPushId);
                             postMap.put("location" , "");
+
                             postMap.put("like_cnt" , 0);
                             postMap.put("comment_cnt" ,0);
                             postMap.put("share_cnt" ,0);
@@ -266,7 +269,7 @@ public class CreatePhotoPostActivity extends AppCompatActivity {
                                     if(task.isSuccessful()){
                                         addRating(mUserID , 15);
                                         Toast.makeText(CreatePhotoPostActivity.this, "Success !", Toast.LENGTH_SHORT).show();
-                                        Intent mainIntent = new Intent(CreatePhotoPostActivity.this , MainActivity.class);
+                                        Intent mainIntent = new Intent(CreatePhotoPostActivity.this , HomeActivity.class);
                                         startActivity(mainIntent);
                                         finish();
                                     }else{

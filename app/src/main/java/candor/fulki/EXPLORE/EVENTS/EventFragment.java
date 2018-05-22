@@ -64,6 +64,7 @@ public class EventFragment extends Fragment {
         Query nextQuery = firebaseFirestore.collection("events").orderBy("timestamp" , Query.Direction.DESCENDING).limit(50);
         nextQuery.addSnapshotListener(getActivity() , (documentSnapshots, e) -> {
             if(!documentSnapshots.isEmpty()){
+
                 for(DocumentChange doc: documentSnapshots.getDocumentChanges()){
                     if(doc.getType() == DocumentChange.Type.ADDED){
                         Events singleEvents = doc.getDocument().toObject(Events.class);

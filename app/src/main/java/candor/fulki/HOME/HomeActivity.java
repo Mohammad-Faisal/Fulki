@@ -28,6 +28,7 @@ import android.widget.ImageButton;
 
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.AuthUI.IdpConfig;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -36,6 +37,7 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.ittianyu.bottomnavigationviewex.BottomNavigationViewEx;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
@@ -65,6 +67,9 @@ import candor.fulki.PROFILE.ProfileActivity;
 import candor.fulki.PROFILE.ProfileSettingsActivity;
 import candor.fulki.R;
 import de.hdodenhof.circleimageview.CircleImageView;
+
+import static candor.fulki.GENERAL.MainActivity.mUserName;
+import static candor.fulki.GENERAL.MainActivity.mUserThumbImage;
 
 public class HomeActivity extends AppCompatActivity {
 
@@ -104,6 +109,7 @@ public class HomeActivity extends AppCompatActivity {
 
 
 
+    int scroll_count = 1;
 
     //----------- FIREBASE -----//
     private FirebaseAuth mAuth;
@@ -173,7 +179,7 @@ public class HomeActivity extends AppCompatActivity {
         //------------- BOTTOM NAVIGATION HANDLING ------//
         BottomNavigationViewEx mNavigation = findViewById(R.id.main_bottom_nav);
         mNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
-        mNavigation.enableAnimation(true);
+        mNavigation.enableAnimation(false);
         mNavigation.enableShiftingMode(false);
         mNavigation.enableItemShiftingMode(false);
         mNavigation.setIconSize(25, 25);
@@ -203,9 +209,13 @@ public class HomeActivity extends AppCompatActivity {
             mUserThumbImage = MainActivity.mUserThumbImage;
 
 
-            setupImageLoader();
-            imageLoader.displayImage(mUserThumbImage, imageView, userImageOptions);
-            imageLoader.destroy();
+            //setupImageLoader();
+            /*imageLoader.displayImage(mUserThumbImage, imageView, userImageOptions);
+            imageLoader.destroy();*/
+
+
+            ImageLoader imageLoader = ImageLoader.getInstance();
+            imageLoader.displayImage(mUserThumbImage, imageView);
 
 
             //setting up the recyclerview
@@ -232,16 +242,17 @@ public class HomeActivity extends AppCompatActivity {
 
             loadFirstPosts();
 
-            /*recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+
+            recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
                 @Override
                 public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                     Boolean reachedBottom = !recyclerView.canScrollVertically(1);
                     if(reachedBottom){
-                        Log.d(TAG, "onScrolled:      reached bottom ");
+                        Log.d(TAG, "onScrolled:      reached bottom "+scroll_count++);
                         loadMorePost();
                     }
                 }
-            });*/
+            });
 
 
 
@@ -271,10 +282,14 @@ public class HomeActivity extends AppCompatActivity {
         String Caption = mCreatePostText.getText().toString();
 
         Map<String , Object> postMap = new HashMap<>();
+
+
+
         postMap.put("user_id" , mUserID);
         postMap.put("user_name" , mUserName);
-        postMap.put("image_url" , "default");
-        postMap.put("thumb_image_url" , "default");
+        postMap.put("user_thumb_image" , mUserThumbImage);
+        postMap.put("post_image_url" , "default");
+        postMap.put("post_thumb_image_url" , "default");
         postMap.put("caption" , Caption);
         postMap.put("time_and_date" , cur_time_and_date);
         postMap.put("timestamp" ,timestamp );
@@ -283,6 +298,8 @@ public class HomeActivity extends AppCompatActivity {
         postMap.put("like_cnt" , 0);
         postMap.put("comment_cnt" ,0);
         postMap.put("share_cnt" ,0);
+
+
 
 
 
@@ -300,7 +317,7 @@ public class HomeActivity extends AppCompatActivity {
 
     public void loadFirstPosts(){
 
-        Query nextQuery = firebaseFirestore.collection("posts").orderBy("timestamp" , Query.Direction.DESCENDING).limit(30);
+        Query nextQuery = firebaseFirestore.collection("posts").orderBy("timestamp" , Query.Direction.DESCENDING).limit(10);
         nextQuery.addSnapshotListener(HomeActivity.this , (documentSnapshots, e) -> {
             if(documentSnapshots!=null){
                 if(!documentSnapshots.isEmpty()){
@@ -333,21 +350,30 @@ public class HomeActivity extends AppCompatActivity {
         Query nextQuery = firebaseFirestore.collection("posts")
                 .orderBy("timestamp" , Query.Direction.DESCENDING)
                 .startAfter(lastVisible)
-                .limit(5);
-        nextQuery.addSnapshotListener(HomeActivity.this , (documentSnapshots, e) -> {
-            if(!documentSnapshots.isEmpty()){
-                lastVisible = documentSnapshots.getDocuments().get(documentSnapshots.size()-1);
-                for(DocumentChange doc: documentSnapshots.getDocumentChanges()){
-                    if(doc.getType() == DocumentChange.Type.ADDED){
-                        Posts singlePosts = doc.getDocument().toObject(Posts.class);
-                        String uid = singlePosts.getUser_id();
+                .limit(10);
+        nextQuery.get().addOnSuccessListener(documentSnapshots -> {
+            if(documentSnapshots!=null){
+                if(!documentSnapshots.isEmpty()){
+                    lastVisible = documentSnapshots.getDocuments().get(documentSnapshots.size()-1);
+                    for(DocumentChange doc: documentSnapshots.getDocumentChanges()){
+                        if(doc.getType() == DocumentChange.Type.ADDED){
+                            Log.d(TAG, "loadMorePost:    found some more data  !!!!!");
+                            Posts singlePosts = doc.getDocument().toObject(Posts.class);
+                            String uid = singlePosts.getUser_id();
                             posts.add(singlePosts);
-                            mHomeAdapter.notifyDataSetChanged();
-
+                        }
+                        mHomeAdapter.notifyDataSetChanged();
                     }
                 }
             }
         });
+
+        /*nextQuery.addSnapshotListener(HomeActivity.this , (documentSnapshots, e) -> {
+            if(documentSnapshots!=null){
+                if(!documentSnapshots.isEmpty()){
+                }
+            }
+        });*/
     }
 
     private Task<Void> addRating( String mUserID  , int factor) {

@@ -11,6 +11,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
+        android:name=".Fulki"
         android:allowBackup="true"
         android:icon="@drawable/fulki_logo"
         android:label="@string/app_name"
@@ -18,15 +19,14 @@
         android:roundIcon="@drawable/fulki_logo"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".GENERAL.MainActivity"
+        <activity
+            android:name=".GENERAL.MainActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
         </activity>
         <activity
             android:name=".PROFILE.RegistrationAccount"
@@ -100,7 +100,6 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".PROFILE.ShowPleopleListActivity"
-            
             android:screenOrientation="portrait" />
         <activity
             android:name=".GENERAL.SearchActivity"
@@ -114,8 +113,10 @@
             android:name=".EXPLORE.EVENTS.ShowEventActivity"
             android:parentActivityName=".EXPLORE.ExploreActivity"
             android:screenOrientation="portrait" />
-        <activity android:name=".HOME.HomeActivity"
-            android:screenOrientation="portrait"></activity>
+        <activity
+            android:name=".HOME.HomeActivity"
+            android:screenOrientation="portrait" />
+        <activity android:name=".GENERAL.FragmentHolderActivity"></activity>
     </application>
 
 </manifest>

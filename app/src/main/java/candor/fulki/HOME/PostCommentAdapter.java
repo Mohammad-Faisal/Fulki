@@ -15,6 +15,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
@@ -28,6 +29,7 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import candor.fulki.EXPLORE.PEOPLE.Ratings;
@@ -307,6 +309,45 @@ public class PostCommentAdapter extends RecyclerView.Adapter<PostCommentAdapter.
                 ratings.setRating(nextRating);
                 transaction.set(ratingRef, ratings);
                 return null;
+            });
+        }
+
+        private void setLikeCount(long cnt){
+
+            if(cnt>1){
+                commentLoveCount.setText(cnt+" likes");
+            }else{
+                commentLoveCount.setText(cnt+" like");
+            }
+
+        }
+
+        private void addLike( String mPostID , int factor) {
+            FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
+            Log.d(TAG, "addLike:   function calledd !!!!");
+            final DocumentReference postRef = FirebaseFirestore.getInstance().collection("posts")
+                    .document(mPostID);
+
+            firebaseFirestore.runTransaction(transaction -> {
+                Posts post = transaction.get(postRef)
+                        .toObject(Posts.class);
+                long curLikes = post.getLike_cnt();
+                long curComments = post.getComment_cnt();
+                long curShares = post.getShare_cnt();
+
+                long nextLike = curLikes + factor;
+                Log.d(TAG, "addLike:     like number is  "+nextLike);
+                long nextComment = curComments + factor;
+                long nextShare = curShares + factor;
+                HashMap< String ,  Object > updateMap = new HashMap<>();
+                updateMap.put("like_cnt" , nextLike);
+                transaction.update(postRef , updateMap);
+                return nextLike;
+            }).addOnSuccessListener(new OnSuccessListener<Long>() {
+                @Override
+                public void onSuccess(Long aLong) {
+                    setLikeCount(aLong);
+                }
             });
         }
 

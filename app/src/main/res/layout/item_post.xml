@@ -138,7 +138,7 @@
 
         <LinearLayout
             android:layout_marginTop="15dp"
-            android:weightSum="3"
+            android:weightSum="2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
@@ -150,7 +150,7 @@
                 android:layout_weight="1"
                 android:layout_marginTop="9dp"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:orientation="horizontal"
                 >
 
@@ -167,13 +167,14 @@
                     android:id="@+id/post_like_number"
                     android:layout_marginTop="10dp"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:textAlignment="center"
                     android:textSize="9sp"
                     android:text="10 likes"/>
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/item_post_comment_linear"
                 android:weightSum="4"
                 android:layout_weight="1"
                 android:layout_marginTop="12dp"
@@ -206,6 +207,7 @@
 
 
             <LinearLayout
+                android:visibility="gone"
                 android:layout_weight="1"
                 android:layout_marginTop="12dp"
                 android:layout_width="0dp"

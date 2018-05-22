@@ -8,23 +8,26 @@ public class Posts {
 
 
     private long timestamp;
+
     private String user_name;
     private String user_id;
+    private String user_thumb_image;
+
+    private String post_image_url;
+    private String post_thumb_image_url;
+
+
     private String time_and_date;
-    private String image_url;
-    private String thumb_image_url;
     private String location;  //works as shared by flag
     private String post_push_id;
     private String caption;
-    private int like_cnt;
-    private int comment_cnt;
-    private int share_cnt;
 
-    public Posts() {
-    }
+    private long like_cnt;
+    private long comment_cnt;
+    private long share_cnt;
+
 
     public long getTimestamp() {
-
         return timestamp;
     }
 
@@ -48,28 +51,36 @@ public class Posts {
         this.user_id = user_id;
     }
 
+    public String getUser_thumb_image() {
+        return user_thumb_image;
+    }
+
+    public void setUser_thumb_image(String user_thumb_image) {
+        this.user_thumb_image = user_thumb_image;
+    }
+
+    public String getPost_image_url() {
+        return post_image_url;
+    }
+
+    public void setPost_image_url(String post_image_url) {
+        this.post_image_url = post_image_url;
+    }
+
+    public String getPost_thumb_image_url() {
+        return post_thumb_image_url;
+    }
+
+    public void setPost_thumb_image_url(String post_thumb_image_url) {
+        this.post_thumb_image_url = post_thumb_image_url;
+    }
+
     public String getTime_and_date() {
         return time_and_date;
     }
 
     public void setTime_and_date(String time_and_date) {
         this.time_and_date = time_and_date;
-    }
-
-    public String getImage_url() {
-        return image_url;
-    }
-
-    public void setImage_url(String image_url) {
-        this.image_url = image_url;
-    }
-
-    public String getThumb_image_url() {
-        return thumb_image_url;
-    }
-
-    public void setThumb_image_url(String thumb_image_url) {
-        this.thumb_image_url = thumb_image_url;
     }
 
     public String getLocation() {
@@ -96,37 +107,43 @@ public class Posts {
         this.caption = caption;
     }
 
-    public int getLike_cnt() {
+    public long getLike_cnt() {
         return like_cnt;
     }
 
-    public void setLike_cnt(int like_cnt) {
+    public void setLike_cnt(long like_cnt) {
         this.like_cnt = like_cnt;
     }
 
-    public int getComment_cnt() {
+    public long getComment_cnt() {
         return comment_cnt;
     }
 
-    public void setComment_cnt(int comment_cnt) {
+    public void setComment_cnt(long comment_cnt) {
         this.comment_cnt = comment_cnt;
     }
 
-    public int getShare_cnt() {
+    public long getShare_cnt() {
         return share_cnt;
     }
 
-    public void setShare_cnt(int share_cnt) {
+    public void setShare_cnt(long share_cnt) {
         this.share_cnt = share_cnt;
     }
 
-    public Posts(long timestamp, String user_name, String user_id, String time_and_date, String image_url, String thumb_image_url, String location, String post_push_id, String caption, int like_cnt, int comment_cnt, int share_cnt) {
+    public Posts() {
+
+    }
+
+    public Posts(long timestamp, String user_name, String user_id, String user_thumb_image, String post_image_url, String post_thumb_image_url, String time_and_date, String location, String post_push_id, String caption, long like_cnt, long comment_cnt, long share_cnt) {
+
         this.timestamp = timestamp;
         this.user_name = user_name;
         this.user_id = user_id;
+        this.user_thumb_image = user_thumb_image;
+        this.post_image_url = post_image_url;
+        this.post_thumb_image_url = post_thumb_image_url;
         this.time_and_date = time_and_date;
-        this.image_url = image_url;
-        this.thumb_image_url = thumb_image_url;
         this.location = location;
         this.post_push_id = post_push_id;
         this.caption = caption;

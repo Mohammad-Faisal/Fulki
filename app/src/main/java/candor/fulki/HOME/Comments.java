@@ -1,8 +1,5 @@
 package candor.fulki.HOME;
 
-/**
- * Created by Mohammad Faisal on 1/29/2018.
- */
 
 public class Comments {
 

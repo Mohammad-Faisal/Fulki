@@ -11,11 +11,15 @@ public class Events {
     private String location;
     private String event_push_id;
     private String description;
-    private String people_cnt;
-    private String discussion_cnt;
+
+    private long people_cnt;
+    private long discussion_cnt;
     private long timestamp;
-    private String clap_cnt;
-    private String love_cnt;
+    private long clap_cnt;
+    private long love_cnt;
+
+    public Events() {
+    }
 
     public String getTitle() {
         return title;
@@ -81,19 +85,19 @@ public class Events {
         this.description = description;
     }
 
-    public String getPeople_cnt() {
+    public long getPeople_cnt() {
         return people_cnt;
     }
 
-    public void setPeople_cnt(String people_cnt) {
+    public void setPeople_cnt(long people_cnt) {
         this.people_cnt = people_cnt;
     }
 
-    public String getDiscussion_cnt() {
+    public long getDiscussion_cnt() {
         return discussion_cnt;
     }
 
-    public void setDiscussion_cnt(String discussion_cnt) {
+    public void setDiscussion_cnt(long discussion_cnt) {
         this.discussion_cnt = discussion_cnt;
     }
 
@@ -105,11 +109,24 @@ public class Events {
         this.timestamp = timestamp;
     }
 
-    public Events() {
-
+    public long getClap_cnt() {
+        return clap_cnt;
     }
 
-    public Events(String title, String moderator_id, String time_and_date, String image_url, String thumb_image_url, String location, String event_push_id, String description, String people_cnt, String discussion_cnt, long timestamp, String clap_cnt, String love_cnt) {
+    public void setClap_cnt(long clap_cnt) {
+        this.clap_cnt = clap_cnt;
+    }
+
+    public long getLove_cnt() {
+        return love_cnt;
+    }
+
+    public void setLove_cnt(long love_cnt) {
+        this.love_cnt = love_cnt;
+    }
+
+    public Events(String title, String moderator_id, String time_and_date, String image_url, String thumb_image_url, String location, String event_push_id, String description, long people_cnt, long discussion_cnt, long timestamp, long clap_cnt, long love_cnt) {
+
         this.title = title;
         this.moderator_id = moderator_id;
         this.time_and_date = time_and_date;
@@ -122,23 +139,6 @@ public class Events {
         this.discussion_cnt = discussion_cnt;
         this.timestamp = timestamp;
         this.clap_cnt = clap_cnt;
-        this.love_cnt = love_cnt;
-    }
-
-    public String getClap_cnt() {
-
-        return clap_cnt;
-    }
-
-    public void setClap_cnt(String clap_cnt) {
-        this.clap_cnt = clap_cnt;
-    }
-
-    public String getLove_cnt() {
-        return love_cnt;
-    }
-
-    public void setLove_cnt(String love_cnt) {
         this.love_cnt = love_cnt;
     }
 }

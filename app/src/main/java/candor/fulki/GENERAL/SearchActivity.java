@@ -62,12 +62,15 @@ public class SearchActivity extends AppCompatActivity {
     String categoryString = "All Category";
     TextView mDistrict;
     TextView mCategory;
+    TextView mBlood;
 
 
     //district filtering
     private ValueAdapter districtValueAdapter;
     AlertDialog districtAlertDialog;
+
     private ArrayList<String> mStringList;
+
     private static final String[] districts={
             "Barguna" , "Barisal" , "Bhola",    "Jhalokati",  "Patuakhali", "Pirojpur",
             "Bandarban","Brahmanbaria",   "Chandpur", "Chittagong", "Comilla",    "Cox's Bazar","Feni",     "Khagrachhari","Lakshmipur", "Noakhali", "Rangamati",
@@ -83,7 +86,27 @@ public class SearchActivity extends AppCompatActivity {
         "Child Marrige" , "Violence" , "Environment" , "Women Empowerment","Education"
     };
 
+    private static final String[] bloods = {
+            "A+" , "A-" , "B+" , "B-","AB+" ,"AB-" , "O+" , "O-"
+    };
+
     private ArrayList<String> mStringListCategory;
+    private ArrayList<String> mStringListBlood = new ArrayList<>();
+
+
+    private  ArrayList < String > ChildMarrige;
+    private  ArrayList < String > Violence;
+    private  ArrayList < String > Environment;
+    private  ArrayList < String > WomenEmpowerment;
+    private  ArrayList < String > Education;
+    private  ArrayList < String > AA;
+    private  ArrayList < String > aa;
+    private  ArrayList < String > BB;
+    private  ArrayList < String > bb;
+    private  ArrayList < String > AB;
+    private  ArrayList < String > ab;
+    private  ArrayList < String > OO;
+    private  ArrayList < String > oo;
 
 
     @Override
@@ -101,12 +124,16 @@ public class SearchActivity extends AppCompatActivity {
 
         mDistrict = findViewById(R.id.search_activity_district);
         mCategory  = findViewById(R.id.search_activity_category);
+        mBlood  =findViewById(R.id.search_activity_blood);
         initDistrictData();
         initCategoryData();
+        initBloodData();
 
 
-        mDistrict.setText("All Bangladesh");
-        mCategory.setText("All Category");
+        mDistrict.setText("District");
+        mCategory.setText("Category");
+        mBlood.setText("Blood");
+
         mSearchBoxText = findViewById(R.id.search_text_input);
         //mSearchBoxText.addTextChangedListener(filterTextWatcher);
 
@@ -178,6 +205,54 @@ public class SearchActivity extends AppCompatActivity {
 
             }
 
+        });
+    }
+
+    private void initBloodData() {
+        mStringList=new ArrayList<String>();
+
+        for(int i=0;i<bloods.length;i++){
+            mStringListBlood.add(bloods[i]);
+        }
+
+
+        mBlood.setOnClickListener(v -> {
+
+            districtValueAdapter=new ValueAdapter(mStringListBlood,SearchActivity.this);
+            districtAlertDialog = new AlertDialog.Builder(SearchActivity.this).create();
+            LayoutInflater inflater = getLayoutInflater();
+            View convertView = inflater.inflate(R.layout.custom_district_list, null);
+            final EditText editText=convertView.findViewById(R.id.distric_list_search_text);
+            editText.setVisibility(View.GONE);
+            final ListView lv =  convertView.findViewById(R.id.distric_list_listview);
+            districtAlertDialog.setView(convertView);
+            districtAlertDialog.setCancelable(false);
+
+            lv.setAdapter(districtValueAdapter);
+            districtAlertDialog.show();
+            editText.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    districtValueAdapter.getFilter().filter(s);
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+
+                }
+            });
+
+            lv.setOnItemClickListener((parent, view, position, id) -> {
+                mDistrict.setText(lv.getItemAtPosition(position).toString());
+                districtString = lv.getItemAtPosition(position).toString();
+                Log.d(TAG, "Blood Data:    found a Blood  "+lv.getItemAtPosition(position).toString());
+                districtAlertDialog.dismiss();
+            });
         });
     }
 
@@ -273,7 +348,7 @@ public class SearchActivity extends AppCompatActivity {
             lv.setOnItemClickListener((parent, view, position, id) -> {
                 mCategory.setText(lv.getItemAtPosition(position).toString());
                 categoryString = lv.getItemAtPosition(position).toString();
-                Log.d(TAG, "initDistrictData:    found a district  "+lv.getItemAtPosition(position).toString());
+                Log.d(TAG, "initDistrictData:    found a category  "+lv.getItemAtPosition(position).toString());
                 districtAlertDialog.dismiss();
             });
         });

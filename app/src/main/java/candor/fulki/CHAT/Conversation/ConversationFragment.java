@@ -69,27 +69,6 @@ public class ConversationFragment extends Fragment {
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 ChatBuddies chatBuddies = dataSnapshot.getValue(ChatBuddies.class);
                 verticalList.add(chatBuddies);
-                verticalList.add(chatBuddies);
-                verticalList.add(chatBuddies);
-                verticalList.add(chatBuddies);
-                verticalList.add(chatBuddies);
-                verticalList.add(chatBuddies);
-                verticalList.add(chatBuddies);
-                verticalList.add(chatBuddies);
-                verticalList.add(chatBuddies);
-                verticalList.add(chatBuddies);
-                verticalList.add(chatBuddies);
-                verticalList.add(chatBuddies);
-                verticalList.add(chatBuddies);
-                verticalList.add(chatBuddies);
-                verticalList.add(chatBuddies);
-                verticalList.add(chatBuddies);
-                verticalList.add(chatBuddies);
-                verticalList.add(chatBuddies);
-                verticalList.add(chatBuddies);
-                verticalList.add(chatBuddies);
-                verticalList.add(chatBuddies);
-
                 verticalAdapter.notifyDataSetChanged();
             }
             @Override
