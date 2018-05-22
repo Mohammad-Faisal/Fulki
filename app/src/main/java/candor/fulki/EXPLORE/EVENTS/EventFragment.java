@@ -61,7 +61,7 @@ public class EventFragment extends Fragment {
 
     public void loadEvents(){
         firebaseFirestore = FirebaseFirestore.getInstance();
-        Query nextQuery = firebaseFirestore.collection("events").orderBy("timestamp" , Query.Direction.DESCENDING).limit(50);
+        Query nextQuery = firebaseFirestore.collection("events").orderBy("timestamp" , Query.Direction.DESCENDING).limit(100);
         nextQuery.addSnapshotListener(getActivity() , (documentSnapshots, e) -> {
             if(!documentSnapshots.isEmpty()){
 

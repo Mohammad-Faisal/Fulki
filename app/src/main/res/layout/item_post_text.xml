@@ -109,8 +109,8 @@
 
 
         <TextView
-            andriod:layout_marginTop="5dp"
-            android:layout_marginBottom="5dp"
+            andriod:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
             android:fontFamily="@font/nunito_extralight"
             android:id="@+id/post_caption"
             android:layout_width="match_parent"
@@ -122,12 +122,14 @@
 
 
         <ProgressBar
+            android:visibility="gone"
             android:id="@+id/item_post_progress"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal" />
 
         <ImageView
+            android:visibility="gone"
             android:contentDescription="@string/app_name"
             android:src="@drawable/ic_person_grey"
             android:id="@+id/post_image"

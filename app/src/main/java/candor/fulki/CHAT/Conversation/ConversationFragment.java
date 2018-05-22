@@ -14,12 +14,16 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -27,6 +31,7 @@ import java.util.List;
 
 import candor.fulki.CHAT.ChatActivity;
 import candor.fulki.CHAT.GetTimeAgo;
+import candor.fulki.PROFILE.UserBasic;
 import candor.fulki.R;
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -35,6 +40,7 @@ public class ConversationFragment extends Fragment {
 
 
 
+    FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
     RecyclerView vertical_recycler_view, horizontal_recycler_view;
     DatabaseReference mChatsDatabase, mFollowingsDatabase;
     private String mUserID;
@@ -84,6 +90,29 @@ public class ConversationFragment extends Fragment {
             public void onCancelled(DatabaseError databaseError) {
             }
         });
+
+
+        firebaseFirestore.collection("followings").document(mUserID).collection("followings").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+            @Override
+            public void onSuccess(QuerySnapshot documentSnapshots) {
+                if(!documentSnapshots.isEmpty()){
+                    if(!documentSnapshots.isEmpty()){
+                        for(DocumentChange doc: documentSnapshots.getDocumentChanges()){
+                            if(doc.getType() == DocumentChange.Type.ADDED){
+                                UserBasic basic = new UserBasic();
+                                basic.setmUserID(doc.getDocument().getString("user_id"));
+                                basic.setmUserName(doc.getDocument().getString("user_name"));
+                                basic.setmUserThumbImage(doc.getDocument().getString("thumb_image"));
+                                horizontalList.add(new Actives(basic.getmUserID() , basic.getmUserName() , basic.getmUserThumbImage()));
+
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+
 
         //-- ETTING THE DATA WHO ARE ONLINE AMONG THOSE WHOM I FOLLOW -//
         horizontalList = new ArrayList<>();

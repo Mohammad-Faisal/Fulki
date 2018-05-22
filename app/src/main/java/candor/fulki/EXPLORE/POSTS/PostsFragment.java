@@ -65,7 +65,7 @@ public class PostsFragment extends Fragment {
 
     public void loadFirstPosts(){
         firebaseFirestore = FirebaseFirestore.getInstance();
-        Query nextQuery = firebaseFirestore.collection("posts").orderBy("like_cnt" , Query.Direction.DESCENDING).limit(30);
+        Query nextQuery = firebaseFirestore.collection("posts").orderBy("like_cnt" , Query.Direction.DESCENDING).limit(50);
         nextQuery.addSnapshotListener(getActivity() , (documentSnapshots, e) -> {
             if(!documentSnapshots.isEmpty()){
                 //isFirstPageLoad = false;

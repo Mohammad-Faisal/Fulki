@@ -128,7 +128,7 @@ public class PeopleFragment extends Fragment {
         Query nextQuery = firebaseFirestore.collection("ratings")
                 .orderBy("rating" , Query.Direction.DESCENDING)
                 .startAfter(lastVisible)
-                .limit(10);
+                .limit(200);
 
         nextQuery.addSnapshotListener(getActivity() , (documentSnapshots, e) -> {
             if(!documentSnapshots.isEmpty()){

@@ -6,6 +6,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityOptionsCompat;
@@ -20,6 +21,7 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -45,6 +47,8 @@ import com.like.OnLikeListener;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+import com.nostra13.universalimageloader.core.assist.FailReason;
+import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
@@ -63,6 +67,11 @@ import candor.fulki.PROFILE.ProfileActivity;
 import candor.fulki.PROFILE.ShowPleopleListActivity;
 import candor.fulki.R;
 import de.hdodenhof.circleimageview.CircleImageView;
+
+import static android.net.NetworkInfo.State.UNKNOWN;
+import static com.nostra13.universalimageloader.core.assist.FailReason.FailType.IO_ERROR;
+import static com.nostra13.universalimageloader.core.assist.FailReason.FailType.NETWORK_DENIED;
+import static com.nostra13.universalimageloader.core.assist.FailReason.FailType.OUT_OF_MEMORY;
 
 public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
 
@@ -108,41 +117,26 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
         this.mRootRef = FirebaseDatabase.getInstance().getReference();
         this.mRootRef.keepSynced(true);
         this.mUserID = FirebaseAuth.getInstance().getCurrentUser().getUid();
-
-
-        /*ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(context)
-                .threadPoolSize(5)
-                .threadPriority(Thread.MIN_PRIORITY + 2)
-                .defaultDisplayImageOptions(DisplayImageOptions.createSimple())
-                .build();
-
-
-        postImageOptions = new DisplayImageOptions.Builder()
-                .showImageOnLoading(R.drawable.ic_camera_icon)
-                .showImageForEmptyUri(R.drawable.ic_camera_icon)
-                .showImageOnFail(R.drawable.ic_camera_icon)
-                .cacheInMemory(true)
-                .cacheOnDisk(true)
-                .considerExifParams(true)
-                .build();
-
-        userImageOptions = new DisplayImageOptions.Builder()
-                .showImageOnLoading(R.drawable.ic_blank_profile)
-                .showImageForEmptyUri(R.drawable.ic_blank_profile)
-                .showImageOnFail(R.drawable.ic_blank_profile)
-                .cacheInMemory(true)
-                .cacheOnDisk(true)
-                .considerExifParams(true)
-                .build();
-        imageLoader = ImageLoader.getInstance();
-        imageLoader.init(config);*/
-        //imageloader ends here
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_post, parent, false);
+        View view;
+        if(viewType==0){
+             view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_post_text, parent, false);
+        }else{
+             view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_post, parent, false);
+        }
         return new ViewHolder(view);
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        if(data.get(position).getPost_image_url().equals("default")){
+            return 0;
+        }else{
+            return 1;
+        }
     }
 
     @Override
@@ -165,13 +159,27 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
         final String timeDate = post.getTime_and_date();
 
 
+        Log.d(TAG, "onBindViewHolder:      image url found for this  is  "+post.getPost_image_url());
+        Log.d(TAG, "onBindViewHolder:      thumb image url found for this  is  "+post.getPost_thumb_image_url());
 
+
+        holder.postProgres.setVisibility(View.GONE);
+        ImageLoader imageLoader = ImageLoader.getInstance();
+        imageLoader.displayImage(post.getPost_image_url(), holder.postImage);
+
+        /*if(post.getPost_image_url().equals("default")){
+            holder.postImage.setVisibility(View.GONE);
+            holder.postProgres.setVisibility(View.GONE);
+        }else{
+
+
+        }*/
 
 
         holder.setPostCaption(caption);
         holder.setPostDateTime(timeDate);
         holder.setUserImage(userThumbImage , holder.postUserImage);
-        holder.setUserImage(postImage , holder.postImage);
+        //holder.setUserImage(postImage , holder.postImage);
         holder.setPostUserName(userName);
         holder.setPostLikeCount(currentLikesCount);
         holder.setPostUserName(userName);
@@ -225,42 +233,26 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
             context.startActivity(showPostIntent , optionsCompat.toBundle());
         });
 
-        //setting like count
-        /*FirebaseFirestore.getInstance().collection("likes/" + postPushID + "/likes").addSnapshotListener((documentSnapshots, e) -> {
-            if (!documentSnapshots.isEmpty()) {
-                int count = documentSnapshots.size();
-                String cnt = Integer.toString(count);
-                firebaseFirestore.collection("posts").document(postPushID).update("like_cnt" , count);
-                if (count == 1) {
-                    holder.setPostLikeCount(cnt + " like");
-                } else {
-                    holder.setPostLikeCount(cnt + " likes");
-                }
-            } else {
-                holder.postLikeButton.setLiked(false);
-                holder.setPostLikeCount("0 like");
-            }
-        });*/
 
         //setting comment count
-        /*FirebaseFirestore.getInstance().collection("comments/" + postPushID + "/comments").addSnapshotListener(new EventListener<QuerySnapshot>() {
+        FirebaseFirestore.getInstance().collection("comments/" + postPushID + "/comments").addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(QuerySnapshot documentSnapshots, FirebaseFirestoreException e) {
                 if (!documentSnapshots.isEmpty()) {
-                    int count = documentSnapshots.size();
-                    String cnt = Integer.toString(count);
+                    long count = documentSnapshots.size();
+                    //long cnt = Integer.toString(count);
 
                     firebaseFirestore.collection("posts").document(postPushID).update("comment_cnt" , count);
                     if (count == 1) {
-                        holder.setPostCommentCount(cnt + " comment");
+                        holder.setPostCommentCount(count);
                     } else {
-                        holder.setPostCommentCount(cnt + " comments");
+                        holder.setPostCommentCount(count);
                     }
                 } else {
-                    holder.setPostCommentCount("0 comment");
+                    holder.setPostCommentCount(0);
                 }
             }
-        });*/
+        });
 
         //setting share count
         /*FirebaseFirestore.getInstance().collection("shares/" + postPushID + "/shares").addSnapshotListener((documentSnapshots, e) -> {
@@ -699,6 +691,7 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
         public ImageButton postCommentButton;
         public ImageButton postShareButton;
         private LinearLayout postCommentLinear;
+        ProgressBar postProgres;
 
         public ViewHolder(View view) {
             super(view);
@@ -716,6 +709,7 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
             postShareButton = view.findViewById(R.id.post_share_button);
             postShareCount = view.findViewById(R.id.post_share_cnt);
             postCommentLinear = view.findViewById(R.id.item_post_comment_linear);
+            postProgres = view.findViewById(R.id.item_post_progress);
         }
 
 
@@ -741,8 +735,6 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
             Log.d(TAG, "addLike:   function calledd !!!!");
             final DocumentReference postRef = FirebaseFirestore.getInstance().collection("posts")
                     .document(mPostID);
-
-
 
             return firebaseFirestore.runTransaction(transaction -> {
                 Posts post = transaction.get(postRef)
@@ -857,7 +849,7 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
             mUserImage = image_url;
             if(image_url!=null){
                 if(image_url.equals("default")){
-                    Log.d(TAG, "setUserImage:    visibility gone but caption is  ");
+                    Log.d(TAG, "setUserImage:    visibility gone but caption is  " + image_url);
                     postImage.setVisibility(View.GONE);
                 }else{
                     ImageLoader imageLoader = ImageLoader.getInstance();

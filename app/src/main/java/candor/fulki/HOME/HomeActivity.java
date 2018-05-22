@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -28,6 +29,7 @@ import android.widget.ImageButton;
 
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.AuthUI.IdpConfig;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -100,12 +102,6 @@ public class HomeActivity extends AppCompatActivity {
     private ImageButton mCreatePostImage;
     private boolean TextPost = false;
 
-
-    //image loader
-    ImageLoader imageLoader;
-    DisplayImageOptions userImageOptions;
-    public ImageLoaderConfiguration config;
-    public DisplayImageOptions postImageOptions;
 
 
 
@@ -185,10 +181,9 @@ public class HomeActivity extends AppCompatActivity {
         mNavigation.setIconSize(25, 25);
         mNavigation.setTextSize(7);
 
-        //setupImageLoader();
 
 
-        getSupportActionBar().setTitle("   Fulki");
+        getSupportActionBar().setTitle("   Jagoron");
         getSupportActionBar().setElevation(1);
         mUserID = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
@@ -204,21 +199,33 @@ public class HomeActivity extends AppCompatActivity {
             firebaseFirestore.collection("device_ids").document(mUserID).set(device_id);
 
 
-            mUserImage = MainActivity.mUserImage;
-            mUserName = MainActivity.mUserName;
-            mUserThumbImage = MainActivity.mUserThumbImage;
+            firebaseFirestore.collection("users").document(mUserID).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                @Override
+                public void onSuccess(DocumentSnapshot documentSnapshot) {
+                    if(documentSnapshot.exists()){
+                        mUserName = documentSnapshot.getString("name");
+                        mUserImage= documentSnapshot.getString("image");
+                        mUserThumbImage =documentSnapshot.getString("thumb_image");
+                    }
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    mUserImage = MainActivity.mUserImage;
+                    mUserName = MainActivity.mUserName;
+                    mUserThumbImage = MainActivity.mUserThumbImage;
+                }
+            });
 
 
-            //setupImageLoader();
-            /*imageLoader.displayImage(mUserThumbImage, imageView, userImageOptions);
-            imageLoader.destroy();*/
 
 
             ImageLoader imageLoader = ImageLoader.getInstance();
             imageLoader.displayImage(mUserThumbImage, imageView);
 
 
-            //setting up the recyclerview
+
+
             posts = new ArrayList<>();
             recyclerView = findViewById(R.id.home_recycler_view);
             mLinearManager = new LinearLayoutManager(HomeActivity.this);
@@ -231,17 +238,14 @@ public class HomeActivity extends AppCompatActivity {
             mCreatePostImage.setOnClickListener(v -> {
                 if(TextPost){
                     uploadTextPost();
-
                 } else{
                     BringImagePicker();
                 }
             });
 
-
             firebaseFirestore = FirebaseFirestore.getInstance();
 
             loadFirstPosts();
-
 
             recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
                 @Override
@@ -253,9 +257,6 @@ public class HomeActivity extends AppCompatActivity {
                     }
                 }
             });
-
-
-
         }
     }
 
@@ -328,7 +329,9 @@ public class HomeActivity extends AppCompatActivity {
                         if(doc.getType() == DocumentChange.Type.ADDED){
                             Posts singlePosts = doc.getDocument().toObject(Posts.class);
                             String uid = singlePosts.getUser_id();
+
                             Log.d(TAG, "onCreate:  found user id   "+ uid);
+                            Log.d(TAG, "loadFirstPosts:  image for this user is  "+singlePosts.getPost_image_url());
                             if(isFirstPageLoad){
                                 posts.add(singlePosts);
                             }else{
@@ -493,25 +496,4 @@ public class HomeActivity extends AppCompatActivity {
                 .start(HomeActivity.this);
     }
 
-    private void setupImageLoader(){
-        //Image loader initialization for offline feature
-        config = new ImageLoaderConfiguration.Builder(HomeActivity.this)
-                .threadPoolSize(5)
-                .threadPriority(Thread.MIN_PRIORITY + 2)
-                .defaultDisplayImageOptions(DisplayImageOptions.createSimple())
-                .build();
-
-
-        postImageOptions = new DisplayImageOptions.Builder()
-                .showImageOnLoading(R.drawable.ic_camera_icon)
-                .showImageForEmptyUri(R.drawable.ic_camera_icon)
-                .showImageOnFail(R.drawable.ic_camera_icon)
-                .cacheInMemory(true)
-                .cacheOnDisk(true)
-                .considerExifParams(true)
-                .build();
-
-        imageLoader = ImageLoader.getInstance();
-        imageLoader.init(config);
-    }
 }

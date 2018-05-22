@@ -18,10 +18,12 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -51,6 +53,11 @@ import static candor.fulki.GENERAL.MainActivity.mUserThumbImage;
 public class CreatePhotoPostActivity extends AppCompatActivity {
 
 
+    FirebaseFirestore firebaseFirestore =FirebaseFirestore.getInstance();
+    String mUserImage;
+    String mUserThumbImage;
+    String mUserName;
+    String mUserID;
     private static final String TAG = "CreatePhotoPostActivity" ;
     //Variables
     Uri imageUri;
@@ -90,6 +97,26 @@ public class CreatePhotoPostActivity extends AppCompatActivity {
         mPhotoPostImage.setImageURI(imageUri);
         thumb_byte = CompressImage(imageUri , this );
 
+
+        mUserID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        firebaseFirestore.collection("users").document(mUserID).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                if(documentSnapshot.exists()){
+                    mUserName = documentSnapshot.getString("name");
+                    mUserImage= documentSnapshot.getString("image");
+                    mUserThumbImage =documentSnapshot.getString("thumb_image");
+                }
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                mUserImage = MainActivity.mUserImage;
+                mUserName = MainActivity.mUserName;
+                mUserThumbImage = MainActivity.mUserThumbImage;
+            }
+        });
 
 
         /*//Toolbar
