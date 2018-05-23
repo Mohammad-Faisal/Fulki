@@ -22,7 +22,6 @@ import java.util.List;
 
 import candor.fulki.CHAT.InboxActivity;
 import candor.fulki.EXPLORE.ExploreActivity;
-import candor.fulki.GENERAL.MainActivity;
 import candor.fulki.GENERAL.SearchActivity;
 import candor.fulki.HOME.HomeActivity;
 import candor.fulki.MapsActivity;
@@ -95,7 +94,7 @@ public class NotificationActivity extends AppCompatActivity {
         mNavigation.setIconSize(25, 25);
         mNavigation.setTextSize(7);
 
-        getSupportActionBar().setTitle("  Notifications");
+        getSupportActionBar().setTitle("  Notification");
 
 
         if(FirebaseAuth.getInstance().getCurrentUser() != null){
@@ -113,7 +112,7 @@ public class NotificationActivity extends AppCompatActivity {
 
             FirebaseFirestore firebaseFirestore;
             firebaseFirestore = FirebaseFirestore.getInstance();
-            Query nextQuery = firebaseFirestore.collection("notifications/"+mUserID+"/notificatinos").orderBy("time_stamp" , Query.Direction.DESCENDING).limit(100);
+            Query nextQuery = firebaseFirestore.collection("notifications/"+mUserID+"/notificatinos").orderBy("time_stamp" , Query.Direction.DESCENDING).limit(200);
             nextQuery.addSnapshotListener((documentSnapshots, e) -> {
                 for(DocumentChange doc: documentSnapshots.getDocumentChanges()){
                     if(doc.getType() == DocumentChange.Type.ADDED){

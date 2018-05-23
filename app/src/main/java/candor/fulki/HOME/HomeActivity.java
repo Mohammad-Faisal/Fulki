@@ -70,8 +70,6 @@ import candor.fulki.PROFILE.ProfileSettingsActivity;
 import candor.fulki.R;
 import de.hdodenhof.circleimageview.CircleImageView;
 
-import static candor.fulki.GENERAL.MainActivity.mUserName;
-import static candor.fulki.GENERAL.MainActivity.mUserThumbImage;
 
 public class HomeActivity extends AppCompatActivity {
 
@@ -107,9 +105,7 @@ public class HomeActivity extends AppCompatActivity {
 
     int scroll_count = 1;
 
-    //----------- FIREBASE -----//
-    private FirebaseAuth mAuth;
-    private FirebaseAuth.AuthStateListener mAuthStateListener;
+    //----------- FIREBASE -----/
 
 
 
@@ -159,9 +155,7 @@ public class HomeActivity extends AppCompatActivity {
         Log.d(TAG, "onCreate:   called !!!!!!!!!!!");
 
 
-        getSupportActionBar().setTitle("  Flare");
-        Toolbar toolbar = findViewById(R.id.toolbar_main);
-        //setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle("  YMoves");
 
 
 
@@ -183,7 +177,7 @@ public class HomeActivity extends AppCompatActivity {
 
 
 
-        getSupportActionBar().setTitle("   Jagoron");
+        getSupportActionBar().setTitle("   YMoves");
         getSupportActionBar().setElevation(1);
         mUserID = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
@@ -206,23 +200,17 @@ public class HomeActivity extends AppCompatActivity {
                         mUserName = documentSnapshot.getString("name");
                         mUserImage= documentSnapshot.getString("image");
                         mUserThumbImage =documentSnapshot.getString("thumb_image");
+                        ImageLoader imageLoader = ImageLoader.getInstance();
+                        imageLoader.displayImage(mUserThumbImage, imageView);
                     }
                 }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    mUserImage = MainActivity.mUserImage;
-                    mUserName = MainActivity.mUserName;
-                    mUserThumbImage = MainActivity.mUserThumbImage;
-                }
+            }).addOnFailureListener(e -> {
+                mUserImage = MainActivity.mUserImage;
+                mUserName = MainActivity.mUserName;
+                mUserThumbImage = MainActivity.mUserThumbImage;
+                ImageLoader imageLoader = ImageLoader.getInstance();
+                imageLoader.displayImage(mUserThumbImage, imageView);
             });
-
-
-
-
-            ImageLoader imageLoader = ImageLoader.getInstance();
-            imageLoader.displayImage(mUserThumbImage, imageView);
-
 
 
 

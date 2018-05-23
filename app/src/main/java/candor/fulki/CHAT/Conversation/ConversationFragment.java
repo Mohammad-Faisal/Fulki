@@ -115,7 +115,7 @@ public class ConversationFragment extends Fragment {
 
 
         //-- ETTING THE DATA WHO ARE ONLINE AMONG THOSE WHOM I FOLLOW -//
-        horizontalList = new ArrayList<>();
+        /*horizontalList = new ArrayList<>();
         mFollowingsDatabase =  FirebaseDatabase.getInstance().getReference().child("followings").child(mUserID);
         mFollowingsDatabase.addChildEventListener(new ChildEventListener() {
             @Override
@@ -124,19 +124,6 @@ public class ConversationFragment extends Fragment {
                     String thumb_image = dataSnapshot.child("thumb_image").getValue().toString();
                     String name = dataSnapshot.child("name").getValue().toString();
                     String id = dataSnapshot.child("id").getValue().toString();
-                    horizontalList.add(new Actives(id , name , thumb_image));
-                    horizontalList.add(new Actives(id , name , thumb_image));
-                    horizontalList.add(new Actives(id , name , thumb_image));
-                    horizontalList.add(new Actives(id , name , thumb_image));
-                    horizontalList.add(new Actives(id , name , thumb_image));
-                    horizontalList.add(new Actives(id , name , thumb_image));
-                    horizontalList.add(new Actives(id , name , thumb_image));
-                    horizontalList.add(new Actives(id , name , thumb_image));
-                    horizontalList.add(new Actives(id , name , thumb_image));
-                    horizontalList.add(new Actives(id , name , thumb_image));
-                    horizontalList.add(new Actives(id , name , thumb_image));
-                    horizontalList.add(new Actives(id , name , thumb_image));
-                    horizontalList.add(new Actives(id , name , thumb_image));
                     horizontalList.add(new Actives(id , name , thumb_image));
                     horizontalAdapter.notifyDataSetChanged();
                 }else{
@@ -156,7 +143,7 @@ public class ConversationFragment extends Fragment {
             public void onCancelled(DatabaseError databaseError) {
 
             }
-        });
+        });*/
         //mUsersDatabase  = FirebaseDatabase.getInstance().getReference().child("users");
 
 

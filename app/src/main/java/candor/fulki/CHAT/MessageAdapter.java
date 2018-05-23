@@ -30,7 +30,6 @@ import java.util.List;
 import candor.fulki.R;
 import de.hdodenhof.circleimageview.CircleImageView;
 
-import static candor.fulki.GENERAL.MainActivity.mUserName;
 
 
 public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageViewHolder>{

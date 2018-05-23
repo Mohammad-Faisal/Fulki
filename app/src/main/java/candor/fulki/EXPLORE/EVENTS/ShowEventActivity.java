@@ -26,7 +26,6 @@ import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.WriteBatch;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.NetworkPolicy;
@@ -65,6 +64,9 @@ public class ShowEventActivity extends AppCompatActivity {
     long peopleCount;
     int joinState = 0;
     String mUserID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+    String mUserName;
+    String mUserImage;
+    String mUserThumbImage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,6 +90,22 @@ public class ShowEventActivity extends AppCompatActivity {
         ownImage = findViewById(R.id.show_event_own_image);
 
 
+        firebaseFirestore.collection("users").document(mUserID).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                if(documentSnapshot.exists()){
+                    mUserName = documentSnapshot.getString("name");
+                    mUserImage= documentSnapshot.getString("image");
+                    mUserThumbImage =documentSnapshot.getString("thumb_image");
+                }
+            }
+        }).addOnFailureListener(e -> {
+            mUserImage = MainActivity.mUserImage;
+            mUserName = MainActivity.mUserName;
+            mUserThumbImage = MainActivity.mUserThumbImage;
+        });
+
+
         LinearLayout mLinear = findViewById(R.id.event_people_list_linear);
         mLinear.setOnClickListener(v -> {
             addRating(mUserID , 1);
@@ -97,7 +115,7 @@ public class ShowEventActivity extends AppCompatActivity {
             startActivity(showPeopleIntent);
         });
 
-        setImage(MainActivity.mUserThumbImage , ownImage);
+        setImage(mUserThumbImage , ownImage);
         setDetails();
         setJoinButtonState();
         loadComments();
@@ -178,7 +196,7 @@ public class ShowEventActivity extends AppCompatActivity {
         String time_stamp = String.valueOf(new Date().getTime());
         DocumentReference ref = FirebaseFirestore.getInstance().collection("notifications/"+moderatorID+"/notificatinos").document();
         String joinNotificatoinPushID = ref.getId();
-        Joins mJoins = new Joins(mUserID , MainActivity.mUserName  , MainActivity.mUserThumbImage , joinNotificatoinPushID ,time_stamp);
+        Joins mJoins = new Joins(mUserID , mUserName  , mUserThumbImage , joinNotificatoinPushID ,time_stamp);
         Notifications pushNoti = new Notifications( "join" ,mUserID ,moderatorID , eventID ,joinNotificatoinPushID , time_stamp,"n"  );
 
         WriteBatch writeBatch  = firebaseFirestore.batch();

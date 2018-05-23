@@ -52,6 +52,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/ic_add_white"
+        app:backgroundTint="@color/colorPrimaryy"
         app:layout_anchor="@id/explore_view_pager"
         app:layout_anchorGravity="bottom|right"
         android:layout_marginBottom="60dp"

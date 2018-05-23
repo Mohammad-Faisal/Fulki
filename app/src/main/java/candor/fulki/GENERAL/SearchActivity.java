@@ -137,13 +137,6 @@ public class SearchActivity extends AppCompatActivity {
         loadAllData();
 
 
-
-
-
-
-
-
-
         mSearchBoxText = findViewById(R.id.search_text_input);
         //mSearchBoxText.addTextChangedListener(filterTextWatcher);
 

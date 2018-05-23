@@ -30,9 +30,7 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.ittianyu.bottomnavigationviewex.BottomNavigationViewEx;
-import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -45,6 +43,7 @@ import java.util.Map;
 import candor.fulki.CHAT.ChatActivity;
 import candor.fulki.CHAT.InboxActivity;
 import candor.fulki.EXPLORE.ExploreActivity;
+import candor.fulki.GENERAL.MainActivity;
 import candor.fulki.GENERAL.SearchActivity;
 import candor.fulki.HOME.HomeActivity;
 import candor.fulki.HOME.HomeAdapter;
@@ -56,8 +55,6 @@ import candor.fulki.NOTIFICATION.Notifications;
 import candor.fulki.R;
 import de.hdodenhof.circleimageview.CircleImageView;
 
-import static candor.fulki.GENERAL.MainActivity.mUserName;
-import static candor.fulki.GENERAL.MainActivity.mUserThumbImage;
 
 public class ProfileActivity extends AppCompatActivity {
 
@@ -65,17 +62,15 @@ public class ProfileActivity extends AppCompatActivity {
     private static final String TAG = "ProfileActivity";
 
     String mUserID = "";
-
-    public ImageLoaderConfiguration config;
-    public DisplayImageOptions postImageOptions;
-    public ImageLoader imageLoader;
-    DisplayImageOptions userImageOptions;
+    String mUserImage;
+    String mUserName;
+    String mUserThumbImage;
 
 
 
 
     private List< Posts> posts;
-    private FirebaseFirestore firebaseFirestore;
+    private FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
     private HomeAdapter mProfilePostAdapter;
     private DocumentSnapshot lastVisible;
     private boolean isFirstPageLoad = true;
@@ -142,7 +137,7 @@ public class ProfileActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
 
-        getSupportActionBar().setTitle("  Flare");
+
 
 
 
@@ -179,8 +174,23 @@ public class ProfileActivity extends AppCompatActivity {
         mProfileBadgesRecycler.setNestedScrollingEnabled(false);
 
 
+        mUserID = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
-        setupImageLoader();
+        firebaseFirestore.collection("users").document(mUserID).get().addOnSuccessListener(documentSnapshot -> {
+            if(documentSnapshot.exists()){
+                mUserName = documentSnapshot.getString("name");
+                mUserImage= documentSnapshot.getString("image");
+                mUserThumbImage =documentSnapshot.getString("thumb_image");
+                getSupportActionBar().setTitle("  "+mUserName);
+            }
+        }).addOnFailureListener(e -> {
+            mUserImage = MainActivity.mUserImage;
+            mUserName = MainActivity.mUserName;
+            mUserThumbImage = MainActivity.mUserThumbImage;
+            getSupportActionBar().setTitle("  "+mUserName);
+        });
+
+
 
         //setting up recycler view
         posts = new ArrayList<>();
@@ -240,7 +250,8 @@ public class ProfileActivity extends AppCompatActivity {
                             mProfileBio.setText(mUserBio);
                         }
                         mProfileName.setText(mCurUserName);
-                        imageLoader.displayImage(mCurUserImage, mProfileImageView, postImageOptions);
+                        ImageLoader imageLoader = ImageLoader.getInstance();
+                        imageLoader.displayImage(mCurUserImage, mProfileImageView);
                     }
                 } else {
                 }
@@ -451,29 +462,6 @@ public class ProfileActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-    }
-
-
-    private void setupImageLoader(){
-        //Image loader initialization for offline feature
-        config = new ImageLoaderConfiguration.Builder(ProfileActivity.this)
-                .threadPoolSize(5)
-                .threadPriority(Thread.MIN_PRIORITY + 2)
-                .defaultDisplayImageOptions(DisplayImageOptions.createSimple())
-                .build();
-
-
-        postImageOptions = new DisplayImageOptions.Builder()
-                .showImageOnLoading(R.drawable.ic_camera_icon)
-                .showImageForEmptyUri(R.drawable.ic_camera_icon)
-                .showImageOnFail(R.drawable.ic_camera_icon)
-                .cacheInMemory(true)
-                .cacheOnDisk(true)
-                .considerExifParams(true)
-                .build();
-
-        imageLoader = ImageLoader.getInstance();
-        imageLoader.init(config);
     }
 
 

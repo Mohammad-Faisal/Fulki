@@ -99,23 +99,16 @@ public class CreatePhotoPostActivity extends AppCompatActivity {
 
 
         mUserID = FirebaseAuth.getInstance().getCurrentUser().getUid();
-
-        firebaseFirestore.collection("users").document(mUserID).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-            @Override
-            public void onSuccess(DocumentSnapshot documentSnapshot) {
-                if(documentSnapshot.exists()){
-                    mUserName = documentSnapshot.getString("name");
-                    mUserImage= documentSnapshot.getString("image");
-                    mUserThumbImage =documentSnapshot.getString("thumb_image");
-                }
+        firebaseFirestore.collection("users").document(mUserID).get().addOnSuccessListener(documentSnapshot -> {
+            if(documentSnapshot.exists()){
+                mUserName = documentSnapshot.getString("name");
+                mUserImage= documentSnapshot.getString("image");
+                mUserThumbImage =documentSnapshot.getString("thumb_image");
             }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                mUserImage = MainActivity.mUserImage;
-                mUserName = MainActivity.mUserName;
-                mUserThumbImage = MainActivity.mUserThumbImage;
-            }
+        }).addOnFailureListener(e -> {
+            mUserImage = MainActivity.mUserImage;
+            mUserName = MainActivity.mUserName;
+            mUserThumbImage = MainActivity.mUserThumbImage;
         });
 
 

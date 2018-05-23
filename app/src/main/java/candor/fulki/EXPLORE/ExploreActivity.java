@@ -18,7 +18,6 @@ import com.ittianyu.bottomnavigationviewex.BottomNavigationViewEx;
 
 import candor.fulki.CHAT.InboxActivity;
 import candor.fulki.EXPLORE.EVENTS.CreateEventActivity;
-import candor.fulki.GENERAL.MainActivity;
 import candor.fulki.GENERAL.SearchActivity;
 import candor.fulki.HOME.HomeActivity;
 import candor.fulki.MapsActivity;
@@ -78,7 +77,7 @@ public class ExploreActivity extends AppCompatActivity {
         setContentView(R.layout.activity_explore);
 
 
-        getSupportActionBar().setTitle("   Flare");
+        if(getSupportActionBar()!=null)getSupportActionBar().setTitle("   Explore");
 
 
         //------------- BOTTOM NAVIGATION HANDLING ------//
@@ -91,15 +90,13 @@ public class ExploreActivity extends AppCompatActivity {
         mNavigation.setTextSize(7);
 
 
-        Toolbar toolbar = findViewById(R.id.toolbar_main);
-        //setSupportActionBar(toolbar);
-
 
         FloatingActionButton exploreFloat = findViewById(R.id.explore_floating);
         exploreFloat.setOnClickListener(v -> {
             Intent createEventIntent  = new Intent( ExploreActivity.this , CreateEventActivity.class);
             startActivity(createEventIntent);
         });
+
 
 
 

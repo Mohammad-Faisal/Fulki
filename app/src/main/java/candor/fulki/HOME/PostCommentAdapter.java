@@ -56,10 +56,7 @@ public class PostCommentAdapter extends RecyclerView.Adapter<PostCommentAdapter.
     Activity activity;
     boolean isLiked = false;
 
-    //Image Loading
-    public ImageLoader imageLoader;
-    public DisplayImageOptions postImageOptions;
-    public DisplayImageOptions userImageOptions;
+
 
     FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
 
@@ -69,24 +66,6 @@ public class PostCommentAdapter extends RecyclerView.Adapter<PostCommentAdapter.
         this.context = context;
         this.activity = activity;
 
-        //image loader initialization
-        //Image loader initialization for offline feature
-        ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(context)
-                .threadPoolSize(5)
-                .threadPriority(Thread.MIN_PRIORITY + 2)
-                .defaultDisplayImageOptions(DisplayImageOptions.createSimple())
-                .build();
-
-        userImageOptions = new DisplayImageOptions.Builder()
-                .showImageOnLoading(R.drawable.ic_blank_profile)
-                .showImageForEmptyUri(R.drawable.ic_blank_profile)
-                .showImageOnFail(R.drawable.ic_blank_profile)
-                .cacheInMemory(true)
-                .cacheOnDisk(true)
-                .considerExifParams(true)
-                .build();
-        imageLoader = ImageLoader.getInstance();
-        imageLoader.init(config);
 
 
     }
@@ -287,7 +266,8 @@ public class PostCommentAdapter extends RecyclerView.Adapter<PostCommentAdapter.
             commentTimeAgo = itemView.findViewById(R.id.comment_item_time_ago);
         }
         public void setUserImage(String image_url) {
-            imageLoader.displayImage(image_url, commentImage, userImageOptions);
+            ImageLoader imageLoader = ImageLoader.getInstance();
+            imageLoader.displayImage(image_url, commentImage);
         }
         public void setPostUserName(String userName) {
             commentName.setText(userName);
@@ -343,12 +323,7 @@ public class PostCommentAdapter extends RecyclerView.Adapter<PostCommentAdapter.
                 updateMap.put("like_cnt" , nextLike);
                 transaction.update(postRef , updateMap);
                 return nextLike;
-            }).addOnSuccessListener(new OnSuccessListener<Long>() {
-                @Override
-                public void onSuccess(Long aLong) {
-                    setLikeCount(aLong);
-                }
-            });
+            }).addOnSuccessListener(aLong -> setLikeCount(aLong));
         }
 
     }

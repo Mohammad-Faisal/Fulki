@@ -55,6 +55,7 @@ public class ShowPostActivity extends AppCompatActivity {
 
     private static final String TAG = "ShowPostActivity";
     private String mPostID , mUserID , mPostOwnerId;
+    private String mUserName , mUserThumbImage , mUserImage;
     /*CollapsingToolbarLayout collapsingToolbarLayout;*/
     public DisplayImageOptions postImageOptions;
     FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
@@ -71,12 +72,9 @@ public class ShowPostActivity extends AppCompatActivity {
 
     public CircleImageView postUserImage , mShowPostOwnImage;
     public LikeButton postLikeButton;
-    public ImageButton postCommentButton;
-    public ImageButton postShareButton;
+
 
     public String mPostOwnerID;
-    String mAnimation;
-
 
 
 
@@ -84,39 +82,6 @@ public class ShowPostActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_post);
-
-        //collapsing toolbar setting
-
-        /*Toolbar toolbar = findViewById(R.id.show_post_collapsing_toolbar);
-        setSupportActionBar(toolbar);
-        ActionBar actionBar= getSupportActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        collapsingToolbarLayout = findViewById(R.id.show_post_collapsing_toolbar_layout);
-        dynamicToolbarColor();
-        toolbarTextAppernce();*/
-
-
-
-        //Image loader initialization for offline feature
-        ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(ShowPostActivity.this)
-                .threadPoolSize(5)
-                .threadPriority(Thread.MIN_PRIORITY + 2)
-                .defaultDisplayImageOptions(DisplayImageOptions.createSimple())
-                .build();
-
-
-        postImageOptions = new DisplayImageOptions.Builder()
-                .showImageOnLoading(R.drawable.ic_camera_icon)
-                .showImageForEmptyUri(R.drawable.ic_camera_icon)
-                .showImageOnFail(R.drawable.ic_camera_icon)
-                .cacheInMemory(true)
-                .cacheOnDisk(true)
-                .considerExifParams(true)
-                .build();
-
-        final ImageLoader imageLoader = ImageLoader.getInstance();
-        imageLoader.init(config);
-        //image loader end
 
 
         postUserName =findViewById(R.id.post_user_name);
@@ -127,10 +92,35 @@ public class ShowPostActivity extends AppCompatActivity {
         postLikeButton = findViewById(R.id.post_like_button);
         postLikeCount = findViewById(R.id.post_like_number);
         postCommentCount = findViewById(R.id.show_post_comment_count);
-
         mShowPostOwnImage = findViewById(R.id.show_post_own_image);
-        imageLoader.displayImage(MainActivity.mUserImage, mShowPostOwnImage, postImageOptions);
+        final ImageView postImageView = findViewById(R.id.show_post_collapsing_image);
 
+
+        mPostID = getIntent().getStringExtra("postID");
+        mUserID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+
+        mUserID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        if(mUserID!=null){
+            firebaseFirestore.collection("users").document(mUserID).get().addOnSuccessListener(documentSnapshot -> {
+                if(documentSnapshot.exists()){
+                    mUserName = documentSnapshot.getString("name");
+                    mUserImage= documentSnapshot.getString("image");
+                    mUserThumbImage =documentSnapshot.getString("thumb_image");
+
+                    ImageLoader imageLoader = ImageLoader.getInstance();
+                    imageLoader.displayImage(mUserThumbImage, mShowPostOwnImage);
+
+                }
+            }).addOnFailureListener(e -> {
+                mUserImage = MainActivity.mUserImage;
+                mUserName = MainActivity.mUserName;
+                mUserThumbImage = MainActivity.mUserThumbImage;
+
+                ImageLoader imageLoader = ImageLoader.getInstance();
+                imageLoader.displayImage(mUserThumbImage, mShowPostOwnImage);
+            });
+        }
 
 
         postLikeCount.setOnClickListener(v -> {
@@ -140,10 +130,9 @@ public class ShowPostActivity extends AppCompatActivity {
             showPeopleIntent.putExtra("user_id" ,mPostID );
             startActivity(showPeopleIntent);
         });
-        mPostID = getIntent().getStringExtra("postID");
-        mUserID = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
-        final ImageView postImageView = findViewById(R.id.show_post_collapsing_image);
+
+
         firebaseFirestore.collection("posts").document(mPostID).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             public static final String TAG = "SHow Post";
 
@@ -166,17 +155,15 @@ public class ShowPostActivity extends AppCompatActivity {
 
                         if(postImage.equals("default")){
                             postImageView.setVisibility(View.GONE);
-                            //toolbar.setVisibility(View.GONE);
-                            //collapsingToolbarLayout.setVisibility(View.GONE);
                         }
 
                         setLikeCount(likeCount);
                         setCommentCount(commentCount);
 
-                        //collapsingToolbarLayout.setTitle(postOwnerName);
                         postUserName.setText(postOwnerName);
-                        imageLoader.displayImage(postOwnerThumbImage, postUserImage, postImageOptions);
-                        imageLoader.displayImage(postImage, postImageView, postImageOptions);
+                        ImageLoader imageLoader = ImageLoader.getInstance();
+                        imageLoader.displayImage(postOwnerThumbImage, postUserImage);
+                        imageLoader.displayImage(postImage, postImageView);
 
 
                         mPostOwnerID = postOwnerID;
@@ -196,24 +183,6 @@ public class ShowPostActivity extends AppCompatActivity {
             }
         });
 
-
-
-        //setting like count
-        FirebaseFirestore.getInstance().collection("likes/" + mPostID + "/likes").addSnapshotListener((documentSnapshots, e) -> {
-            if (!documentSnapshots.isEmpty()) {
-                int count = documentSnapshots.size();
-                String cnt = Integer.toString(count);
-                firebaseFirestore.collection("posts").document(mPostID).update("like_cnt" , count);
-                if (count == 1) {
-                    postLikeCount.setText(cnt);
-                } else {
-                    postLikeCount.setText(cnt);
-                }
-
-            } else {
-                postLikeCount.setText("0");
-            }
-        });
 
         //setting the current state of like button
         FirebaseFirestore.getInstance().collection("likes/" + mPostID + "/likes").document(mUserID).get().addOnCompleteListener(task -> {
@@ -244,7 +213,7 @@ public class ShowPostActivity extends AppCompatActivity {
                 DocumentReference ref = FirebaseFirestore.getInstance().collection("notifications/"+mPostOwnerID+"/notificatinos").document();
                 String likeNotificatoinPushID = ref.getId();
 
-                Likes mLikes = new Likes(mUserID , MainActivity.mUserName , MainActivity.mUserThumbImage ,likeNotificatoinPushID , time_stamp);
+                Likes mLikes = new Likes(mUserID , mUserName , mUserThumbImage ,likeNotificatoinPushID , time_stamp);
                 Notifications pushNoti = new Notifications( "like" ,mUserID ,mPostOwnerID , mPostID ,likeNotificatoinPushID , time_stamp,"n"  );
 
 
@@ -268,11 +237,6 @@ public class ShowPostActivity extends AppCompatActivity {
                 }).addOnFailureListener(e -> {
                     Log.d(TAG, "liked:   like is not succesful");
                 });
-
-              /*  firebaseFirestore.collection("notifications/"+mPostOwnerID+"/notificatinos").document(likeNotificatoinPushID).set(pushNoti);
-                firebaseFirestore.collection("posts/"+mPostID+"/notifications").document(likeNotificatoinPushID).set(pushNoti);
-                firebaseFirestore.collection("likes/" + mPostID + "/likes").document(mUserID).set(mLikes);*/
-
             }
             @Override
             public void unLiked(LikeButton likeButton) {
@@ -322,15 +286,12 @@ public class ShowPostActivity extends AppCompatActivity {
         //-------------LOADING COMMENTS------------//
         firebaseFirestore = FirebaseFirestore.getInstance();
         Query nextQuery = firebaseFirestore.collection("comments/"+mPostID+"/comments").orderBy("time_stamp" , Query.Direction.DESCENDING);
-        nextQuery.addSnapshotListener(new EventListener<QuerySnapshot>() {
-            @Override
-            public void onEvent(QuerySnapshot documentSnapshots, FirebaseFirestoreException e) {
-                for(DocumentChange doc: documentSnapshots.getDocumentChanges()){
-                    if(doc.getType() == DocumentChange.Type.ADDED){
-                        Comments singleComment = doc.getDocument().toObject(Comments.class);
-                        commentList.add(singleComment);
-                        mPostCommentAdapter.notifyDataSetChanged();
-                    }
+        nextQuery.addSnapshotListener((documentSnapshots, e) -> {
+            for(DocumentChange doc: documentSnapshots.getDocumentChanges()){
+                if(doc.getType() == DocumentChange.Type.ADDED){
+                    Comments singleComment = doc.getDocument().toObject(Comments.class);
+                    commentList.add(singleComment);
+                    mPostCommentAdapter.notifyDataSetChanged();
                 }
             }
         });
@@ -380,25 +341,6 @@ public class ShowPostActivity extends AppCompatActivity {
 
     }
 
-
-
-    private void dynamicToolbarColor() {
-
-        Bitmap bitmap = BitmapFactory.decodeResource(getResources(),
-                R.drawable.ic_person_icon);
-        Palette.from(bitmap).generate(palette -> {
-            //collapsingToolbarLayout.setContentScrimColor(palette.getMutedColor(R.attr.colorPrimary));
-            //collapsingToolbarLayout.setStatusBarScrimColor(palette.getMutedColor(R.attr.colorPrimaryDark));
-        });
-    }
-
-
-    private void toolbarTextAppernce() {
-        //collapsingToolbarLayout.setCollapsedTitleTextAppearance(R.style.collapsedappbar);
-        //collapsingToolbarLayout.setExpandedTitleTextAppearance(R.style.expandedappbar);
-    }
-
-
     private Task<Void> addRating(String mUserID  , int factor) {
 
         FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
@@ -417,7 +359,6 @@ public class ShowPostActivity extends AppCompatActivity {
             return null;
         });
     }
-
 
     private void setLikeCount(long likeCnt){
         if(likeCnt>1){
@@ -459,20 +400,6 @@ public class ShowPostActivity extends AppCompatActivity {
         });
     }
 
-
-
-
-   /* @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_show_post, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        return super.onOptionsItemSelected(item);
-    }*/
 }
 
 

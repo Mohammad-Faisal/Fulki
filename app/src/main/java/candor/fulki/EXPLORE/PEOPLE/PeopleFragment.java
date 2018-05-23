@@ -19,10 +19,8 @@ import com.google.firebase.firestore.Query;
 import java.util.ArrayList;
 import java.util.List;
 
-import candor.fulki.HOME.HomeActivity;
-import candor.fulki.HOME.Posts;
+
 import candor.fulki.PROFILE.ListPeopleAdapter;
-import candor.fulki.PROFILE.ShowPleopleListActivity;
 import candor.fulki.PROFILE.UserBasic;
 import candor.fulki.R;
 

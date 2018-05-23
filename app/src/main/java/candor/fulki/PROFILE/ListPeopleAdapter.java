@@ -36,12 +36,11 @@ import java.util.Map;
 
 import candor.fulki.CHAT.ChatActivity;
 import candor.fulki.EXPLORE.PEOPLE.Ratings;
+import candor.fulki.GENERAL.MainActivity;
 import candor.fulki.NOTIFICATION.Notifications;
 import candor.fulki.R;
 import de.hdodenhof.circleimageview.CircleImageView;
 
-import static candor.fulki.GENERAL.MainActivity.mUserName;
-import static candor.fulki.GENERAL.MainActivity.mUserThumbImage;
 
 public class ListPeopleAdapter extends RecyclerView.Adapter<ListPeopleAdapter.ListPeopleVIewHolder> {
 
@@ -50,16 +49,31 @@ public class ListPeopleAdapter extends RecyclerView.Adapter<ListPeopleAdapter.Li
     private FirebaseAuth mAuth;
     Context context;
     Activity activity;
-    String mUserID = FirebaseAuth.getInstance().getCurrentUser().getUid();
     boolean followState = false;
     boolean ownProfile = false;
     private FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
+    String mUserName , mUserImage, mUserThumbImage;
+    String mUserID;
 
 
     public ListPeopleAdapter(List<UserBasic> mUserList , Context context , Activity activity){
         this.mUserList = mUserList;
         this.context  = context;
         this.activity = activity;
+
+        mUserID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        firebaseFirestore.collection("users").document(mUserID).get().addOnSuccessListener(documentSnapshot -> {
+            if(documentSnapshot.exists()){
+                mUserName = documentSnapshot.getString("name");
+                mUserImage= documentSnapshot.getString("image");
+                mUserThumbImage =documentSnapshot.getString("thumb_image");
+            }
+        }).addOnFailureListener(e -> {
+            mUserImage = MainActivity.mUserImage;
+            mUserName = MainActivity.mUserName;
+            mUserThumbImage = MainActivity.mUserThumbImage;
+        });
+
     }
 
     @Override

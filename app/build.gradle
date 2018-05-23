@@ -15,7 +15,6 @@ android {
         release {
             minifyEnabled false
         }
-
     }
     packagingOptions { // kiser jani error khaitesilam pore eita add korsi
         exclude 'META-INF/LICENSE'
