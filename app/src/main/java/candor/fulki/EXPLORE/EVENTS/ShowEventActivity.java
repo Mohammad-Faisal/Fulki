@@ -97,12 +97,14 @@ public class ShowEventActivity extends AppCompatActivity {
                     mUserName = documentSnapshot.getString("name");
                     mUserImage= documentSnapshot.getString("image");
                     mUserThumbImage =documentSnapshot.getString("thumb_image");
+                    setImage(mUserThumbImage , ownImage);
                 }
             }
         }).addOnFailureListener(e -> {
             mUserImage = MainActivity.mUserImage;
             mUserName = MainActivity.mUserName;
             mUserThumbImage = MainActivity.mUserThumbImage;
+            setImage(mUserThumbImage , ownImage);
         });
 
 

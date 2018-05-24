@@ -151,11 +151,17 @@ public class HomeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
+        /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ){
+            checkPermission();
+        }*/
+
 
         Log.d(TAG, "onCreate:   called !!!!!!!!!!!");
 
 
-        getSupportActionBar().setTitle("  YMoves");
+        if(getSupportActionBar()!=null){
+            getSupportActionBar().setTitle("  YMoves");
+        }
 
 
 
@@ -482,6 +488,18 @@ public class HomeActivity extends AppCompatActivity {
                 .setAspectRatio(10, 8)
                 .setMinCropResultSize(512 , 512)
                 .start(HomeActivity.this);
+    }
+
+    public void checkPermission(){
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                ){//Can add more as per requirement
+
+            ActivityCompat.requestPermissions(this,
+                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
+                    RC_CHECK_PERMISSION_LOCATION);
+
+        }
     }
 
 }

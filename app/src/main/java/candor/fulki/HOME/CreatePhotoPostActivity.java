@@ -89,6 +89,8 @@ public class CreatePhotoPostActivity extends AppCompatActivity {
         mPhotoUpload = findViewById(R.id.photo_post_upload);
 
 
+        if(getSupportActionBar()!=null)getSupportActionBar().setTitle("  Create Post");
+
 
         //getting the image uri
         Intent intent = getIntent();

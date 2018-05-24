@@ -10,7 +10,9 @@
         <item name="actionMenuTextColor">@color/Black</item>
         <item name="titleTextColor">@color/Black</item>
         <item name="actionBarDivider">@color/colorPrimaryDark</item>
+
         <item name="android:fontFamily">@font/nunito</item>
+        
         <item name="android:textSize">15sp</item>
         <item name="android:popupTheme"> @style/Base.Widget.AppCompat.PopupWindow</item>
         <!--

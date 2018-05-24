@@ -406,9 +406,10 @@ public class ProfileSettingsActivity extends AppCompatActivity implements Adapte
         for(int i=0;i<myBloodArray.length;i++){
             String blood = myBloodArray[i];
             if(blood.equals(bloodString)){
+                Log.d(TAG, "upload:   should be setting my blood in database "+bloodString);
                 firebaseFirestore.collection(bloodString).document(mUserID).set(categoryMap);
             }else{
-                firebaseFirestore.collection(bloodString).document(mUserID).delete();
+                firebaseFirestore.collection(myBloodArray[i]).document(mUserID).delete();
             }
         }
 

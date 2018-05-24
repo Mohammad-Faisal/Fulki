@@ -11,7 +11,9 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -19,6 +21,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.Toast;
@@ -138,75 +141,78 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Log.d(TAG, "onCreate: suru");
-
-        if (savedInstanceState != null) {
-            mLastKnownLocation = savedInstanceState.getParcelable(KEY_LOCATION);
-            mCameraPosition = savedInstanceState.getParcelable(KEY_CAMERA_POSITION);
-        }
-        setContentView(R.layout.activity_maps);
-        setvalue= findViewById(R.id.setvalue);
 
 
-        if(!isDataAvailable()){
-            Toast.makeText(this, "Please turn on data", Toast.LENGTH_SHORT).show();
-            finish();
-        }
-        googleApiClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(LocationServices.API)
-                .build();
+            Log.d(TAG, "onCreate: suru");
 
-        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+            if (savedInstanceState != null) {
+                mLastKnownLocation = savedInstanceState.getParcelable(KEY_LOCATION);
+                mCameraPosition = savedInstanceState.getParcelable(KEY_CAMERA_POSITION);
+            }
+            setContentView(R.layout.activity_maps);
+            setvalue= findViewById(R.id.setvalue);
 
 
-        subList1.add("child marriage");
-        subList1.add("violence");
-        subList1.add("environment");
-        subList1.add("women empowerment");
-        subList1.add("education");
-        subList1.add("A+ blood");
-        subList1.add("A- blood");
-        subList1.add("B+ blood");
-        subList1.add("B- blood");
-        subList1.add("AB+ blood");
-        subList1.add("AB- blood");
-        subList1.add("O+ blood");
-        subList1.add("O- blood");
+            if(!isDataAvailable()){
+                Toast.makeText(this, "Please turn on data", Toast.LENGTH_SHORT).show();
+                finish();
+            }
+            googleApiClient = new GoogleApiClient.Builder(this)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .addApi(LocationServices.API)
+                    .build();
+
+            mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
 
-        category_key.put("child marriage" , "child_marrige");
-        category_key.put("violence" , "violence");
-        category_key.put("environment" , "environment");
-        category_key.put("education" , "education");
-        category_key.put("women empowerment" , "women_empowerment");
-
-        category_key.put("A+ blood" , "A+");
-        category_key.put("A- blood" , "A-");
-        category_key.put("B+ blood" , "B+");
-        category_key.put("B- blood" , "B-");
-        category_key.put("AB+ blood" , "AB+");
-        category_key.put("AB- blood" , "AB-");
-        category_key.put("O+ blood" , "O+");
-        category_key.put("O- blood" ,"O-");
-
+            subList1.add("child marriage");
+            subList1.add("violence");
+            subList1.add("environment");
+            subList1.add("women empowerment");
+            subList1.add("education");
+            subList1.add("A+ blood");
+            subList1.add("A- blood");
+            subList1.add("B+ blood");
+            subList1.add("B- blood");
+            subList1.add("AB+ blood");
+            subList1.add("AB- blood");
+            subList1.add("O+ blood");
+            subList1.add("O- blood");
 
 
+            category_key.put("child marriage" , "child_marrige");
+            category_key.put("violence" , "violence");
+            category_key.put("environment" , "environment");
+            category_key.put("education" , "education");
+            category_key.put("women empowerment" , "women_empowerment");
+
+            category_key.put("A+ blood" , "A+");
+            category_key.put("A- blood" , "A-");
+            category_key.put("B+ blood" , "B+");
+            category_key.put("B- blood" , "B-");
+            category_key.put("AB+ blood" , "AB+");
+            category_key.put("AB- blood" , "AB-");
+            category_key.put("O+ blood" , "O+");
+            category_key.put("O- blood" ,"O-");
 
 
 
-        RecyclerView mRecyclerView = findViewById(R.id.topiclistmap);
-        mRecyclerView.setHasFixedSize(true);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-        layoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
-        mRecyclerView.setLayoutManager(layoutManager);
-        HorizontalRecyclerAdapterfortopic adapter = new HorizontalRecyclerAdapterfortopic(subList1,this);
-        mRecyclerView.setAdapter(adapter);
 
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
+
+
+            RecyclerView mRecyclerView = findViewById(R.id.topiclistmap);
+            mRecyclerView.setHasFixedSize(true);
+            LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+            layoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
+            mRecyclerView.setLayoutManager(layoutManager);
+            HorizontalRecyclerAdapterfortopic adapter = new HorizontalRecyclerAdapterfortopic(subList1,this);
+            mRecyclerView.setAdapter(adapter);
+
+            SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                    .findFragmentById(R.id.map);
+            mapFragment.getMapAsync(this);
+
 
     }
 
@@ -452,7 +458,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     protected void onStart() {
-        googleApiClient.connect();
+            googleApiClient.connect();
+
+
         super.onStart();
         Log.d(TAG, "onStart: suru");
 
@@ -532,6 +540,31 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             transaction.set(ratingRef, ratings);
             return null;
         });
+    }
+
+
+
+    public static boolean isLocationEnabled(Context context) {
+        int locationMode = 0;
+        String locationProviders;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
+            try {
+                locationMode = Settings.Secure.getInt(context.getContentResolver(), Settings.Secure.LOCATION_MODE);
+
+            } catch (Settings.SettingNotFoundException e) {
+                e.printStackTrace();
+                return false;
+            }
+
+            return locationMode != Settings.Secure.LOCATION_MODE_OFF;
+
+        }else{
+            locationProviders = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
+            return !TextUtils.isEmpty(locationProviders);
+        }
+
+
     }
 
 
