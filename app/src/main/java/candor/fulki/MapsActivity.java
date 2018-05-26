@@ -80,13 +80,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onButtonClick(int position) {
-
-
         final FirebaseFirestore firebaseFirestore  = FirebaseFirestore.getInstance();
-
         mMap.clear();
         markerMap.clear();
         int len=arrayList.size();
+
 
         String topic = subList1.get(position);
         Log.d(TAG, "onButtonClick:   on button click  "+topic );
@@ -282,8 +280,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
     }
-
-
 
 
 

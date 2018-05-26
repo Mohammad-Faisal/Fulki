@@ -181,13 +181,12 @@ public class ProfileActivity extends AppCompatActivity {
                 mUserName = documentSnapshot.getString("name");
                 mUserImage= documentSnapshot.getString("image");
                 mUserThumbImage =documentSnapshot.getString("thumb_image");
-                getSupportActionBar().setTitle("  "+mUserName);
+
             }
         }).addOnFailureListener(e -> {
             mUserImage = MainActivity.mUserImage;
             mUserName = MainActivity.mUserName;
             mUserThumbImage = MainActivity.mUserThumbImage;
-            getSupportActionBar().setTitle("  "+mUserName);
         });
 
 
@@ -252,6 +251,7 @@ public class ProfileActivity extends AppCompatActivity {
                         mProfileName.setText(mCurUserName);
                         ImageLoader imageLoader = ImageLoader.getInstance();
                         imageLoader.displayImage(mCurUserImage, mProfileImageView);
+                        getSupportActionBar().setTitle("  "+mCurUserName);
                     }
                 } else {
                 }
@@ -384,7 +384,7 @@ public class ProfileActivity extends AppCompatActivity {
                 });
 
             firebaseFirestore = FirebaseFirestore.getInstance();
-            Query nextQuery = firebaseFirestore.collection("posts").orderBy("timestamp" , Query.Direction.DESCENDING).limit(3).whereEqualTo("user_id", mCurProfileId);
+            Query nextQuery = firebaseFirestore.collection("posts").orderBy("timestamp" , Query.Direction.DESCENDING).limit(30).whereEqualTo("user_id", mCurProfileId);
             nextQuery.addSnapshotListener(ProfileActivity.this , (documentSnapshots, e) -> {
                 if(documentSnapshots!=null){
                     if(!documentSnapshots.isEmpty()){
@@ -454,7 +454,6 @@ public class ProfileActivity extends AppCompatActivity {
         super.onResume();
     }
 
-
     @Override
     protected void onStart() {
         super.onStart();
@@ -477,6 +476,8 @@ public class ProfileActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.action_log_out:
                 FirebaseAuth.getInstance().signOut();
+                Intent mainIntent = new Intent(ProfileActivity.this, candor.fulki.GENERAL.MainActivity.class);
+                startActivity(mainIntent);
                 finish();
                 return true;
             case R.id.action_edit_profile:

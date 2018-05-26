@@ -26,6 +26,7 @@ import android.view.MenuItem;
 import android.view.Window;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.Toast;
 
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.AuthUI.IdpConfig;
@@ -81,7 +82,7 @@ public class HomeActivity extends AppCompatActivity {
     private static final String SAVED_LAYOUT_MANAGER = "home recycler";
 
 
-    public  String mUserID = "";
+    public  String mUserID = null;
     public  String mUserName = "";
     public  String mUserThumbImage = "";
     public  String mUserImage = "";
@@ -151,9 +152,9 @@ public class HomeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ){
             checkPermission();
-        }*/
+        }
 
 
         Log.d(TAG, "onCreate:   called !!!!!!!!!!!");
@@ -185,7 +186,11 @@ public class HomeActivity extends AppCompatActivity {
 
         getSupportActionBar().setTitle("   YMoves");
         getSupportActionBar().setElevation(1);
-        mUserID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        if(FirebaseAuth.getInstance().getCurrentUser()!=null){
+            mUserID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        }
+
 
         if (mUserID != null) {
 
@@ -231,7 +236,11 @@ public class HomeActivity extends AppCompatActivity {
 
             mCreatePostImage.setOnClickListener(v -> {
                 if(TextPost){
-                    uploadTextPost();
+                    if(isDataAvailable()){
+                        uploadTextPost();
+                    }else{
+                        Toast.makeText(this, "Please enable your data to upload your post", Toast.LENGTH_SHORT).show();
+                    }
                 } else{
                     BringImagePicker();
                 }
@@ -448,6 +457,8 @@ public class HomeActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.action_log_out:
                 FirebaseAuth.getInstance().signOut();
+                Intent mainIntent = new Intent(HomeActivity.this, candor.fulki.GENERAL.MainActivity.class);
+                startActivity(mainIntent);
                 finish();
                 return true;
             case R.id.action_edit_profile:
@@ -467,7 +478,6 @@ public class HomeActivity extends AppCompatActivity {
                 return super.onOptionsItemSelected(item);
         }
     }
-
 
     @Override
     protected void onResume() {
@@ -500,6 +510,12 @@ public class HomeActivity extends AppCompatActivity {
                     RC_CHECK_PERMISSION_LOCATION);
 
         }
+    }
+
+    private boolean isDataAvailable() {
+        android.net.ConnectivityManager connectivityManager = (android.net.ConnectivityManager) getSystemService(android.content.Context.CONNECTIVITY_SERVICE);
+        android.net.NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+        return networkInfo != null && networkInfo.isConnected();
     }
 
 }

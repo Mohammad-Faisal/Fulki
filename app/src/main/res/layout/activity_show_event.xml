@@ -21,7 +21,7 @@
 
 
             <ImageView
-
+                android:maxHeight="300dp"
                 android:scaleType="fitXY"
                 android:src="@drawable/ic_person_icon"
                 android:id="@+id/show_event_image"
@@ -182,7 +182,8 @@
                 android:layout_width="match_parent"
                 android:minHeight="50dp"
                 android:layout_height="0dp"
-                android:layout_weight="1"></android.support.v7.widget.RecyclerView>
+                android:layout_weight="1"/>
+
             <View
                 android:background="@color/Grey"
                 android:layout_marginTop="2dp"

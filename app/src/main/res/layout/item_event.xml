@@ -21,6 +21,7 @@
             android:orientation="vertical">
 
             <ImageView
+                android:minHeight="300dp"
                 android:id="@+id/item_event_image"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -130,7 +131,7 @@
                         android:layout_gravity="center_horizontal"
                         android:layout_marginLeft="4dp"
                         android:id="@+id/item_event_comment_cnt"
-                        android:text="100 comment"
+                        android:text="0 comment"
                         android:textSize="10sp"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"/>

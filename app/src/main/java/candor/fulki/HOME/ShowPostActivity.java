@@ -333,10 +333,6 @@ public class ShowPostActivity extends AppCompatActivity {
             });
 
 
-/*
-            firebaseFirestore.collection("notifications/"+mPostOwnerID+"/notificatinos").document(commentNotificatoinPushID).set(pushNoti);
-            firebaseFirestore.collection("comments/"+mPostID+"/comments").add(comment);
-            firebaseFirestore.collection("posts/"+mPostID+"/notifications").document(commentNotificatoinPushID).set(pushNoti);*/
         });
 
     }

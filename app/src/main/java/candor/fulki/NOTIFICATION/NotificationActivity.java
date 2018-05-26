@@ -140,6 +140,8 @@ public class NotificationActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.action_log_out:
                 FirebaseAuth.getInstance().signOut();
+                Intent mainIntent = new Intent(NotificationActivity.this, candor.fulki.GENERAL.MainActivity.class);
+                startActivity(mainIntent);
                 finish();
                 return true;
             case R.id.action_edit_profile:

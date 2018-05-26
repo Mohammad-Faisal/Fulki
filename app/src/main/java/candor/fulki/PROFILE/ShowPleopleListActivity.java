@@ -99,6 +99,7 @@ public class ShowPleopleListActivity extends AppCompatActivity {
                 //isFirstPageLoaded = true;
                 for(DocumentChange doc: documentSnapshots.getDocumentChanges()){
                     if(doc.getType() == DocumentChange.Type.ADDED){
+                        Log.d(TAG, "loadFirstData:  found a data");
                         UserBasic basic = new UserBasic();
                         basic.setmUserID(doc.getDocument().getString("id"));
                         basic.setmUserName(doc.getDocument().getString("name"));

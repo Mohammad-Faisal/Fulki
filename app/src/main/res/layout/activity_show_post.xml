@@ -167,7 +167,7 @@
                 android:id="@+id/show_post_comment_count"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="100 comments"/>
+                android:text="0 comments"/>
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"

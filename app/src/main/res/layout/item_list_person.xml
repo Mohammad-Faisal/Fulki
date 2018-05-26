@@ -47,7 +47,7 @@
             android:id="@+id/item_list_person_rating"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="rating : 1200"
+            android:text="rating : 0"
             />
     </LinearLayout>
 

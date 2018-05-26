@@ -23,7 +23,6 @@ public class Likes {
     }
 
     public String getId() {
-
         return id;
     }
 

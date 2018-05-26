@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -80,8 +81,6 @@ public class CreatePhotoPostActivity extends AppCompatActivity {
 
 
 
-
-
         //widgets
         mPhotoPostImage = findViewById(R.id.create_photo_post_image);
         mPhotoPostCaption = findViewById(R.id.photo_post_caption);
@@ -123,6 +122,19 @@ public class CreatePhotoPostActivity extends AppCompatActivity {
         mPhotoChange.setOnClickListener(v -> BringImagePicker());
 
         mPhotoUpload.setOnClickListener(v -> post());
+
+        mPhotoUpload.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(isDataAvailable()){
+                    post();
+                }else{
+                    Toast.makeText(CreatePhotoPostActivity.this, "Your internet connection is weak please enable data", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+
     }
 
 
@@ -210,6 +222,8 @@ public class CreatePhotoPostActivity extends AppCompatActivity {
 
 
     public void post(){
+
+
         final String Caption = mPhotoPostCaption.getText().toString();
 
 
@@ -329,6 +343,12 @@ public class CreatePhotoPostActivity extends AppCompatActivity {
             transaction.set(ratingRef, ratings);
             return null;
         });
+    }
+
+    private boolean isDataAvailable() {
+        android.net.ConnectivityManager connectivityManager = (android.net.ConnectivityManager) getSystemService(android.content.Context.CONNECTIVITY_SERVICE);
+        android.net.NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+        return networkInfo != null && networkInfo.isConnected();
     }
 
 

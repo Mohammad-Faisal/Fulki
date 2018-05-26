@@ -110,6 +110,7 @@ public class ProfileSettingsActivity extends AppCompatActivity implements Adapte
 
     Spinner mDivisionSpinner;
     Spinner mBloodSpinner;
+    long ratingLong;
 
     private DatePickerDialog.OnDateSetListener mDateListener;
     ArrayList < String > mCategoryList = new ArrayList<>();
@@ -146,7 +147,6 @@ public class ProfileSettingsActivity extends AppCompatActivity implements Adapte
         initButtons();
         initDistrictData();
         setupSpinner();
-        setupImageLoader();;
 
 
 
@@ -236,11 +236,18 @@ public class ProfileSettingsActivity extends AppCompatActivity implements Adapte
                         mRegFemale.setBackgroundResource(R.drawable.textview_selected);
                     }
 
-                    imageLoader.displayImage(thumbImageUrlString, mRegPhoto, postImageOptions);
+                    ImageLoader imageLoader = ImageLoader.getInstance();
+                    imageLoader.displayImage(thumbImageUrlString, mRegPhoto);
                 }
             } else {
                 isFirstTime = true;
-
+                //set rating
+                Map< String, Object> rating = new HashMap<>();
+                rating.put("rating" , 0);
+                rating.put("user_name" , nameString);
+                rating.put("user_id" , mUserID);
+                rating.put("thumb_image" , thumbImageUrlString);
+                firebaseFirestore.collection("ratings").document(mUserID).set(rating);
             }
         });
     }
@@ -394,132 +401,112 @@ public class ProfileSettingsActivity extends AppCompatActivity implements Adapte
         mProgress.show();
 
 
-        //blood ar category upload kora lagbe
-        Map< String, String> categoryMap = new HashMap<>();
+
+        Map< String, Object> userMap = getAllData();
 
         if(!isFirstTime)firebaseFirestore.collection("categories").document(mUserID).delete();
-
-        categoryMap.put("user_name" , nameString);
-        categoryMap.put("user_id" , mUserID);
-        categoryMap.put("thumb_image" , thumbImageUrlString);
-
-        for(int i=0;i<myBloodArray.length;i++){
-            String blood = myBloodArray[i];
-            if(blood.equals(bloodString)){
-                Log.d(TAG, "upload:   should be setting my blood in database "+bloodString);
-                firebaseFirestore.collection(bloodString).document(mUserID).set(categoryMap);
-            }else{
-                firebaseFirestore.collection(myBloodArray[i]).document(mUserID).delete();
-            }
-        }
-
-        Map< String, String> odvut = new HashMap<>();
-        for(int i=0;i<mCategoryList.size();i++){
-            String category = mCategoryList.get(i);
-            firebaseFirestore.collection(category).document(mUserID).set(categoryMap);
-            odvut.put(category , category);
-        }
-        //category set holo
-        firebaseFirestore.collection("categories").document(mUserID).set(odvut);
-        if(isFirstTime){
-
-
-            Map< String, Object> userMap = getAllData();
+        else{
             Client client = new Client( "YWTL46QL1P" , "fcdc55274ed56d6fb92f51c0d0fc46a0" );
             Index index = client.getIndex("users");
             List<JSONObject> userList = new ArrayList<>();
             userList.add(new JSONObject(userMap));
             index.addObjectsAsync(new JSONArray(userList), null);
-
-
-            //set rating
-            Map< String, Object> rating = new HashMap<>();
-            rating.put("rating" , 0);
-            rating.put("user_name" , nameString);
-            rating.put("user_id" , mUserID);
-            rating.put("thumb_image" , thumbImageUrlString);
-
-            //time stamp
-            Map< String, Object> time_stamp = new HashMap<>();
-            time_stamp.put("user_id" , mUserID);
-            time_stamp.put("time_stamp" ,  new Date().getTime());
-
-            // device token id
-            Map< String, Object> device_id = new HashMap<>();
-            String deviceTokenID = FirebaseInstanceId.getInstance().getToken();
-            device_id.put("user_id" , mUserID);
-            device_id.put("device_id" , deviceTokenID);
-
-            //user names
-            Map< String, Object> user_name = new HashMap<>();
-            user_name.put("user_id" , mUserID);
-            user_name.put("user_name" , userNameString);
-
-
-
-            WriteBatch writeBatch  = firebaseFirestore.batch();
-
-            DocumentReference ratingRef = firebaseFirestore.collection("ratings").document(mUserID);
-            DocumentReference timestampRef = firebaseFirestore.collection("time_stamps").document(mUserID);
-            DocumentReference deviceRef = firebaseFirestore.collection("device_ids").document(mUserID);
-            DocumentReference userNameRef = firebaseFirestore.collection("user_names").document(mUserID);
-            DocumentReference maleRef = firebaseFirestore.collection("males").document(mUserID);
-            DocumentReference femaleRef = firebaseFirestore.collection("females").document(mUserID);
-            DocumentReference userRef = firebaseFirestore.collection("users").document(mUserID);
-
-            writeBatch.set(userRef , userMap);
-            writeBatch.set(ratingRef , rating);
-            writeBatch.set(timestampRef , time_stamp);
-            writeBatch.set(deviceRef , device_id);
-            writeBatch.set(userNameRef , user_name);
-
-
-            if(mGender == 0){
-                Map< String, Object> female = new HashMap<>();
-                female.put("user_id" , mUserID);
-                writeBatch.set(femaleRef , female);
-            }else{
-                Map< String, Object> male = new HashMap<>();
-                male.put("user_id" , mUserID);
-                writeBatch.set(maleRef , male);
-            }
-
-
-
-            writeBatch.commit().addOnSuccessListener(aVoid -> {
-
-                Intent homeIntent = new Intent(ProfileSettingsActivity.this, HomeActivity.class);
-                startActivity(homeIntent);
-                mProgress.dismiss();
-                finish();
-                Log.d(TAG, "first time data upload is successful");
-
-            }).addOnFailureListener(e -> {
-                mProgress.dismiss();
-                Log.d(TAG, "  aditional data upload not succesful");
-            });
-
-        }else{
-            Map< String, Object> userMap = getAllData();
-            firebaseFirestore.collection("users").document(mUserID).set(userMap).addOnCompleteListener(new OnCompleteListener<Void>() {
-                public static final String TAG ="Update account process " ;
-                @Override
-                public void onComplete(@NonNull Task<Void> task) {
-                    if(task.isSuccessful()){
-                        addRating(mUserID , 8);
-                        Intent homeIntent = new Intent(ProfileSettingsActivity.this, HomeActivity.class);
-                        startActivity(homeIntent);
-                        mProgress.dismiss();
-                        finish();
-                    }else{
-                        mProgress.dismiss();
-                        String error = task.getException().getMessage();
-                        Toast.makeText(ProfileSettingsActivity.this, "Some error occured. check your internet connection", Toast.LENGTH_SHORT).show();
-                        Log.d(TAG, "onComplete: "+ error);
-                    }
-                }
-            });
         }
+
+
+
+        //used for category and blood
+        Map< String, String> categoryMap = new HashMap<>();
+        categoryMap.put("user_name" , nameString);
+        categoryMap.put("user_id" , mUserID);
+        categoryMap.put("thumb_image" , thumbImageUrlString);
+
+
+        //time stamp
+        Map< String, Object> time_stamp = new HashMap<>();
+        time_stamp.put("user_id" , mUserID);
+        time_stamp.put("time_stamp" ,  new Date().getTime());
+
+        // device token id
+        Map< String, Object> device_id = new HashMap<>();
+        String deviceTokenID = FirebaseInstanceId.getInstance().getToken();
+        device_id.put("user_id" , mUserID);
+        device_id.put("device_id" , deviceTokenID);
+
+        //user names
+        Map< String, Object> user_name = new HashMap<>();
+        user_name.put("user_id" , mUserID);
+        user_name.put("user_name" , userNameString);
+
+        WriteBatch writeBatch  = firebaseFirestore.batch();
+
+
+        for(int i=0;i<myBloodArray.length;i++){
+            String blood = myBloodArray[i];
+            if(blood.equals(bloodString)){
+                Log.d(TAG, "upload:   should be setting my blood in database "+bloodString);
+                DocumentReference bloodRef = firebaseFirestore.collection(bloodString).document(mUserID);
+                writeBatch.set(bloodRef,categoryMap);
+            }else{
+                DocumentReference bloodRef = firebaseFirestore.collection(myBloodArray[i]).document(mUserID);
+                writeBatch.delete(bloodRef);
+            }
+        }
+
+
+
+        Map< String, String> odvut = new HashMap<>();
+        for(int i=0;i<mCategoryList.size();i++){
+            String category = mCategoryList.get(i);
+            DocumentReference categoryRef = firebaseFirestore.collection(category).document(mUserID);
+            writeBatch.set(categoryRef , categoryMap);
+            odvut.put(category , category);
+        }
+
+
+
+        DocumentReference timestampRef = firebaseFirestore.collection("time_stamps").document(mUserID);
+        DocumentReference deviceRef = firebaseFirestore.collection("device_ids").document(mUserID);
+        DocumentReference userNameRef = firebaseFirestore.collection("user_names").document(mUserID);
+        DocumentReference maleRef = firebaseFirestore.collection("males").document(mUserID);
+        DocumentReference femaleRef = firebaseFirestore.collection("females").document(mUserID);
+        DocumentReference userRef = firebaseFirestore.collection("users").document(mUserID);
+        DocumentReference categoryRefRef = firebaseFirestore.collection("categories").document(mUserID);
+
+        writeBatch.set(userRef , userMap);
+        writeBatch.set(timestampRef , time_stamp);
+        writeBatch.set(deviceRef , device_id);
+        writeBatch.set(userNameRef , user_name);
+        writeBatch.set(categoryRefRef,odvut);
+
+        if(mGender == 0){
+            Map< String, Object> female = new HashMap<>();
+            female.put("user_id" , mUserID);
+            writeBatch.set(femaleRef , female);
+        }else{
+            Map< String, Object> male = new HashMap<>();
+            male.put("user_id" , mUserID);
+            writeBatch.set(maleRef , male);
+        }
+
+        writeBatch.commit().addOnSuccessListener(aVoid -> {
+
+            addRating(mUserID , 3);
+            Intent homeIntent = new Intent(ProfileSettingsActivity.this, HomeActivity.class);
+            startActivity(homeIntent);
+            mProgress.dismiss();
+
+            finish();
+            Log.d(TAG, "first time data upload is successful");
+
+        }).addOnFailureListener(e -> {
+            mProgress.dismiss();
+            Log.d(TAG, "  aditional data upload not succesful");
+        });
+
+
+
+
 
     }
 
@@ -623,26 +610,6 @@ public class ProfileSettingsActivity extends AppCompatActivity implements Adapte
         return userMap;
     }
 
-    private void setupImageLoader(){
-        config = new ImageLoaderConfiguration.Builder(ProfileSettingsActivity.this)
-                .threadPoolSize(5)
-                .threadPriority(Thread.MIN_PRIORITY + 2)
-                .defaultDisplayImageOptions(DisplayImageOptions.createSimple())
-                .build();
-
-
-        postImageOptions = new DisplayImageOptions.Builder()
-                .showImageOnLoading(R.drawable.ic_camera_icon)
-                .showImageForEmptyUri(R.drawable.ic_camera_icon)
-                .showImageOnFail(R.drawable.ic_camera_icon)
-                .cacheInMemory(true)
-                .cacheOnDisk(true)
-                .considerExifParams(true)
-                .build();
-
-        imageLoader = ImageLoader.getInstance();
-        imageLoader.init(config);
-    }
 
     public void categoryOnClick(View view){
 
@@ -758,11 +725,6 @@ public class ProfileSettingsActivity extends AppCompatActivity implements Adapte
     }
 
     private void initVariables() {
-
-
-
-
-
 
         //widgets
         mRegName = findViewById(R.id.reg_name);
@@ -893,7 +855,7 @@ public class ProfileSettingsActivity extends AppCompatActivity implements Adapte
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 
             if (ContextCompat.checkSelfPermission(ProfileSettingsActivity.this, android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(ProfileSettingsActivity.this, "Permission Denied", Toast.LENGTH_LONG).show();
+                Toast.makeText(ProfileSettingsActivity.this, "Permission Granted", Toast.LENGTH_LONG).show();
                 ActivityCompat.requestPermissions(ProfileSettingsActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
 
             } else {
@@ -937,6 +899,8 @@ public class ProfileSettingsActivity extends AppCompatActivity implements Adapte
     public void onNothingSelected(AdapterView<?> parent) {
         // Another interface callback
     }
+
+
 
 
 

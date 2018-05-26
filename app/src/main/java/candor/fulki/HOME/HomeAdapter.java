@@ -42,6 +42,8 @@ import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.Transaction;
 import com.google.firebase.firestore.WriteBatch;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.like.LikeButton;
 import com.like.OnLikeListener;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
@@ -65,8 +67,13 @@ import candor.fulki.GENERAL.MainActivity;
 import candor.fulki.NOTIFICATION.Notifications;
 import candor.fulki.PROFILE.ProfileActivity;
 import candor.fulki.PROFILE.ShowPleopleListActivity;
+import candor.fulki.PROFILE.UserBasic;
 import candor.fulki.R;
+import candor.fulki.UTILITIES.GMailSender;
 import de.hdodenhof.circleimageview.CircleImageView;
+
+import static android.content.ContentValues.TAG;
+
 public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
 
 
@@ -327,8 +334,6 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
                 }).addOnFailureListener(e -> {
                     Log.d(TAG, "liked:   like is not succesful");
                 });
-
-                //as the user liked this post so i should give him some points
             }
             @Override
             public void unLiked(LikeButton likeButton) {
@@ -348,10 +353,13 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
                                     DocumentReference postNotificatinoRef =  firebaseFirestore.collection("posts/"+postPushID+"/notifications").document(likeNotificatoinPushID);
                                     writeBatch.delete(postNotificatinoRef);
                                 }
-                                DocumentReference postLikeRef =  firebaseFirestore.collection("likes/" + postPushID + "/likes").document(mUserID); //.set(mLikes);
+                                DocumentReference postLikeRef =  firebaseFirestore.collection("likes/" + postPushID + "/likes").document(mUserID);
                                 writeBatch.delete(postLikeRef);
 
                                 writeBatch.commit().addOnSuccessListener(aVoid -> {
+                                    holder.addRating(mUserID , -3);
+                                    holder.addRating(post.getUser_id() , -1);
+                                    holder.addLike(postPushID,-1);
                                     Log.d(TAG, "liked:   unlike is successful");
 
                                 }).addOnFailureListener(e -> {
@@ -362,9 +370,7 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
                         }
                     }
                 });
-                holder.addRating(mUserID , -3);
-                holder.addRating(post.getUser_id() , -1);
-                holder.addLike(postPushID,-1);
+
             }
         });
 
@@ -457,7 +463,7 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
         });
 
         //more options functionality
-        holder.mPostMoreOptions.setEnabled(false);
+        //holder.mPostMoreOptions.setEnabled(false);
         holder.mPostMoreOptions.setOnClickListener(v -> {
 
             if(mUserID.equals(mCurrentPosterId)){
@@ -474,104 +480,15 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
                             mProgress.setCanceledOnTouchOutside(false);
                             mProgress.show();
 
-                            // post theke delete korte hobe
-                            //notification gula delete korte hobe
                             //share gula delete korte hobe
-                            //comment gula delete korte hobe
-                            //comment like gula delete korte hobe
-                            //like gula delete korte hobe
 
-
-                            firebaseFirestore.collection("posts").document(postPushID).delete().addOnCompleteListener(task -> {
-                                if(task.isSuccessful()){
-                                    mProgress.dismiss();
-                                    notifyDataSetChanged();
-                                    Log.d(TAG, "onComplete: post is deleted !!");
-                                }else{
-                                    mProgress.dismiss();
-                                    Toast.makeText(context, "Delete did not work !", Toast.LENGTH_SHORT).show();
-                                    Log.d(TAG, "onComplete: likes are not deleted !!!!");
-                                }
-                            });
-
-
-                            /*firebaseFirestore.collection("comments").document(postPushID).delete();
-                            firebaseFirestore.collection("comment_likes").document(postPushID).delete();
-                            firebaseFirestore.collection("shares").document(postPushID).delete();*/
-
-
-
-                            /*firebaseFirestore.collection("images").document(mUserID).collection("posts").document(postPushID).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                                @Override
-                                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                                 if(task.isSuccessful()){
-                                     if(task.getResult().exists()){
-                                         final String imagePath = task.getResult().get("imagePath").toString();
-                                         final String thumbImagePath = task.getResult().get("imageThumbPath").toString();
-                                         // Create a storage reference from our app
-
-                                         final StorageReference storageRef = FirebaseStorage.getInstance().getReference();
-                                         StorageReference imageRef = storageRef.child(imagePath);
-                                         imageRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
-                                             @Override
-                                             public void onSuccess(Void aVoid) {
-                                                 StorageReference imageRef = storageRef.child(thumbImagePath);
-                                                 imageRef.delete();
-                                                 firebaseFirestore.collection("images").document(mUserID).collection("posts").document(postPushID).delete();
-                                             }
-                                         }).addOnFailureListener(new OnFailureListener() {
-                                             @Override
-                                             public void onFailure(@NonNull Exception exception) {
-                                                 // Uh-oh, an error occurred!
-                                             }
-                                         });
-                                     }
-                                 }else{
-                                     Log.d(TAG, "onComplete: some error occured");
-                                 }
-                                }
-                            });*/
-
-
-
-                            /*Query nextQuery = firebaseFirestore.collection("posts/"+postPushID+"/notificatinos");
-                            nextQuery.addSnapshotListener(new EventListener<QuerySnapshot>() {
-                                @Override
-                                public void onEvent(QuerySnapshot documentSnapshots, FirebaseFirestoreException e) {
-                                    for(DocumentChange doc: documentSnapshots.getDocumentChanges()){
-                                        if(doc.getType() == DocumentChange.Type.REMOVED){
-                                            Notifications singleNotifications = doc.getDocument().toObject(Notifications.class);
-                                            String notiID = singleNotifications.getNotification_id();
-                                            String userID = singleNotifications.getNotification_to();
-                                            firebaseFirestore.collection("notifications/"+userID+"/notificatinos").document(notiID).delete();
-                                        }else{
-                                            Log.d(TAG, "onEvent: notification type is not added");
-                                        }
-                                    }
-                                }
-                            });*/
-
-
-                            /*firebaseFirestore.collection("posts").document(postPushID).delete().addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    if(task.isSuccessful()){
-                                        mProgress.dismiss();
-                                    }
-                                }
-                            });*/
-
-
-
+                            holder.deletePost(postPushID);
+                            if(post.getPost_image_url().equals("default")){
+                                holder.deleteImage(postPushID);
+                            }
                             dialog.cancel();
                         });
-                builder1.setNegativeButton(
-                        "No",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                dialog.cancel();
-                            }
-                        });
+                        builder1.setNegativeButton("No", (dialog, id) -> dialog.cancel());
 
                 AlertDialog alert11 = builder1.create();
                 alert11.show();
@@ -584,6 +501,7 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
                         "Yes",
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
+                                holder.sendReport(postPushID);
                                 dialog.cancel();
                             }
                         });
@@ -711,6 +629,107 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
             postProgres = view.findViewById(R.id.item_post_progress);
         }
 
+        public void sendReport(String postPushId){
+            Thread sender = new Thread(() -> {
+                try {
+                    GMailSender sender1 = new GMailSender("candorappbd@gmail.com", "plan2018");
+                    sender1.sendMail("Report about a post from Youth app BD",
+                            "Here is a problem in the post with "+ postPushId,
+                            "youremail",
+                            "youthappbd@gmail.com");
+                    // dialog.dismiss();
+                } catch (Exception e) {
+                    Log.e("mylog", "Error: " + e.getMessage());
+                }
+            });
+            Log.d(TAG, "sendMessage: sending mail");
+            sender.start();
+        }
+
+        public void deletePost(String postPushID){
+
+
+            firebaseFirestore.collection("posts").document(postPushID).collection("notifications").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                @Override
+                public void onSuccess(QuerySnapshot documentSnapshots) {
+                    if(!documentSnapshots.isEmpty()){
+                        WriteBatch writeBatch = firebaseFirestore.batch();
+                        for(DocumentChange doc: documentSnapshots.getDocumentChanges()){
+                            if(doc.getType() == DocumentChange.Type.ADDED){
+                                Log.d(TAG, "loadFirstData:  found a data");
+                                Notifications notifications = doc.getDocument().toObject(Notifications.class);
+                                String notificationID = notifications.getNotification_id();
+                                String notificationTo =notifications.getNotification_to();
+                                DocumentReference notificationRef= firebaseFirestore.collection("posts").document(postPushID).collection("notifications").document(notificationID);
+                                DocumentReference notificationToRef= firebaseFirestore.collection("notifications").document(notificationTo).collection("notificatinos").document(notificationID);
+                                writeBatch.delete(notificationRef);
+                                writeBatch.delete(notificationToRef);
+                            }
+                        }
+                        writeBatch.commit().addOnSuccessListener(aVoid -> {
+                            Log.d(TAG, "onSuccess:    writebatch succesful");
+                        });
+                    }
+                }
+            });
+
+            WriteBatch writeBatch = firebaseFirestore.batch();
+
+            DocumentReference postRef = firebaseFirestore.collection("posts").document(postPushID);
+            writeBatch.delete(postRef);
+
+            DocumentReference likesRef = firebaseFirestore.collection("likes").document(postPushID);
+            writeBatch.delete(likesRef);
+
+            DocumentReference commentsRef = firebaseFirestore.collection("comments").document(postPushID);
+            writeBatch.delete(commentsRef);
+
+            DocumentReference commentsLikesRef = firebaseFirestore.collection("comment_likes").document(postPushID);
+            writeBatch.delete(commentsLikesRef);
+
+            writeBatch.commit().addOnSuccessListener(aVoid -> {
+                mProgress.dismiss();
+                notifyDataSetChanged();
+                Log.d(TAG, "onSuccess:    deletion is succesful");
+                Toast.makeText(context, "Deletion Successful !", Toast.LENGTH_SHORT).show();
+            }).addOnFailureListener(e -> Toast.makeText(context, "Some Error Occured please try again later", Toast.LENGTH_SHORT).show());
+        }
+
+        public void deleteImage(String postPushID){
+            firebaseFirestore.collection("images").document(mUserID).collection("posts").document(postPushID).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                    if(task.isSuccessful()){
+                        if(task.getResult().exists()){
+                            final String imagePath = task.getResult().get("imagePath").toString();
+                            final String thumbImagePath = task.getResult().get("imageThumbPath").toString();
+                            // Create a storage reference from our app
+
+                            final StorageReference storageRef = FirebaseStorage.getInstance().getReference();
+                            StorageReference imageRef = storageRef.child(imagePath);
+                            imageRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    StorageReference imageRef = storageRef.child(thumbImagePath);
+                                    imageRef.delete();
+                                    firebaseFirestore.collection("images").document(mUserID).collection("posts").document(postPushID).delete();
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception exception) {
+                                    // Uh-oh, an error occurred!
+                                }
+                            });
+                        }else{
+                            Log.d(TAG, "onComplete:   there was no image to delete so deletion is succesful");
+                        }
+                    }else{
+                        Log.d(TAG, "onComplete: some error occured");
+                    }
+                }
+            });
+        }
+
 
         private Task<Void> addRating( String mUserID  , int factor) {
 
@@ -764,23 +783,13 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
                 Posts post = transaction.get(postRef)
                         .toObject(Posts.class);
                 long curLikes = post.getLike_cnt();
-                long curComments = post.getComment_cnt();
-                long curShares = post.getShare_cnt();
-
                 long nextLike = curLikes + factor;
                  Log.d(TAG, "addLike:     like number is  "+nextLike);
-                long nextComment = curComments + factor;
-                long nextShare = curShares + factor;
                 HashMap< String ,  Object > updateMap = new HashMap<>();
                 updateMap.put("like_cnt" , nextLike);
                 transaction.update(postRef , updateMap);
                 return nextLike;
-            }).addOnSuccessListener(new OnSuccessListener<Long>() {
-                 @Override
-                 public void onSuccess(Long aLong) {
-                     setPostLikeCount(aLong);
-                 }
-             });
+            }).addOnSuccessListener(aLong -> setPostLikeCount(aLong));
         }
 
 

@@ -39,7 +39,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="10dp"
                     android:layout_marginTop="10dp"
-                    android:fontFamily="@font/nunito_extralight"
+                    android:fontFamily="@font/nunito"
                     android:text="User Name"
                     android:textColor="?android:attr/textColorPrimaryNoDisable"
                     android:textSize="15sp"

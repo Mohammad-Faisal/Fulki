@@ -11,7 +11,6 @@
 
 
 
-
     <android.support.v4.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -24,8 +23,8 @@
 
             <de.hdodenhof.circleimageview.CircleImageView
                 android:id="@+id/reg_photo"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
+                android:layout_width="120dp"
+                android:layout_height="120dp"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="20dp"
                 android:src="@drawable/ic_blank_profile"
@@ -33,12 +32,13 @@
 
             <Button
                 android:id="@+id/reg_camera"
-                android:layout_width="100dp"
-                android:layout_height="30dp"
+                android:layout_width="140dp"
+                android:layout_height="40dp"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="10dp"
-                android:background="@drawable/textview_information"
-                android:fontFamily="@font/averia_serif_libre_bold"
+                android:background="@color/colorPrimaryy"
+                android:textColor="@color/White"
+                android:fontFamily="@font/nunito"
                 android:text="Set Photo"
                 android:textAllCaps="false"
                 android:transitionName="edit_photo" />
@@ -97,6 +97,7 @@
                 android:text="    Bio" />
 
             <EditText
+                android:hint="describe yourself in one sentence..."
                 android:id="@+id/reg_bio"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
@@ -110,7 +111,7 @@
 
             <LinearLayout
                 android:layout_width="wrap_content"
-                android:layout_height="50dp"
+                android:layout_height="40dp"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="35dp">
 
@@ -154,7 +155,8 @@
                     android:text="Division"
                     android:gravity="center"
                     android:textColor="@color/White"
-                    android:background="@drawable/solid_blue_background"/>
+                    android:background="@drawable/solid_blue_background"
+                    />
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="50dp"

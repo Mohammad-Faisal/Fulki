@@ -149,6 +149,8 @@ public class ExploreActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.action_log_out:
                 FirebaseAuth.getInstance().signOut();
+                Intent mainIntent = new Intent(ExploreActivity.this, candor.fulki.GENERAL.MainActivity.class);
+                startActivity(mainIntent);
                 finish();
                 return true;
             case R.id.action_edit_profile:
