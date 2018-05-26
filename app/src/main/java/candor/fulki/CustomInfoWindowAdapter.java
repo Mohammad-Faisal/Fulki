@@ -39,7 +39,6 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
         String snippet = marker.getSnippet();
 
         if(!snippet.equals("")){
-
             setImage(snippet,context , markerImage);
         }
     }

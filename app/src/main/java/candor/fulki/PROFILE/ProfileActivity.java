@@ -280,20 +280,14 @@ public class ProfileActivity extends AppCompatActivity {
             }
 
             //follower and following count setting
-            FirebaseFirestore.getInstance().collection("followings/" + mCurProfileId + "/followings").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                @Override
-                public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                    int followings_cnt = task.getResult().size();
-                    mProfileFollowingsCnt.setText(followings_cnt+" following");
-                }
+            FirebaseFirestore.getInstance().collection("followings/" + mCurProfileId + "/followings").get().addOnCompleteListener(task -> {
+                int followings_cnt = task.getResult().size();
+                mProfileFollowingsCnt.setText(followings_cnt+" following");
             });
-            FirebaseFirestore.getInstance().collection("followers/" + mCurProfileId + "/followers").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                @Override
-                public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                    int followers_cnt = task.getResult().size();
-                    if(followers_cnt<2)mProfileFollowersCnt.setText(""+followers_cnt+" follower");
-                    else mProfileFollowersCnt.setText(""+followers_cnt+" followers");
-                }
+            FirebaseFirestore.getInstance().collection("followers/" + mCurProfileId + "/followers").get().addOnCompleteListener(task -> {
+                int followers_cnt = task.getResult().size();
+                if(followers_cnt<2)mProfileFollowersCnt.setText(""+followers_cnt+" follower");
+                else mProfileFollowersCnt.setText(""+followers_cnt+" followers");
             });
 
 
@@ -384,7 +378,7 @@ public class ProfileActivity extends AppCompatActivity {
                 });
 
             firebaseFirestore = FirebaseFirestore.getInstance();
-            Query nextQuery = firebaseFirestore.collection("posts").orderBy("timestamp" , Query.Direction.DESCENDING).limit(30).whereEqualTo("user_id", mCurProfileId);
+            Query nextQuery = firebaseFirestore.collection("posts").orderBy("timestamp" , Query.Direction.DESCENDING).limit(100).whereEqualTo("user_id", mCurProfileId);
             nextQuery.addSnapshotListener(ProfileActivity.this , (documentSnapshots, e) -> {
                 if(documentSnapshots!=null){
                     if(!documentSnapshots.isEmpty()){

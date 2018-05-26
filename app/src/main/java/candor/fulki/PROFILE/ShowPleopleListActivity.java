@@ -99,7 +99,7 @@ public class ShowPleopleListActivity extends AppCompatActivity {
                 //isFirstPageLoaded = true;
                 for(DocumentChange doc: documentSnapshots.getDocumentChanges()){
                     if(doc.getType() == DocumentChange.Type.ADDED){
-                        Log.d(TAG, "loadFirstData:  found a data");
+                        Log.d(TAG, "loadFirstData:  found a data"+doc.getDocument().getId());
                         UserBasic basic = new UserBasic();
                         basic.setmUserID(doc.getDocument().getString("id"));
                         basic.setmUserName(doc.getDocument().getString("name"));
@@ -123,6 +123,7 @@ public class ShowPleopleListActivity extends AppCompatActivity {
                     lastVisible = documentSnapshots.getDocuments().get(documentSnapshots.size()-1);
                     for(DocumentChange doc: documentSnapshots.getDocumentChanges()){
                         if(doc.getType() == DocumentChange.Type.ADDED){
+
                             UserBasic basic = new UserBasic();
                             basic.setmUserID(doc.getDocument().getString("id"));
                             basic.setmUserName(doc.getDocument().getString("name"));

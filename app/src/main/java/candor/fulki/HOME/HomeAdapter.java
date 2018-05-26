@@ -119,19 +119,7 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
         this.mRootRef.keepSynced(true);
         this.mUserID = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
-        if(mUserID!=null){
-            firebaseFirestore.collection("users").document(mUserID).get().addOnSuccessListener(documentSnapshot -> {
-                if(documentSnapshot.exists()){
-                    mUserName = documentSnapshot.getString("name");
-                    mUserImage= documentSnapshot.getString("image");
-                    mUserThumbImage =documentSnapshot.getString("thumb_image");
-                }
-            }).addOnFailureListener(e -> {
-                mUserImage = MainActivity.mUserImage;
-                mUserName = MainActivity.mUserName;
-                mUserThumbImage = MainActivity.mUserThumbImage;
-            });
-        }
+
     }
 
     @Override
@@ -174,8 +162,22 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
         final String timeDate = post.getTime_and_date();
 
 
-        Log.d(TAG, "onBindViewHolder:      image url found for this  is  "+post.getPost_image_url());
-        Log.d(TAG, "onBindViewHolder:      thumb image url found for this  is  "+post.getPost_thumb_image_url());
+
+        if(mUserID!=null){
+            firebaseFirestore.collection("users").document(mUserID).get().addOnSuccessListener(documentSnapshot -> {
+                if(documentSnapshot.exists()){
+                    mUserName = documentSnapshot.getString("name");
+                    mUserImage= documentSnapshot.getString("image");
+                    mUserThumbImage =documentSnapshot.getString("thumb_image");
+                    Log.d(TAG, "HomeAdapter:      user name" + mUserName);
+                    Log.d(TAG, "HomeAdapter:      user name" + mUserID);
+                }
+            }).addOnFailureListener(e -> {
+                mUserImage = MainActivity.mUserImage;
+                mUserName = MainActivity.mUserName;
+                mUserThumbImage = MainActivity.mUserThumbImage;
+            });
+        }
 
 
         holder.postProgres.setVisibility(View.GONE);
@@ -305,16 +307,17 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
 
                 //building like
                 holder.postLikeButton.setLiked(true);
-                Functions f = new Functions();
 
                 //building like
-                String time_stamp = String.valueOf(new Date().getTime());
+                String timestamp = String.valueOf(new Date().getTime());
                 WriteBatch writeBatch  = firebaseFirestore.batch();
                 DocumentReference ref = FirebaseFirestore.getInstance().collection("notifications/"+mCurrentPosterId+"/notificatinos").document();
                 String likeNotificatoinPushID = ref.getId();
 
-                Likes mLikes = new Likes(mUserID ,mUserName ,mUserThumbImage ,likeNotificatoinPushID , time_stamp);
-                Notifications pushNoti = new Notifications( "like" ,mUserID , post.getUser_id() , postPushID ,likeNotificatoinPushID , time_stamp,"n"  );
+                Log.d(TAG, "liked: "+mUserName);
+
+                Likes mLikes = new Likes(mUserID ,mUserName ,mUserThumbImage ,likeNotificatoinPushID , timestamp);
+                Notifications pushNoti = new Notifications( "like" ,mUserID , post.getUser_id() , postPushID ,likeNotificatoinPushID , timestamp,"n"  );
 
 
                 DocumentReference notificatinoRef = firebaseFirestore.collection("notifications/"+post.getUser_id()+"/notificatinos").document(likeNotificatoinPushID);
@@ -324,7 +327,10 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
                 writeBatch.set(postNotificatinoRef, pushNoti);
 
                 DocumentReference postLikeRef =  firebaseFirestore.collection("likes/" + postPushID + "/likes").document(mUserID); //.set(mLikes);
+                //firebaseFirestore.collection("likes/" + postPushID + "/likes").document(mUserID).set(mLikes);
                 writeBatch.set(postLikeRef, mLikes);
+
+                Log.d(TAG, "liked:     the object is  "+ mLikes.getTime_stamp());
 
                 writeBatch.commit().addOnSuccessListener(aVoid -> {
                     Log.d(TAG, "liked:   like is successful");

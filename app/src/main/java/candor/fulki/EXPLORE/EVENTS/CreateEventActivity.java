@@ -57,7 +57,7 @@ public class CreateEventActivity extends AppCompatActivity {
     private StorageReference thumbFilePath;
     private ProgressDialog mProgress;
 
-    String titleText , dateText , locationText , descriptionText;
+    String titleText , dateText = "", locationText , descriptionText;
 
     private DatePickerDialog.OnDateSetListener mDateListener;
 
@@ -78,7 +78,12 @@ public class CreateEventActivity extends AppCompatActivity {
         mCreateEventImage.setOnClickListener(v -> BringImagePicker());
         mCreateEventCreate.setOnClickListener(v -> {
             if(check()){
-                post();
+                if(isDataAvailable()){
+                    post();
+                }else{
+                    Toast.makeText(this, "Please enable your internet connection", Toast.LENGTH_SHORT).show();
+                }
+
             }
         });
 
@@ -307,6 +312,12 @@ public class CreateEventActivity extends AppCompatActivity {
             transaction.set(ratingRef, ratings);
             return null;
         });
+    }
+
+    private boolean isDataAvailable() {
+        android.net.ConnectivityManager connectivityManager = (android.net.ConnectivityManager) getSystemService(android.content.Context.CONNECTIVITY_SERVICE);
+        android.net.NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+        return networkInfo != null && networkInfo.isConnected();
     }
 
 }
