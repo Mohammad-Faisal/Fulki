@@ -230,7 +230,7 @@ public class ProfileActivity extends AppCompatActivity {
             addRating(mUserID ,1);
             addRating(mCurProfileId , 1);
             Intent chatIntent = new Intent(ProfileActivity.this  , ChatActivity.class);
-            chatIntent.putExtra("user_id" , mUserID);
+            chatIntent.putExtra("user_id" , mCurProfileId);
             startActivity(chatIntent);
         });
 

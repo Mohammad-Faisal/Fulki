@@ -26,7 +26,7 @@
 
 
 
-                <include layout="@layout/search_people_toolbar"
+                <include layout="@layout/toolbar_search_people"
                     android:id="@+id/invite_people_search_toolbar"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">

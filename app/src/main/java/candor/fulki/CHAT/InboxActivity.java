@@ -1,12 +1,10 @@
 package candor.fulki.CHAT;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.TabLayout;
-import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -14,7 +12,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -45,7 +42,9 @@ public class InboxActivity extends AppCompatActivity {
     FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
     RecyclerView vertical_recycler_view, horizontal_recycler_view;
     DatabaseReference mChatsDatabase, mFollowingsDatabase;
-    private String mUserID;
+    private String mUserID  = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+
 
     private ArrayList<Actives> horizontalList = new ArrayList<>();
     private ArrayList<ChatBuddies> verticalList = new ArrayList<>();
@@ -58,6 +57,7 @@ public class InboxActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_inbox);
 
+        Log.d(TAG, "onCreate:    user id pf myself " + mUserID);
 
         FloatingActionButton inboxFloating;
         inboxFloating = findViewById(R.id.inbox_floating);
@@ -111,10 +111,10 @@ public class InboxActivity extends AppCompatActivity {
         verticalList = new ArrayList<>();
         mChatsDatabase.keepSynced(true);
         mChatsDatabase.addChildEventListener(new ChildEventListener() {
-
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 ChatBuddies chatBuddies = dataSnapshot.getValue(ChatBuddies.class);
+
                 verticalList.add(chatBuddies);
                 verticalAdapter.notifyDataSetChanged();
             }
@@ -142,9 +142,9 @@ public class InboxActivity extends AppCompatActivity {
 
                             if(doc.getType() == DocumentChange.Type.ADDED){
                                 UserBasic basic = new UserBasic();
-                                Log.d(TAG, "onSuccess: found a follower  !!!");
-                                basic.setmUserID(doc.getDocument().getString("user_id"));
-                                basic.setmUserName(doc.getDocument().getString("user_name"));
+                                Log.d(TAG, "onSuccess: found a followings  !!!");
+                                basic.setmUserID(doc.getDocument().getString("id"));
+                                basic.setmUserName(doc.getDocument().getString("name"));
                                 basic.setmUserThumbImage(doc.getDocument().getString("thumb_image"));
                                 horizontalList.add(new Actives(basic.getmUserID() , basic.getmUserName() , basic.getmUserThumbImage()));
                                 horizontalAdapter.notifyDataSetChanged();
@@ -218,22 +218,21 @@ public class InboxActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(final HorizontalAdapter.MyViewHolder holder, final int position) {
+            Log.d(TAG, "onBindViewHolder: found a name "+horizontalList.get(position).getName());
             holder.chats_actives_name.setText(horizontalList.get(position).getName());
 
             String ImageUrl = horizontalList.get(position).getThumb_image();
+            String listUserID = horizontalList.get(position).getUserID();
+
             if (ImageUrl == null) {
 
             } else {
                 Picasso.with(InboxActivity.this).load(ImageUrl).placeholder(R.drawable.ic_blank_profile).into(holder.chats_actives_image);
             }
-            final String mUserID = horizontalList.get(position).getUserID();
-            holder.itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Intent chatIntent = new Intent(InboxActivity.this, ChatActivity.class);
-                    chatIntent.putExtra("user_id", mUserID);
-                    startActivity(chatIntent);
-                }
+            holder.itemView.setOnClickListener(view -> {
+                Intent chatIntent = new Intent(InboxActivity.this, ChatActivity.class);
+                chatIntent.putExtra("user_id", listUserID);
+                startActivity(chatIntent);
             });
         }
 
@@ -270,7 +269,7 @@ public class InboxActivity extends AppCompatActivity {
         @Override
         public VerticalAdapter.MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             View itemView = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.item_chats_single_vertical, parent, false);
+                    .inflate(R.layout.item_chats_vertical, parent, false);
             return new VerticalAdapter.MyViewHolder(itemView);
         }
         @Override

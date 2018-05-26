@@ -45,7 +45,7 @@
                 android:id="@+id/horizontal_recycler_view"
                 android:background="#fff"
                 android:layout_width="match_parent"
-                android:layout_height="110dp"/>
+                android:layout_height="120dp"/>
 
             <View
                 android:background="#787878"
