@@ -54,8 +54,7 @@ public class PostsFragment extends Fragment {
         mHomeAdapter = new HomeAdapter(recyclerView, posts,getActivity(), getContext());
         recyclerView.setAdapter(mHomeAdapter);
 
-        loadFirstPosts();;
-
+        loadFirstPosts();
 
 
         return view;

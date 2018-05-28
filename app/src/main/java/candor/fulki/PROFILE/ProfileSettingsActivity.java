@@ -267,7 +267,7 @@ public class ProfileSettingsActivity extends AppCompatActivity implements Adapte
                     year , month , day
             );
             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-            dialog.show();;
+            dialog.show();
 
             mDateListener = (view, year1, month1, dayOfMonth) -> {
                 month1 = month1 +1;

@@ -2,11 +2,14 @@ package candor.fulki.HOME;
 
 public class Likes {
 
+
+
     String id;
     String name;
     String thumb_image;
     String notification_id;
     String timestamp;
+
 
     public Likes() {
     }

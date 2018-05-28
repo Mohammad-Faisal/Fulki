@@ -143,7 +143,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
                     //setting time ago for comment
                     GetTimeAgo ob = new GetTimeAgo();
                     long time = Long.parseLong(online);
-                    String time_ago = ob.getTimeAgo(time ,context);
+                    String time_ago = GetTimeAgo.getTimeAgo(time ,context);
                     holder.notificationTime.setText( time_ago);
 
                     String sourceString =   userName + "  has followed your profile";
@@ -199,7 +199,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
                     //setting time ago for comment
                     GetTimeAgo ob = new GetTimeAgo();
                     long time = Long.parseLong(online);
-                    String time_ago = ob.getTimeAgo(time ,context);
+                    String time_ago = GetTimeAgo.getTimeAgo(time ,context);
                     holder.notificationTime.setText( time_ago);
 
 
@@ -262,7 +262,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
                     ////SETTING TIME AGO OF THE NOTIFICATION -//
                     GetTimeAgo ob = new GetTimeAgo();
                     long time = Long.parseLong(online);
-                    String time_ago = ob.getTimeAgo(time ,context);
+                    String time_ago = GetTimeAgo.getTimeAgo(time ,context);
                     holder.notificationTime.setText( time_ago);
                 }
                 @Override
@@ -302,7 +302,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
                     //setting time ago for comment
                     GetTimeAgo ob = new GetTimeAgo();
                     long time = Long.parseLong(online);
-                    String time_ago = ob.getTimeAgo(time ,context);
+                    String time_ago = GetTimeAgo.getTimeAgo(time ,context);
                     holder.notificationTime.setText( time_ago);
                     String sourceString = userName  + "  has Joined your event";
                     holder.notificationText.setText(Html.fromHtml(sourceString));

@@ -70,7 +70,7 @@ public class NotificationActivity extends AppCompatActivity {
                 Intent profileIntent = new Intent(NotificationActivity.this , ProfileActivity.class);
                 profileIntent.putExtra("userID" , mUserID);
                 startActivity(profileIntent);
-                finish();;
+                finish();
                 //setFragment(mProfileFragment);
                 return true;
         }

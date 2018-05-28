@@ -116,7 +116,7 @@ public class ProfileActivity extends AppCompatActivity {
             case R.id.navigation_notifications:
                 Intent notificaitonIntent = new Intent(ProfileActivity.this , NotificationActivity.class);
                 startActivity(notificaitonIntent);
-                finish();;
+                finish();
                 //setFragment(mNotificationFragment);
                 return true;
             case R.id.navigation_profile:
@@ -144,11 +144,7 @@ public class ProfileActivity extends AppCompatActivity {
         mUserID = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
         mCurProfileId = getIntent().getStringExtra("userID");
-        if(mCurProfileId.equals(mUserID)){
-            ownProfile = true;
-        }else{
-            ownProfile = false;
-        }
+        ownProfile = mCurProfileId.equals(mUserID);
 
 
         //------------- BOTTOM NAVIGATION HANDLING ------//

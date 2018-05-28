@@ -91,7 +91,7 @@ public class PostCommentAdapter extends RecyclerView.Adapter<PostCommentAdapter.
         //setting comment time ago
         GetTimeAgo ob = new GetTimeAgo();
         long time = Long.parseLong(mTimeStamp);
-        String time_ago = ob.getTimeAgo(time ,context);
+        String time_ago = GetTimeAgo.getTimeAgo(time ,context);
         holder.commentTimeAgo.setText(time_ago);
 
 

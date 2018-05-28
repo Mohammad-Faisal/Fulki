@@ -148,8 +148,8 @@ public class ConversationFragment extends Fragment {
 
 
         //----- FROM INTERNET -//
-        vertical_recycler_view = (RecyclerView) mView.findViewById(R.id.vertical_recycler_view);
-        horizontal_recycler_view = (RecyclerView)mView.findViewById(R.id.horizontal_recycler_view);
+        vertical_recycler_view = mView.findViewById(R.id.vertical_recycler_view);
+        horizontal_recycler_view = mView.findViewById(R.id.horizontal_recycler_view);
 
 
         horizontalAdapter = new HorizontalAdapter(horizontalList);
@@ -275,7 +275,7 @@ public class ConversationFragment extends Fragment {
             ////SETTING TIME AGO OF THE NOTIFICATION -//
             GetTimeAgo ob = new GetTimeAgo();
             long time = verticalList.get(position).getTime_stamp();
-            String time_ago = ob.getTimeAgo(time ,getContext());
+            String time_ago = GetTimeAgo.getTimeAgo(time ,getContext());
             holder.chats_hor_time.setText(time_ago);
 
             String ImageUrl = verticalList.get(position).getThumb_image_url();

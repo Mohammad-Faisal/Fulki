@@ -62,7 +62,7 @@ public class ExploreActivity extends AppCompatActivity {
                 Intent profileIntent = new Intent(ExploreActivity.this , ProfileActivity.class);
                 profileIntent.putExtra("userID" , mUserID);
                 startActivity(profileIntent);
-                finish();;
+                finish();
                 //setFragment(mProfileFragment);
                 return true;
         }

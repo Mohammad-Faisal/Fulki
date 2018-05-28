@@ -285,7 +285,7 @@ public class InboxActivity extends AppCompatActivity {
             ////SETTING TIME AGO OF THE NOTIFICATION -//
             GetTimeAgo ob = new GetTimeAgo();
             long time = verticalList.get(position).getTime_stamp();
-            String time_ago = ob.getTimeAgo(time ,InboxActivity.this);
+            String time_ago = GetTimeAgo.getTimeAgo(time ,InboxActivity.this);
             holder.chats_hor_time.setText(time_ago);
 
             String ImageUrl = verticalList.get(position).getThumb_image_url();

@@ -267,37 +267,17 @@ public class SearchActivity extends AppCompatActivity {
 
     private boolean processCategory(String uid , String categoryString){
         if(categoryString.equals("Child Marrige")){
-            if(ChildMarrige.get(uid)!=null && ChildMarrige.get(uid).equals("y")){
-                return  true;
-            }else{
-                return false;
-            }
+            return ChildMarrige.get(uid) != null && ChildMarrige.get(uid).equals("y");
         }else if(categoryString.equals("Violence")){
-            if( Violence.get(uid)!=null && Violence.get(uid).equals("y")){
-                return  true;
-            }else{
-                return false;
-            }
+            return Violence.get(uid) != null && Violence.get(uid).equals("y");
 
         }else if(categoryString.equals("Environment")){
-            if(Environment.get(uid)!=null && Environment.get(uid).equals("y")){
-                return  true;
-            }else{
-                return false;
-            }
+            return Environment.get(uid) != null && Environment.get(uid).equals("y");
 
         }else if(categoryString.equals("Women Empowerment")){
-            if(WomenEmpowerment.get(uid)!=null && WomenEmpowerment.get(uid).equals("y")){
-                return  true;
-            }else{
-                return false;
-            }
+            return WomenEmpowerment.get(uid) != null && WomenEmpowerment.get(uid).equals("y");
         }else if(categoryString.equals("Education")){
-            if(Education.get(uid) != null && Education.get(uid).equals("y")){
-                return  true;
-            }else{
-                return false;
-            }
+            return Education.get(uid) != null && Education.get(uid).equals("y");
         }else{
             return  true;
         }
