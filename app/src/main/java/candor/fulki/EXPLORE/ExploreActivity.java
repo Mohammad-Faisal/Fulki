@@ -18,13 +18,13 @@ import com.ittianyu.bottomnavigationviewex.BottomNavigationViewEx;
 
 import candor.fulki.CHAT.InboxActivity;
 import candor.fulki.EXPLORE.EVENTS.CreateEventActivity;
-import candor.fulki.GENERAL.SearchActivity;
 import candor.fulki.HOME.HomeActivity;
 import candor.fulki.MapsActivity;
 import candor.fulki.NOTIFICATION.NotificationActivity;
 import candor.fulki.PROFILE.ProfileActivity;
 import candor.fulki.PROFILE.ProfileSettingsActivity;
 import candor.fulki.R;
+import candor.fulki.SEARCH.SearchActivity;
 
 
 public class ExploreActivity extends AppCompatActivity {

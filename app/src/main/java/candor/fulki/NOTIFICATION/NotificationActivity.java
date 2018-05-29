@@ -22,12 +22,12 @@ import java.util.List;
 
 import candor.fulki.CHAT.InboxActivity;
 import candor.fulki.EXPLORE.ExploreActivity;
-import candor.fulki.GENERAL.SearchActivity;
 import candor.fulki.HOME.HomeActivity;
 import candor.fulki.MapsActivity;
 import candor.fulki.PROFILE.ProfileActivity;
 import candor.fulki.PROFILE.ProfileSettingsActivity;
 import candor.fulki.R;
+import candor.fulki.SEARCH.SearchActivity;
 
 public class NotificationActivity extends AppCompatActivity {
 

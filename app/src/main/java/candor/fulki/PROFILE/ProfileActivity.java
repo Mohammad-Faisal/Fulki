@@ -44,7 +44,6 @@ import candor.fulki.CHAT.ChatActivity;
 import candor.fulki.CHAT.InboxActivity;
 import candor.fulki.EXPLORE.ExploreActivity;
 import candor.fulki.GENERAL.MainActivity;
-import candor.fulki.GENERAL.SearchActivity;
 import candor.fulki.HOME.HomeActivity;
 import candor.fulki.HOME.HomeAdapter;
 import candor.fulki.HOME.Posts;
@@ -53,6 +52,7 @@ import candor.fulki.MapsActivity;
 import candor.fulki.NOTIFICATION.NotificationActivity;
 import candor.fulki.NOTIFICATION.Notifications;
 import candor.fulki.R;
+import candor.fulki.SEARCH.SearchActivity;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 
