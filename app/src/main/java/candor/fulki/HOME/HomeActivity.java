@@ -62,13 +62,13 @@ import candor.fulki.CHAT.InboxActivity;
 import candor.fulki.EXPLORE.ExploreActivity;
 import candor.fulki.EXPLORE.PEOPLE.Ratings;
 import candor.fulki.GENERAL.MainActivity;
-import candor.fulki.GENERAL.SearchActivity;
 
 import candor.fulki.MapsActivity;
 import candor.fulki.NOTIFICATION.NotificationActivity;
 import candor.fulki.PROFILE.ProfileActivity;
 import candor.fulki.PROFILE.ProfileSettingsActivity;
 import candor.fulki.R;
+import candor.fulki.SEARCH.SearchActivity;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 
@@ -466,7 +466,7 @@ public class HomeActivity extends AppCompatActivity {
                 startActivity(mProfileIntent);
                 return true;
             case R.id.action_search:
-                Intent searchIntent = new Intent(HomeActivity.this , SearchActivity.class);
+                Intent searchIntent = new Intent(HomeActivity.this ,SearchActivity.class);
 
                 startActivity(searchIntent);
                 return true;

@@ -46,6 +46,10 @@
         <activity
             android:name=".PROFILE.ProfileActivity"
             android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".SEARCH.SearchActivity"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".HOME.ShowPostActivity"
             android:screenOrientation="portrait"

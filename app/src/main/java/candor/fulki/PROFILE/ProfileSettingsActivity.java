@@ -69,6 +69,7 @@ import candor.fulki.GENERAL.ValueAdapter;
 import candor.fulki.HOME.HomeActivity;
 import candor.fulki.EXPLORE.PEOPLE.Ratings;
 import candor.fulki.R;
+import candor.fulki.SEARCH.UserSearch;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ProfileSettingsActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener{
@@ -392,6 +393,13 @@ public class ProfileSettingsActivity extends AppCompatActivity implements Adapte
                 });
     }
 
+    public boolean isthree(String name){
+        String[] arr = name.split(" ");
+        int len=arr.length;
+        if(len>3)return false;
+        return true;
+    }
+
     private void upload(){
 
         mProgress = new ProgressDialog(ProfileSettingsActivity.this);
@@ -412,6 +420,51 @@ public class ProfileSettingsActivity extends AppCompatActivity implements Adapte
             userList.add(new JSONObject(userMap));
             index.addObjectsAsync(new JSONArray(userList), null);
         }
+
+        Map< String, String> dis = new HashMap<>();
+        dis.put("district" , districtString);
+        Map< String, String> dis1 = new HashMap<>();
+        dis1.put("uid" , mUserID);
+
+        firebaseFirestore.collection(districtString).document(mUserID)
+                .set(dis1);
+        firebaseFirestore.collection("user_districts").document(mUserID)
+                .set(dis);
+
+
+
+
+
+        String fname="",mname="",lname="";
+
+
+
+
+        String[] arr = nameString.split(" ");
+        int len=arr.length;
+        if(len==1){
+            fname=arr[0];
+        }
+        else if(len==2){
+            fname=arr[0];
+            mname=arr[1];
+        }
+        else{
+            fname=arr[0];
+            mname=arr[1];
+            lname=arr[2];
+        }
+
+        Log.d(TAG, "upload: hhhh "+thumbImageUrlString);
+
+        UserSearch userSearch=new UserSearch(nameString,districtString,thumbImageUrlString,userNameString,mUserID,fname,lname,mname);
+
+        firebaseFirestore.collection("user_search").document(mUserID)
+                .set(userSearch);
+
+
+
+
 
 
 
@@ -579,7 +632,12 @@ public class ProfileSettingsActivity extends AppCompatActivity implements Adapte
         }else if(bloodString.equals("Select One")){
             Toast.makeText(this, "Please select your blood group", Toast.LENGTH_SHORT).show();
             return  false;
-        } else{
+        }
+        else if(!isthree(nameString)){
+            Toast.makeText(ProfileSettingsActivity.this, "Name can contain at most 3 words", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        else{
             return true;
         }
     }
