@@ -43,7 +43,6 @@
     <color name="base_gree">#9fffe0</color>
 
 
-
     <color name="red_error">#f44336</color>
     <color name="red_dark">#ba000d</color>
     <color name="red_light">#fce4ec</color>
@@ -53,16 +52,10 @@
     <color name="yellow_light">#ffeb3b</color>
 
 
-
     <color name="infotextbackgrount">#e8f5e9</color>
 
 
-
     <color name="mild_black">#2A3E52</color>
-
-
-
-
 
 
 </resources>

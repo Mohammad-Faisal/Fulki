@@ -432,12 +432,7 @@ public class ProfileSettingsActivity extends AppCompatActivity implements Adapte
                 .set(dis);
 
 
-
-
-
         String fname="",mname="",lname="";
-
-
 
 
         String[] arr = nameString.split(" ");
@@ -455,17 +450,11 @@ public class ProfileSettingsActivity extends AppCompatActivity implements Adapte
             lname=arr[2];
         }
 
-        Log.d(TAG, "upload: hhhh "+thumbImageUrlString);
 
         UserSearch userSearch=new UserSearch(nameString,districtString,thumbImageUrlString,userNameString,mUserID,fname,lname,mname);
 
         firebaseFirestore.collection("user_search").document(mUserID)
                 .set(userSearch);
-
-
-
-
-
 
 
         //used for category and blood
@@ -556,9 +545,6 @@ public class ProfileSettingsActivity extends AppCompatActivity implements Adapte
             mProgress.dismiss();
             Log.d(TAG, "  aditional data upload not succesful");
         });
-
-
-
 
 
     }

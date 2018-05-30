@@ -195,8 +195,6 @@ public class ProfileActivity extends AppCompatActivity {
         firebaseFirestore = FirebaseFirestore.getInstance();
 
 
-
-
         android.widget.LinearLayout cardFollowers = findViewById(R.id.profile_followers_linear);
         android.widget.LinearLayout cardFollowings = findViewById(R.id.profile_followings_linear);
         android.widget.LinearLayout sendMessage = findViewById(R.id.profile_send_message_linear);
@@ -231,6 +229,16 @@ public class ProfileActivity extends AppCompatActivity {
         });
 
         final CircleImageView mProfileImageView =findViewById(R.id.profile_image);
+        mProfileImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent profileImageIntent = new Intent(ProfileActivity.this , ShowProfileImageActivity.class);
+                profileImageIntent.putExtra("url", mCurUserImage);
+                profileImageIntent.putExtra("name", mCurUserName);
+                startActivity(profileImageIntent);
+            }
+
+        });
         FirebaseUser mUser = FirebaseAuth.getInstance().getCurrentUser();
 
         if(mUser!=null){
