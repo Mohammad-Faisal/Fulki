@@ -415,12 +415,13 @@ public class SearchActivity extends AppCompatActivity
         }
 
 
-        topicusers.clear();
+
         Log.d(TAG, "onButtonClick1: fidget1"+ text);
 
         firebaseFirestore.collection(reps).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                topicusers.clear();
                 if (task.isSuccessful()) {
                     for (DocumentSnapshot document : task.getResult()) {
                         if(uid.contains(document.getString("user_id"))){
