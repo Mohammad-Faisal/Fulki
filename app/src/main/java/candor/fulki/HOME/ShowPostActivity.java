@@ -48,6 +48,7 @@ import candor.fulki.GENERAL.MainActivity;
 import candor.fulki.NOTIFICATION.Notifications;
 import candor.fulki.PROFILE.ShowPleopleListActivity;
 import candor.fulki.R;
+import candor.fulki.UTILITIES.TouchImageView;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ShowPostActivity extends AppCompatActivity {
@@ -93,7 +94,8 @@ public class ShowPostActivity extends AppCompatActivity {
         postLikeCount = findViewById(R.id.post_like_number);
         postCommentCount = findViewById(R.id.show_post_comment_count);
         mShowPostOwnImage = findViewById(R.id.show_post_own_image);
-        final ImageView postImageView = findViewById(R.id.show_post_collapsing_image);
+        //final ImageView postImageView = findViewById(R.id.show_post_collapsing_image);
+        final TouchImageView postImageView = findViewById(R.id.show_post_collapsing_image);
 
 
         mPostID = getIntent().getStringExtra("postID");
@@ -130,7 +132,6 @@ public class ShowPostActivity extends AppCompatActivity {
             showPeopleIntent.putExtra("user_id" ,mPostID );
             startActivity(showPeopleIntent);
         });
-
 
 
         firebaseFirestore.collection("posts").document(mPostID).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
@@ -182,7 +183,6 @@ public class ShowPostActivity extends AppCompatActivity {
                 }
             }
         });
-
 
         //setting the current state of like button
         FirebaseFirestore.getInstance().collection("likes/" + mPostID + "/likes").document(mUserID).get().addOnCompleteListener(task -> {
