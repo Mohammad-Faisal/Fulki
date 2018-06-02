@@ -23,6 +23,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.Window;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -191,6 +192,10 @@ public class HomeActivity extends AppCompatActivity {
             mUserID = FirebaseAuth.getInstance().getCurrentUser().getUid();
         }
 
+        findViewById(R.id.home_floating).setOnClickListener(v -> {
+            Intent createPostIntent = new Intent(HomeActivity.this , CreatePostActivity.class);
+            startActivity(createPostIntent);
+        });
 
         if (mUserID != null) {
 
@@ -374,12 +379,6 @@ public class HomeActivity extends AppCompatActivity {
             }
         });
 
-        /*nextQuery.addSnapshotListener(HomeActivity.this , (documentSnapshots, e) -> {
-            if(documentSnapshots!=null){
-                if(!documentSnapshots.isEmpty()){
-                }
-            }
-        });*/
     }
 
     private Task<Void> addRating( String mUserID  , int factor) {
