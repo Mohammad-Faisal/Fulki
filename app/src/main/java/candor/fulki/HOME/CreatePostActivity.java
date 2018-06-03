@@ -3,6 +3,8 @@ package candor.fulki.HOME;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
+import candor.fulki.R;
+
 public class CreatePostActivity extends AppCompatActivity {
 
     @Override

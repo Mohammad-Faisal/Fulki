@@ -28,9 +28,6 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
-import com.firebase.ui.auth.AuthUI;
-import com.firebase.ui.auth.AuthUI.IdpConfig;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -68,7 +65,7 @@ import candor.fulki.NOTIFICATION.NotificationActivity;
 import candor.fulki.PROFILE.ProfileActivity;
 import candor.fulki.PROFILE.ProfileSettingsActivity;
 import candor.fulki.R;
-import candor.fulki.SEARCH.SearchActivity;
+import candor.fulki.GENERAL.SearchActivity;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 
@@ -467,7 +464,6 @@ public class HomeActivity extends AppCompatActivity {
                 return true;
             case R.id.action_search:
                 Intent searchIntent = new Intent(HomeActivity.this ,SearchActivity.class);
-
                 startActivity(searchIntent);
                 return true;
             case R.id.action_message:

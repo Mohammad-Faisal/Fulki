@@ -6,7 +6,7 @@ android {
         applicationId "candor.fulki"
         minSdkVersion 19
         targetSdkVersion 26
-        versionCode 4
+        versionCode 5
         versionName "1.1"
         multiDexEnabled true
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
