@@ -94,6 +94,8 @@ public class HomeActivity extends AppCompatActivity {
     private List< Posts> posts;
     private FirebaseFirestore firebaseFirestore;
     private HomeAdapter mHomeAdapter;
+    private CombinedHomeAdapter mCombinedHomeAdapter;
+    private List< CombinedPosts> combinedPosts;
     LinearLayoutManager mLinearManager;
     private DocumentSnapshot lastVisible = null;
     private boolean isFirstPageLoad = true;
@@ -230,13 +232,24 @@ public class HomeActivity extends AppCompatActivity {
 
 
 
-            posts = new ArrayList<>();
+            /*posts = new ArrayList<>();
             recyclerView = findViewById(R.id.home_recycler_view);
             mLinearManager = new LinearLayoutManager(HomeActivity.this);
             recyclerView.setLayoutManager(mLinearManager);
             recyclerView.setNestedScrollingEnabled(false);
             mHomeAdapter = new HomeAdapter(recyclerView, posts,HomeActivity.this, HomeActivity.this);
             recyclerView.setAdapter(mHomeAdapter);
+*/
+
+
+            combinedPosts = new ArrayList<>();
+            recyclerView = findViewById(R.id.home_recycler_view);
+            mLinearManager = new LinearLayoutManager(HomeActivity.this);
+            recyclerView.setLayoutManager(mLinearManager);
+            recyclerView.setNestedScrollingEnabled(false);
+            mCombinedHomeAdapter = new CombinedHomeAdapter( combinedPosts,HomeActivity.this, HomeActivity.this);
+            recyclerView.setAdapter(mCombinedHomeAdapter);
+
 
 
             mCreatePostImage.setOnClickListener(v -> {
@@ -326,7 +339,38 @@ public class HomeActivity extends AppCompatActivity {
 
     public void loadFirstPosts(){
 
-        Query nextQuery = firebaseFirestore.collection("posts").orderBy("timestamp" , Query.Direction.DESCENDING).limit(10);
+
+        Query nextQuery = firebaseFirestore.collection("test").orderBy("time_stamp" , Query.Direction.DESCENDING).limit(10);
+        nextQuery.addSnapshotListener(HomeActivity.this , (documentSnapshots, e) -> {
+            if(documentSnapshots!=null){
+                if(!documentSnapshots.isEmpty()){
+                    if(isFirstPageLoad==true){
+                        lastVisible = documentSnapshots.getDocuments().get(documentSnapshots.size()-1);
+                    }
+                    for(DocumentChange doc: documentSnapshots.getDocumentChanges()){
+                        if(doc.getType() == DocumentChange.Type.ADDED){
+                            CombinedPosts singlePosts = doc.getDocument().toObject(CombinedPosts.class);
+                            String uid = singlePosts.getPrimary_user_id();
+                            Log.d(TAG, "found user id               "+ uid);
+                            Log.d(TAG, "caption  for this user is   "+singlePosts.getCaption());
+                            if(isFirstPageLoad){
+                                combinedPosts.add(singlePosts);
+                            }else{
+                                combinedPosts.add(0, singlePosts);
+                            }
+                            mCombinedHomeAdapter.notifyDataSetChanged();
+                        }
+                    }
+                    isFirstPageLoad = false;
+                }
+            }else{
+                Log.d(TAG, "onCreate:   document snapshot is null");
+            }
+        });
+
+
+
+        /*Query nextQuery = firebaseFirestore.collection("posts").orderBy("timestamp" , Query.Direction.DESCENDING).limit(10);
         nextQuery.addSnapshotListener(HomeActivity.this , (documentSnapshots, e) -> {
             if(documentSnapshots!=null){
                 if(!documentSnapshots.isEmpty()){
@@ -353,12 +397,12 @@ public class HomeActivity extends AppCompatActivity {
             }else{
                 Log.d(TAG, "onCreate:   document snapshot is null");
             }
-        });
+        });*/
     }
 
 
     public void loadMorePost(){
-        Query nextQuery = firebaseFirestore.collection("posts")
+       /* Query nextQuery = firebaseFirestore.collection("posts")
                 .orderBy("timestamp" , Query.Direction.DESCENDING)
                 .startAfter(lastVisible)
                 .limit(10);
@@ -377,7 +421,7 @@ public class HomeActivity extends AppCompatActivity {
                     }
                 }
             }
-        });
+        });*/
 
     }
 

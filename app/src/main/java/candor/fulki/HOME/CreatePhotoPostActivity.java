@@ -298,19 +298,16 @@ public class CreatePhotoPostActivity extends AppCompatActivity {
                             //setting the path to file so that later we can delete this post
                             PostFiles postFiles = new PostFiles("post_images/"+mUserID+"/"+randomName+".jpg" ,"post_thumb_images/"+mUserID+"/"+randomName+".jpg", postPushId);
                             firebaseFirestore.collection("images").document(mUserID).collection("posts").document(postPushId).set(postFiles);
-                            firebaseFirestore.collection("posts").document(postPushId).set(postMap).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    mProgress.dismiss();
-                                    if(task.isSuccessful()){
-                                        addRating(mUserID , 15);
-                                        Toast.makeText(CreatePhotoPostActivity.this, "Success !", Toast.LENGTH_SHORT).show();
-                                        Intent mainIntent = new Intent(CreatePhotoPostActivity.this , HomeActivity.class);
-                                        startActivity(mainIntent);
-                                        finish();
-                                    }else{
-                                        Toast.makeText(CreatePhotoPostActivity.this, "There was an error !", Toast.LENGTH_SHORT).show();
-                                    }
+                            firebaseFirestore.collection("posts").document(postPushId).set(postMap).addOnCompleteListener(task -> {
+                                mProgress.dismiss();
+                                if(task.isSuccessful()){
+                                    addRating(mUserID , 15);
+                                    Toast.makeText(CreatePhotoPostActivity.this, "Success !", Toast.LENGTH_SHORT).show();
+                                    Intent mainIntent = new Intent(CreatePhotoPostActivity.this , HomeActivity.class);
+                                    startActivity(mainIntent);
+                                    finish();
+                                }else{
+                                    Toast.makeText(CreatePhotoPostActivity.this, "There was an error !", Toast.LENGTH_SHORT).show();
                                 }
                             });
 
