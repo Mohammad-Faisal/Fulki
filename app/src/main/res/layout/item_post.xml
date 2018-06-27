@@ -109,7 +109,7 @@
 
 
         <TextView
-            andriod:layout_marginTop="5dp"
+            andriod:layout_marginTop="0dp"
             android:layout_marginBottom="5dp"
             android:fontFamily="@font/nunito_extralight"
             android:id="@+id/post_caption"
@@ -118,7 +118,7 @@
             android:textAlignment="center"
             android:layout_marginLeft="5dp"
             android:textColor="@color/common_google_signin_btn_text_dark_focused"
-            android:textSize="15sp" />
+            android:textSize="15sp"/>
 
 
         <ProgressBar
@@ -131,7 +131,7 @@
         <com.daimajia.slider.library.SliderLayout
             android:id="@+id/item_post_slider"
             android:layout_width="match_parent"
-            android:layout_height="320dp"
+            android:layout_height="400dp"
             />
 
         <com.daimajia.slider.library.Indicators.PagerIndicator
@@ -143,6 +143,7 @@
 
 
         <ImageView
+
             android:visibility="gone"
             android:contentDescription="@string/app_name"
             android:src="@drawable/ic_person_grey"

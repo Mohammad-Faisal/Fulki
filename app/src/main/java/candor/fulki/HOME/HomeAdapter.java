@@ -252,7 +252,6 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
                 if (!documentSnapshots.isEmpty()) {
                     long count = documentSnapshots.size();
                     //long cnt = Integer.toString(count);
-
                     firebaseFirestore.collection("posts").document(postPushID).update("comment_cnt" , count);
                     if (count == 1) {
                         holder.setPostCommentCount(count);
@@ -713,13 +712,10 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
 
                             final StorageReference storageRef = FirebaseStorage.getInstance().getReference();
                             StorageReference imageRef = storageRef.child(imagePath);
-                            imageRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
-                                @Override
-                                public void onSuccess(Void aVoid) {
-                                    StorageReference imageRef = storageRef.child(thumbImagePath);
-                                    imageRef.delete();
-                                    firebaseFirestore.collection("images").document(mUserID).collection("posts").document(postPushID).delete();
-                                }
+                            imageRef.delete().addOnSuccessListener(aVoid -> {
+                                StorageReference imageRef1 = storageRef.child(thumbImagePath);
+                                imageRef1.delete();
+                                firebaseFirestore.collection("images").document(mUserID).collection("posts").document(postPushID).delete();
                             }).addOnFailureListener(new OnFailureListener() {
                                 @Override
                                 public void onFailure(@NonNull Exception exception) {
@@ -864,7 +860,7 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
             if(image_url!=null){
                 if(image_url.equals("default")){
                     Log.d(TAG, "setUserImage:    visibility gone but caption is  " + image_url);
-                    postImage.setVisibility(View.GONE);
+                    //postImage.setVisibility(View.GONE);
                 }else{
                     ImageLoader imageLoader = ImageLoader.getInstance();
                     imageLoader.displayImage(image_url, imageView);

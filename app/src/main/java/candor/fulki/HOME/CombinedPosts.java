@@ -6,7 +6,6 @@ import java.util.Map;
 
 public class CombinedPosts {
 
-
     private long timestamp;
 
     private String primary_user_id;

@@ -73,6 +73,7 @@ public class CreatePostActivity extends AppCompatActivity {
 
     ArrayList<String> imageUrls = new ArrayList<>();
     ArrayList<String> thumbImageUrls = new ArrayList<>();
+    ArrayList<PostFiles> postFIles = new ArrayList<>();
 
     FirebaseFirestore firebaseFirestore;
 
@@ -147,7 +148,6 @@ public class CreatePostActivity extends AppCompatActivity {
                     .compressToBitmap(actualImage);
             byte[] thumbByte  = getFileDataFromDrawable(compressedThumbFile);
 
-            final String randomName = random();
 
             long timestamp = 1* new Date().getTime();
             String img = String.valueOf(timestamp);
@@ -156,10 +156,11 @@ public class CreatePostActivity extends AppCompatActivity {
             imageFilePath = FirebaseStorage.getInstance().getReference().child("post_images").child(mUserID).child(img+".jpg");
             thumbFilePath = FirebaseStorage.getInstance().getReference().child("post_thumb_images").child(mUserID).child(img+".jpg");
 
+            PostFiles postFiles = new PostFiles("post_images/"+mUserID+"/"+img+".jpg" ,"post_thumb_images/"+mUserID+"/"+img+".jpg", postPushId);
+            postFIles.add(postFiles);
 
             UploadTask uploadThumbTask = thumbFilePath.putBytes(thumbByte);
             UploadTask uploadImageTask = imageFilePath.putBytes(imageByte);
-
 
 
             uploadImageTask.addOnSuccessListener(taskSnapshot -> {
@@ -196,16 +197,18 @@ public class CreatePostActivity extends AppCompatActivity {
     }
 
     public void uploadPost(){
+        for(int i=0;i<postFIles.size();i++){
+            PostFiles  file = postFIles.get(i);
+            firebaseFirestore.collection("images").document("posts").collection(postPushId).add(file);
+        }
 
-
-        //PostFiles postFiles = new PostFiles("post_images/"+mUserID+"/"+randomName+".jpg" ,"post_thumb_images/"+mUserID+"/"+randomName+".jpg", postPushId);
-        //firebaseFirestore.collection("images").document(mUserID).collection("posts").document(postPushId).set(postFiles);
-        firebaseFirestore.collection("test").document(postPushId).set(postMap).addOnCompleteListener(task -> {
+        //test er jaygay posts hobe
+        firebaseFirestore.collection("posts").document(postPushId).set(postMap).addOnCompleteListener(task -> {
             //mProgress.dismiss();
             if(task.isSuccessful()){
                 Log.d(TAG, "uploadPost:     post upload succesfull ");
                 mProgress.dismiss();
-                //addRating(mUserID , 15);
+                addRating(mUserID , 15);
                 Toast.makeText(CreatePostActivity.this, "Success !", Toast.LENGTH_SHORT).show();
                 Intent mainIntent = new Intent(CreatePostActivity.this , HomeActivity.class);
                 startActivity(mainIntent);
@@ -221,13 +224,20 @@ public class CreatePostActivity extends AppCompatActivity {
 
     public void validatePost(){
 
+
+        mProgress = new ProgressDialog(CreatePostActivity.this);
+        mProgress.setTitle("Uploading Image.......");
+        mProgress.setMessage("please wait while we upload your post");
+        mProgress.setCanceledOnTouchOutside(false);
+        mProgress.show();
+
         Log.d(TAG, "validatePost:     started ");
         
         
         String caption = mCaption.getText().toString();
         String location = mLocation.getText().toString();
 
-        DocumentReference ref = FirebaseFirestore.getInstance().collection("test").document();
+        DocumentReference ref = FirebaseFirestore.getInstance().collection("posts").document();
         postPushId = ref.getId();
 
         long timestamp = 1* new Date().getTime();
@@ -305,10 +315,34 @@ public class CreatePostActivity extends AppCompatActivity {
                 String[] filePathColumn = { MediaStore.Images.Media.DATA };
                 imagesEncodedList = new ArrayList<String>();
                 if(data.getData()!=null){
-                    Uri mImageUri=data.getData();
-                    Cursor cursor = getContentResolver().query(mImageUri,
+                    Uri uri=data.getData();
+                    Cursor cursor = getContentResolver().query(uri,
                             filePathColumn, null, null, null);
                     cursor.moveToFirst();
+
+                    try {
+                        Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), uri);
+                        ViewGroup holder;
+
+                        holder = findViewById(R.id.post_image_holder);
+
+                        int dimen = (int) getResources().getDimension(R.dimen.feedback_image_size);
+
+                        ImageView image = new ImageView(this);
+                        image.setLayoutParams(new android.view.ViewGroup.LayoutParams(dimen, dimen));
+                        image.setMaxHeight(dimen);
+                        image.setMaxWidth(dimen);
+                        image.setImageBitmap(bitmap);
+                        image.setTag(uri);
+
+                        holder.addView(image, holder.getChildCount()-1);
+
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    postImageUriArrayList.add(uri);
+
 
                     int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
                     imageEncoded  = cursor.getString(columnIndex);
