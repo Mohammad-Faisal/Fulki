@@ -23,6 +23,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.Window;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -90,6 +91,8 @@ public class HomeActivity extends AppCompatActivity {
     private List< Posts> posts;
     private FirebaseFirestore firebaseFirestore;
     private HomeAdapter mHomeAdapter;
+    private CombinedHomeAdapter mCombinedHomeAdapter;
+    private List< CombinedPosts> combinedPosts;
     LinearLayoutManager mLinearManager;
     private DocumentSnapshot lastVisible = null;
     private boolean isFirstPageLoad = true;
@@ -168,6 +171,11 @@ public class HomeActivity extends AppCompatActivity {
         mCreatePostImage = findViewById(R.id.create_post_image);
         final CircleImageView imageView = findViewById(R.id.home_circle_image);
 
+        mCreatePostText.setOnClickListener(v -> {
+            Intent createPostIntent = new Intent(HomeActivity.this , CreatePostActivity.class);
+            startActivity(createPostIntent);
+        });
+
 
 
         //------------- BOTTOM NAVIGATION HANDLING ------//
@@ -188,6 +196,10 @@ public class HomeActivity extends AppCompatActivity {
             mUserID = FirebaseAuth.getInstance().getCurrentUser().getUid();
         }
 
+        findViewById(R.id.home_floating).setOnClickListener(v -> {
+            Intent createPostIntent = new Intent(HomeActivity.this , CreatePostActivity.class);
+            startActivity(createPostIntent);
+        });
 
         if (mUserID != null) {
 
@@ -222,17 +234,31 @@ public class HomeActivity extends AppCompatActivity {
 
 
 
-            posts = new ArrayList<>();
+            /*posts = new ArrayList<>();
             recyclerView = findViewById(R.id.home_recycler_view);
             mLinearManager = new LinearLayoutManager(HomeActivity.this);
             recyclerView.setLayoutManager(mLinearManager);
             recyclerView.setNestedScrollingEnabled(false);
             mHomeAdapter = new HomeAdapter(recyclerView, posts,HomeActivity.this, HomeActivity.this);
-            recyclerView.setAdapter(mHomeAdapter);
+            recyclerView.setAdapter(mHomeAdapter);*/
+
+
+            combinedPosts = new ArrayList<>();
+            recyclerView = findViewById(R.id.home_recycler_view);
+            mLinearManager = new LinearLayoutManager(HomeActivity.this);
+            recyclerView.setLayoutManager(mLinearManager);
+            recyclerView.setNestedScrollingEnabled(false);
+            mCombinedHomeAdapter = new CombinedHomeAdapter( combinedPosts,HomeActivity.this, HomeActivity.this);
+            recyclerView.setAdapter(mCombinedHomeAdapter);
+
 
 
             mCreatePostImage.setOnClickListener(v -> {
-                if(TextPost){
+
+                Intent createPostIntent = new Intent(HomeActivity.this , CreatePostActivity.class);
+                startActivity(createPostIntent);
+
+                /*if(TextPost){
                     if(isDataAvailable()){
                         uploadTextPost();
                     }else{
@@ -240,7 +266,7 @@ public class HomeActivity extends AppCompatActivity {
                     }
                 } else{
                     BringImagePicker();
-                }
+                }*/
             });
 
             firebaseFirestore = FirebaseFirestore.getInstance();
@@ -303,7 +329,6 @@ public class HomeActivity extends AppCompatActivity {
 
 
 
-
         firebaseFirestore.collection("posts").document(postPushId).set(postMap).addOnCompleteListener(task1 -> {
             mProgress.dismiss();
             if(task1.isSuccessful()){
@@ -318,7 +343,8 @@ public class HomeActivity extends AppCompatActivity {
 
     public void loadFirstPosts(){
 
-        Query nextQuery = firebaseFirestore.collection("posts").orderBy("timestamp" , Query.Direction.DESCENDING).limit(10);
+
+        Query nextQuery = firebaseFirestore.collection("posts").orderBy("time_stamp" , Query.Direction.DESCENDING).limit(10);
         nextQuery.addSnapshotListener(HomeActivity.this , (documentSnapshots, e) -> {
             if(documentSnapshots!=null){
                 if(!documentSnapshots.isEmpty()){
@@ -327,17 +353,17 @@ public class HomeActivity extends AppCompatActivity {
                     }
                     for(DocumentChange doc: documentSnapshots.getDocumentChanges()){
                         if(doc.getType() == DocumentChange.Type.ADDED){
-                            Posts singlePosts = doc.getDocument().toObject(Posts.class);
-                            String uid = singlePosts.getUser_id();
-
-                            Log.d(TAG, "onCreate:  found user id   "+ uid);
-                            Log.d(TAG, "loadFirstPosts:  image for this user is  "+singlePosts.getPost_image_url());
+                            //Toast.makeText(this, "found", Toast.LENGTH_SHORT).show();
+                            CombinedPosts singlePosts = doc.getDocument().toObject(CombinedPosts.class);
+                            String uid = singlePosts.getPrimary_user_id();
+                            Log.d(TAG, "found user id               "+ uid);
+                            Log.d(TAG, "caption  for this user is   "+singlePosts.getCaption());
                             if(isFirstPageLoad){
-                                posts.add(singlePosts);
+                                combinedPosts.add(singlePosts);
                             }else{
-                                posts.add(0, singlePosts);
+                                combinedPosts.add(0, singlePosts);
                             }
-                            mHomeAdapter.notifyDataSetChanged();
+                            mCombinedHomeAdapter.notifyDataSetChanged();
                         }
                     }
                     isFirstPageLoad = false;
@@ -346,12 +372,15 @@ public class HomeActivity extends AppCompatActivity {
                 Log.d(TAG, "onCreate:   document snapshot is null");
             }
         });
+
+
+
     }
 
 
     public void loadMorePost(){
         Query nextQuery = firebaseFirestore.collection("posts")
-                .orderBy("timestamp" , Query.Direction.DESCENDING)
+                .orderBy("time_stamp" , Query.Direction.DESCENDING)
                 .startAfter(lastVisible)
                 .limit(10);
         nextQuery.get().addOnSuccessListener(documentSnapshots -> {
@@ -371,12 +400,6 @@ public class HomeActivity extends AppCompatActivity {
             }
         });
 
-        /*nextQuery.addSnapshotListener(HomeActivity.this , (documentSnapshots, e) -> {
-            if(documentSnapshots!=null){
-                if(!documentSnapshots.isEmpty()){
-                }
-            }
-        });*/
     }
 
     private Task<Void> addRating( String mUserID  , int factor) {

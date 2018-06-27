@@ -24,7 +24,10 @@ import com.theartofdev.edmodo.cropper.CropImageView;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
 
 import candor.fulki.PROFILE.RegistrationAccount;
@@ -37,6 +40,9 @@ public class Functions {
 
     public Functions() {
     }
+
+
+
 
 
     // give image uri and context and return byte array

@@ -79,9 +79,6 @@ public class RegistrationAccount extends AppCompatActivity {
         setContentView(R.layout.activity_registration_account);
 
 
-        // setting toolbar staff
-        /*Toolbar mSettingsToolbar = findViewById(R.id.reg_toolbar);
-        setSupportActionBar(mSettingsToolbar);*/
         getSupportActionBar().setTitle("Create Your Account ");
 
 
@@ -306,7 +303,6 @@ public class RegistrationAccount extends AppCompatActivity {
         }
     };
 
-
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
@@ -331,14 +327,11 @@ public class RegistrationAccount extends AppCompatActivity {
         }
     }
 
-
-
-
     public void checkPermissionStorage() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 
             if (ContextCompat.checkSelfPermission(RegistrationAccount.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(RegistrationAccount.this, "Permission Denied", Toast.LENGTH_LONG).show();
+                Toast.makeText(RegistrationAccount.this, "Permission granted ....  try now", Toast.LENGTH_LONG).show();
                 ActivityCompat.requestPermissions(RegistrationAccount.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
 
             } else {

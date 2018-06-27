@@ -46,7 +46,6 @@
         <activity
             android:name=".PROFILE.ProfileActivity"
             android:screenOrientation="portrait" />
-
         <activity
             android:name=".SEARCH.SearchActivity"
             android:screenOrientation="portrait" />
@@ -126,9 +125,10 @@
             android:name=".PROFILE.ShowProfileImageActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_show_profile_image"
-            android:theme="@style/FullscreenTheme"
+            android:parentActivityName=".PROFILE.ProfileActivity"
             android:screenOrientation="portrait"
-            android:parentActivityName=".PROFILE.ProfileActivity"></activity>
+            android:theme="@style/FullscreenTheme" />
+        <activity android:name=".HOME.CreatePostActivity"></activity>
     </application>
 
 </manifest>

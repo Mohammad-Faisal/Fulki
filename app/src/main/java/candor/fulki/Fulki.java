@@ -3,6 +3,7 @@ package candor.fulki;
 import com.google.firebase.database.FirebaseDatabase;
 
 import android.content.Context;
+import android.support.multidex.MultiDexApplication;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
@@ -17,7 +18,7 @@ import candor.fulki.UTILITIES.UniversalImageLoader;
 import okhttp3.Cache;
 import okhttp3.OkHttpClient;
 
-public class Fulki extends android.app.Application{
+public class Fulki extends MultiDexApplication {
 
 
     //offline er jonno lagbe

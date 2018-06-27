@@ -29,12 +29,13 @@
                 android:src="@drawable/ic_blank_profile" />
 
             <Button
+                android:textColor="@color/white"
                 android:id="@+id/reg_camera"
-                android:layout_width="100dp"
-                android:layout_height="30dp"
+                android:layout_width="140dp"
+                android:layout_height="40dp"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="10dp"
-                android:background="@drawable/textview_information"
+                android:background="@color/colorPrimaryy"
                 android:fontFamily="@font/averia_serif_libre_bold"
                 android:text="Set Photo"
                 android:textAllCaps="false" />
@@ -157,7 +158,7 @@
                     android:id="@+id/reg_save"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:background="@color/colorPrimary"
+                    android:background="@color/colorPrimaryy"
                     android:fontFamily="@font/averia_serif_libre_bold"
                     android:text="Save"
                     android:textAllCaps="false"
