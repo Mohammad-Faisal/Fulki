@@ -44,6 +44,8 @@ import candor.fulki.CHAT.ChatActivity;
 import candor.fulki.CHAT.InboxActivity;
 import candor.fulki.EXPLORE.ExploreActivity;
 import candor.fulki.GENERAL.MainActivity;
+import candor.fulki.HOME.CombinedHomeAdapter;
+import candor.fulki.HOME.CombinedPosts;
 import candor.fulki.HOME.HomeActivity;
 import candor.fulki.HOME.HomeAdapter;
 import candor.fulki.HOME.Posts;
@@ -69,9 +71,9 @@ public class ProfileActivity extends AppCompatActivity {
 
 
 
-    private List< Posts> posts;
+    private List<CombinedPosts> posts;
     private FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
-    private HomeAdapter mProfilePostAdapter;
+    private CombinedHomeAdapter mProfilePostAdapter;
     private DocumentSnapshot lastVisible;
     private boolean isFirstPageLoad = true;
 
@@ -189,7 +191,7 @@ public class ProfileActivity extends AppCompatActivity {
 
         //setting up recycler view
         posts = new ArrayList<>();
-        mProfilePostAdapter = new HomeAdapter(mProfilePostsRecycelr, posts,ProfileActivity.this, ProfileActivity.this);
+        mProfilePostAdapter = new CombinedHomeAdapter( posts,ProfileActivity.this, ProfileActivity.this);
         mProfilePostsRecycelr.setLayoutManager(new LinearLayoutManager(ProfileActivity.this));
         mProfilePostsRecycelr.setAdapter(mProfilePostAdapter);
         firebaseFirestore = FirebaseFirestore.getInstance();
@@ -382,7 +384,7 @@ public class ProfileActivity extends AppCompatActivity {
                 });
 
             firebaseFirestore = FirebaseFirestore.getInstance();
-            Query nextQuery = firebaseFirestore.collection("posts").orderBy("timestamp" , Query.Direction.DESCENDING).limit(100).whereEqualTo("user_id", mCurProfileId);
+            Query nextQuery = firebaseFirestore.collection("posts").orderBy("time_stamp" , Query.Direction.DESCENDING).limit(100).whereEqualTo("primary_user_id", mCurProfileId);
             nextQuery.addSnapshotListener(ProfileActivity.this , (documentSnapshots, e) -> {
                 if(documentSnapshots!=null){
                     if(!documentSnapshots.isEmpty()){
@@ -391,9 +393,7 @@ public class ProfileActivity extends AppCompatActivity {
                         }
                         for(DocumentChange doc: documentSnapshots.getDocumentChanges()){
                             if(doc.getType() == DocumentChange.Type.ADDED){
-                                Posts singlePosts = doc.getDocument().toObject(Posts.class);
-                                String uid = singlePosts.getUser_id();
-                                Log.d(TAG, "onCreate:  found user id   "+ uid);
+                                CombinedPosts singlePosts = doc.getDocument().toObject(CombinedPosts.class);
                                 if(isFirstPageLoad){
                                         posts.add(singlePosts);
                                 }else{
@@ -425,9 +425,9 @@ public class ProfileActivity extends AppCompatActivity {
 
     public void loadMorePost(){
         Query nextQuery = firebaseFirestore.collection("posts")
-                .orderBy("timestamp" , Query.Direction.DESCENDING)
+                .orderBy("time_stamp" , Query.Direction.DESCENDING)
                 .startAfter(lastVisible)
-                .whereEqualTo("user_id" , mCurProfileId)
+                .whereEqualTo("primary_user_id" , mCurProfileId)
                 .limit(5);
         nextQuery.addSnapshotListener(ProfileActivity.this , (documentSnapshots, e) -> {
             if(documentSnapshots!=null){
@@ -435,11 +435,9 @@ public class ProfileActivity extends AppCompatActivity {
                     lastVisible = documentSnapshots.getDocuments().get(documentSnapshots.size()-1);
                     for(DocumentChange doc: documentSnapshots.getDocumentChanges()){
                         if(doc.getType() == DocumentChange.Type.ADDED){
-                            Posts singlePosts = doc.getDocument().toObject(Posts.class);
-                            String uid = singlePosts.getUser_id();
+                            CombinedPosts singlePosts = doc.getDocument().toObject(CombinedPosts.class);
                             posts.add(singlePosts);
                             mProfilePostAdapter.notifyDataSetChanged();
-
                         }
                     }
                 }

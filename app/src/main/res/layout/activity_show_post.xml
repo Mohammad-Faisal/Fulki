@@ -31,6 +31,7 @@
 
 
             <candor.fulki.UTILITIES.TouchImageView
+                android:visibility="gone"
                 android:scaleType="fitXY"
                 android:src="@drawable/ic_camera_icon"
                 android:layout_width="match_parent"
@@ -38,6 +39,19 @@
                 android:transitionName="post_image"
                 android:id="@+id/show_post_collapsing_image"/>
 
+
+            <com.daimajia.slider.library.SliderLayout
+                android:id="@+id/show_post_slider"
+                android:layout_width="match_parent"
+                android:layout_height="400dp"
+                />
+
+            <com.daimajia.slider.library.Indicators.PagerIndicator
+                android:id="@+id/custom_indicator"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                />
 
 
             <!--
@@ -174,6 +188,7 @@
             </LinearLayout>
 
             <View
+                android:layout_marginTop="4dp"
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:background="@color/Grey"/>

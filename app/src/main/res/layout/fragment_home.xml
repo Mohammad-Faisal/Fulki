@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:clickable="true"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context="candor.flare.HOME.HomeFragment">
+    tools:context="candor.fulki.HOME.HomeFragment">
 
 
     <android.support.v4.widget.NestedScrollView

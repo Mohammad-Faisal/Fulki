@@ -18,6 +18,12 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.daimajia.slider.library.Animations.DescriptionAnimation;
+import com.daimajia.slider.library.Indicators.PagerIndicator;
+import com.daimajia.slider.library.SliderLayout;
+import com.daimajia.slider.library.SliderTypes.BaseSliderView;
+import com.daimajia.slider.library.SliderTypes.TextSliderView;
+import com.daimajia.slider.library.Tricks.ViewPagerEx;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -51,7 +57,7 @@ import candor.fulki.R;
 import candor.fulki.UTILITIES.TouchImageView;
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class ShowPostActivity extends AppCompatActivity {
+public class ShowPostActivity extends AppCompatActivity  implements BaseSliderView.OnSliderClickListener, ViewPagerEx.OnPageChangeListener{
 
 
     private static final String TAG = "ShowPostActivity";
@@ -70,12 +76,15 @@ public class ShowPostActivity extends AppCompatActivity {
     public TextView postLocaiton;
     public TextView postLikeCount;
     public TextView postCommentCount;
+    public SliderLayout postSlider;
 
     public CircleImageView postUserImage , mShowPostOwnImage;
     public LikeButton postLikeButton;
 
 
     public String mPostOwnerID;
+
+
 
 
 
@@ -96,6 +105,7 @@ public class ShowPostActivity extends AppCompatActivity {
         mShowPostOwnImage = findViewById(R.id.show_post_own_image);
         //final ImageView postImageView = findViewById(R.id.show_post_collapsing_image);
         final TouchImageView postImageView = findViewById(R.id.show_post_collapsing_image);
+        postSlider = findViewById(R.id.show_post_slider);
 
 
         mPostID = getIntent().getStringExtra("postID");
@@ -142,32 +152,73 @@ public class ShowPostActivity extends AppCompatActivity {
                 if(task.isSuccessful()){
                     if(task.getResult().exists()){
 
-                        Posts post = task.getResult()
-                                .toObject(Posts.class);
-                        String postImage = post.getPost_image_url();
+                        CombinedPosts post = task.getResult()
+                                .toObject(CombinedPosts.class);
+
+                        HashMap<String,String> Hash_file_maps;
+                        Hash_file_maps = post.getPost_thumb_url();
+
+                        if(Hash_file_maps.size() == 0){
+                            postSlider.setVisibility(View.GONE);
+                        }else{
+                            setImages(Hash_file_maps);
+                        }
+
+
+
+                        String primary_user_id = post.getPrimary_user_id();
+                        String secondary_user_id = post.getSecondary_user_id();
+
+                        String primary_push_id = post.getPrimary_push_id();
+                        String secondary_push_id = post.getSecondary_push_id();
+
+
+                        String timedate = post.getTime_and_date();
+                        String location = post.getLocation();
+                        String caption = post.getCaption();
+                        String type = post.getType();
+
+                        String privacy = post.getPrivacy();
+
+                        long like_cnt = post.getLike_cnt();
+                        long comment_cnt = post.getComment_cnt();
+                        long share_cnt = post.getShare_cnt();
+
+
                         String postCaptionText = post.getCaption();
                         String postTime = post.getTime_and_date();
-                        String postOwnerID = post.getUser_id();
-                        String postOwnerThumbImage = post.getUser_thumb_image();
-                        String postOwnerName = post.getUser_name();
+
+
+
+                        firebaseFirestore.collection("users").document(primary_user_id).get().addOnSuccessListener(documentSnapshot -> {
+                            if(documentSnapshot.exists()){
+                                String primaryUserName = documentSnapshot.getString("name");
+                                String primaryUserThumbImage =documentSnapshot.getString("thumb_image");
+                                postUserName.setText(primaryUserName);
+                                ImageLoader imageLoader = ImageLoader.getInstance();
+                                imageLoader.displayImage(primaryUserThumbImage, postUserImage);
+
+                            }
+                        }).addOnFailureListener(e -> {
+                            String primaryUserName = "User Name";
+                            String primaryUserThumbImage = "default";
+                            postUserName.setText(primaryUserName);
+                            ImageLoader imageLoader = ImageLoader.getInstance();
+                            imageLoader.displayImage(primaryUserThumbImage, postUserImage);
+                        });
+
+
+
                         long likeCount = post.getLike_cnt();
                         long commentCount = post.getComment_cnt();
 
 
-                        if(postImage.equals("default")){
-                            postImageView.setVisibility(View.GONE);
-                        }
 
                         setLikeCount(likeCount);
                         setCommentCount(commentCount);
 
-                        postUserName.setText(postOwnerName);
-                        ImageLoader imageLoader = ImageLoader.getInstance();
-                        imageLoader.displayImage(postOwnerThumbImage, postUserImage);
-                        imageLoader.displayImage(postImage, postImageView);
 
-
-                        mPostOwnerID = postOwnerID;
+                        mPostOwnerID = primary_user_id;
                         postDateTime.setText(postTime);
                         if(postCaptionText.length() == 0){
                             postCaption.setVisibility(View.GONE);
@@ -396,6 +447,53 @@ public class ShowPostActivity extends AppCompatActivity {
         });
     }
 
+
+    public void setImages(HashMap<String , String> Hash_file_maps) {
+
+        if (Hash_file_maps.size() > 0) {
+            for (String name : Hash_file_maps.keySet()) {
+                TextSliderView textSliderView = new TextSliderView(ShowPostActivity.this);
+                textSliderView
+                        .description(Hash_file_maps.get(name))
+                        .image(name)
+                        .setScaleType(BaseSliderView.ScaleType.FitCenterCrop)
+                        .setOnSliderClickListener(this);
+                textSliderView.bundle(new Bundle());
+                textSliderView.getBundle()
+                        .putString("extra", name);
+                postSlider.addSlider(textSliderView);
+            }
+            postSlider.setPresetTransformer(SliderLayout.Transformer.Accordion);
+            postSlider.setPresetIndicator(SliderLayout.PresetIndicators.Center_Bottom);
+            postSlider.setCustomAnimation(new DescriptionAnimation());
+            postSlider.setDuration(3000);
+            postSlider.addOnPageChangeListener(this);
+            postSlider.setCustomIndicator((PagerIndicator)findViewById(R.id.custom_indicator));
+        } else {
+            if(postSlider!=null)postSlider.setVisibility(View.GONE);
+
+        }
+    }
+
+    @Override
+    public void onSliderClick(BaseSliderView slider) {
+
+    }
+
+    @Override
+    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+    }
+
+    @Override
+    public void onPageSelected(int position) {
+
+    }
+
+    @Override
+    public void onPageScrollStateChanged(int state) {
+
+    }
 }
 
 
