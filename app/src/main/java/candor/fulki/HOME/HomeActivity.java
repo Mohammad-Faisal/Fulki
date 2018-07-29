@@ -27,7 +27,6 @@ import android.view.View;
 import android.view.Window;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -89,14 +88,16 @@ public class HomeActivity extends AppCompatActivity {
 
     // home fragments recycler view
     private RecyclerView recyclerView;
+    private List< Posts> posts;
     private FirebaseFirestore firebaseFirestore;
+    private HomeAdapter mHomeAdapter;
     private CombinedHomeAdapter mCombinedHomeAdapter;
     private List< CombinedPosts> combinedPosts;
     LinearLayoutManager mLinearManager;
     private DocumentSnapshot lastVisible = null;
     private boolean isFirstPageLoad = true;
     private ProgressDialog mProgress;
-    TextView mCreatePostText;
+    EditText mCreatePostText;
     private ImageButton mCreatePostImage;
     private boolean TextPost = false;
 
@@ -166,7 +167,7 @@ public class HomeActivity extends AppCompatActivity {
 
 
         mCreatePostText = findViewById(R.id.home_create_post);
-        //mCreatePostText.addTextChangedListener(filterTextWatcher);
+        mCreatePostText.addTextChangedListener(filterTextWatcher);
         mCreatePostImage = findViewById(R.id.create_post_image);
         final CircleImageView imageView = findViewById(R.id.home_circle_image);
 
@@ -389,10 +390,11 @@ public class HomeActivity extends AppCompatActivity {
                     for(DocumentChange doc: documentSnapshots.getDocumentChanges()){
                         if(doc.getType() == DocumentChange.Type.ADDED){
                             Log.d(TAG, "loadMorePost:    found some more data  !!!!!");
-                            CombinedPosts singlePosts = doc.getDocument().toObject(CombinedPosts.class);
-                            combinedPosts.add(singlePosts);
+                            Posts singlePosts = doc.getDocument().toObject(Posts.class);
+                            String uid = singlePosts.getUser_id();
+                            posts.add(singlePosts);
                         }
-                        mCombinedHomeAdapter.notifyDataSetChanged();
+                        mHomeAdapter.notifyDataSetChanged();
                     }
                 }
             }

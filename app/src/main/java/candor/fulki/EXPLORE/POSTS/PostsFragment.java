@@ -17,9 +17,6 @@ import com.google.firebase.firestore.Query;
 import java.util.ArrayList;
 import java.util.List;
 
-import candor.fulki.HOME.CombinedHomeAdapter;
-import candor.fulki.HOME.CombinedPosts;
-import candor.fulki.HOME.HomeActivity;
 import candor.fulki.HOME.HomeAdapter;
 import candor.fulki.HOME.Posts;
 import candor.fulki.R;
@@ -29,9 +26,9 @@ public class PostsFragment extends Fragment {
 
 
     private RecyclerView recyclerView;
+    private List< Posts> posts;
     private FirebaseFirestore firebaseFirestore;
-    private CombinedHomeAdapter mCombinedHomeAdapter;
-    private List< CombinedPosts> combinedPosts;
+    private HomeAdapter mHomeAdapter;
 
 
     public PostsFragment() {
@@ -50,14 +47,12 @@ public class PostsFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_posts, container, false);
 
-        combinedPosts = new ArrayList<>();
+        posts = new ArrayList<>();
         recyclerView = view.findViewById(R.id.fragment_post_recycler);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setNestedScrollingEnabled(false);
-        mCombinedHomeAdapter =  new CombinedHomeAdapter( combinedPosts,getContext(), getActivity());
-        recyclerView.setAdapter(mCombinedHomeAdapter);
-
-
+        mHomeAdapter = new HomeAdapter(recyclerView, posts,getActivity(), getContext());
+        recyclerView.setAdapter(mHomeAdapter);
 
         loadFirstPosts();
 
@@ -75,14 +70,14 @@ public class PostsFragment extends Fragment {
                 //lastVisible = documentSnapshots.getDocuments().get(documentSnapshots.size()-1);
                 for(DocumentChange doc: documentSnapshots.getDocumentChanges()){
                     if(doc.getType() == DocumentChange.Type.ADDED){
-                        CombinedPosts singlePosts = doc.getDocument().toObject(CombinedPosts.class);
-                        combinedPosts.add(singlePosts);
+                        Posts singlePosts = doc.getDocument().toObject(Posts.class);
+                        posts.add(singlePosts);
                         /*if(isFirstPageLoad){
                             posts.add(singlePosts);
                         }else{
                             posts.add(0, singlePosts);
                         }*/
-                        mCombinedHomeAdapter.notifyDataSetChanged();
+                        mHomeAdapter.notifyDataSetChanged();
                     }
                 }
             }

@@ -89,56 +89,27 @@ public class ShowPleopleListActivity extends AppCompatActivity {
 
     private void loadFirstData(){
 
-        if(type.equals("likes")){
-            firebaseFirestore = FirebaseFirestore.getInstance();
-            Query nextQuery = firebaseFirestore.collection(type+"/" + userID + "/"+type)
-                    .orderBy("time_stamp" , Query.Direction.DESCENDING)
-                    .limit(100);
-            nextQuery.addSnapshotListener(ShowPleopleListActivity.this , (documentSnapshots, e) -> {
-                if(!documentSnapshots.isEmpty()){
-                    lastVisible = documentSnapshots.getDocuments().get(documentSnapshots.size()-1);
-                    //isFirstPageLoaded = true;
-                    for(DocumentChange doc: documentSnapshots.getDocumentChanges()){
-                        if(doc.getType() == DocumentChange.Type.ADDED){
-                            Log.d(TAG, "loadFirstData:  found a data"+doc.getDocument().getId());
-                            UserBasic basic = new UserBasic();
-                            basic.setmUserID(doc.getDocument().getString("id"));
-                            basic.setmUserName(doc.getDocument().getString("name"));
-                            basic.setmUserThumbImage(doc.getDocument().getString("thumb_image"));
-                            userList.add(basic);
-                            mPeopleAdapter.notifyDataSetChanged();
-                        }
+        firebaseFirestore = FirebaseFirestore.getInstance();
+        Query nextQuery = firebaseFirestore.collection(type+"/" + userID + "/"+type)
+                .orderBy("timestamp" , Query.Direction.DESCENDING)
+                .limit(100);
+        nextQuery.addSnapshotListener(ShowPleopleListActivity.this , (documentSnapshots, e) -> {
+            if(!documentSnapshots.isEmpty()){
+                lastVisible = documentSnapshots.getDocuments().get(documentSnapshots.size()-1);
+                //isFirstPageLoaded = true;
+                for(DocumentChange doc: documentSnapshots.getDocumentChanges()){
+                    if(doc.getType() == DocumentChange.Type.ADDED){
+                        Log.d(TAG, "loadFirstData:  found a data"+doc.getDocument().getId());
+                        UserBasic basic = new UserBasic();
+                        basic.setmUserID(doc.getDocument().getString("id"));
+                        basic.setmUserName(doc.getDocument().getString("name"));
+                        basic.setmUserThumbImage(doc.getDocument().getString("thumb_image"));
+                        userList.add(basic);
+                        mPeopleAdapter.notifyDataSetChanged();
                     }
                 }
-            });
-        }else{
-            firebaseFirestore = FirebaseFirestore.getInstance();
-            Query nextQuery = firebaseFirestore.collection(type+"/" + userID + "/"+type)
-                    .orderBy("timestamp" , Query.Direction.DESCENDING)
-                    .limit(100);
-            nextQuery.addSnapshotListener(ShowPleopleListActivity.this , (documentSnapshots, e) -> {
-                if(!documentSnapshots.isEmpty()){
-                    lastVisible = documentSnapshots.getDocuments().get(documentSnapshots.size()-1);
-                    //isFirstPageLoaded = true;
-                    for(DocumentChange doc: documentSnapshots.getDocumentChanges()){
-                        if(doc.getType() == DocumentChange.Type.ADDED){
-                            Log.d(TAG, "loadFirstData:  found a data"+doc.getDocument().getId());
-                            UserBasic basic = new UserBasic();
-                            basic.setmUserID(doc.getDocument().getString("id"));
-                            basic.setmUserName(doc.getDocument().getString("name"));
-                            basic.setmUserThumbImage(doc.getDocument().getString("thumb_image"));
-                            userList.add(basic);
-                            mPeopleAdapter.notifyDataSetChanged();
-                        }
-                    }
-                }
-            });
-        }
-
-
-
-
-
+            }
+        });
     }
 
     private void loadMoreData() {

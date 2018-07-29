@@ -105,15 +105,7 @@ public class CombinedHomeAdapter extends RecyclerView.Adapter<CombinedHomeAdapte
 
         HashMap<String,String> Hash_file_maps;
         Hash_file_maps = post.getPost_thumb_url();
-
-        if(Hash_file_maps.size() == 0){
-            //holder.invisible(holder.postSlider);
-            //holder.postSlider.setVisibility(View.GONE);
-        }else{
-            holder.setImages(Hash_file_maps);
-        }
-
-
+        holder.setImages(Hash_file_maps);
 
         String primary_user_id = post.getPrimary_user_id();
         String secondary_user_id = post.getSecondary_user_id();
@@ -530,10 +522,6 @@ public class CombinedHomeAdapter extends RecyclerView.Adapter<CombinedHomeAdapte
             postCommentLinear = view.findViewById(R.id.item_post_comment_linear);
             postProgres = view.findViewById(R.id.item_post_progress);
             postSlider = view.findViewById(R.id.item_post_slider);
-        }
-
-        public void invisible(View view){
-            view.setVisibility(View.GONE);
         }
 
         public void setImages(HashMap<String , String> Hash_file_maps) {

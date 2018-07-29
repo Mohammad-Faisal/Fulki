@@ -6,7 +6,6 @@
     tools:context=".EXPLORE.POSTS.PostsFragment">
 
     <android.support.v7.widget.RecyclerView
-        android:layout_marginBottom="50dp"
         android:layout_width="match_parent"
         android:id="@+id/fragment_post_recycler"
         android:layout_height="match_parent"></android.support.v7.widget.RecyclerView>

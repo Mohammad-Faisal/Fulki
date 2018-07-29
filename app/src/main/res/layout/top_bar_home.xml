@@ -17,8 +17,7 @@
             android:src="@drawable/ic_person_grey"
             android:layout_gravity="center_vertical"/>
 
-        <TextView
-            android:inputType="none"
+        <EditText
             android:layout_marginRight="10dp"
             android:layout_marginTop="10dp"
             android:layout_marginBottom="10dp"
