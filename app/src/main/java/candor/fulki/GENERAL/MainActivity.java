@@ -25,7 +25,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.Arrays;
 
 import candor.fulki.HOME.HomeActivity;
-import candor.fulki.PROFILE.ProfileSettingsActivity;
+import candor.fulki.profile.ProfileSettingsActivity;
 import candor.fulki.R;
 
 public class MainActivity extends AppCompatActivity {

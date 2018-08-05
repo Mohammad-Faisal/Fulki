@@ -20,8 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-import candor.fulki.PROFILE.ListPeopleAdapter;
-import candor.fulki.PROFILE.UserBasic;
+import candor.fulki.profile.ListPeopleAdapter;
+import candor.fulki.profile.UserBasic;
 import candor.fulki.R;
 
 

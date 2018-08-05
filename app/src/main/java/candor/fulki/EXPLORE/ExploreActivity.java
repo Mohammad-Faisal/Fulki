@@ -7,11 +7,9 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.ittianyu.bottomnavigationviewex.BottomNavigationViewEx;
@@ -21,8 +19,8 @@ import candor.fulki.EXPLORE.EVENTS.CreateEventActivity;
 import candor.fulki.HOME.HomeActivity;
 import candor.fulki.MapsActivity;
 import candor.fulki.NOTIFICATION.NotificationActivity;
-import candor.fulki.PROFILE.ProfileActivity;
-import candor.fulki.PROFILE.ProfileSettingsActivity;
+import candor.fulki.profile.ProfileActivity;
+import candor.fulki.profile.ProfileSettingsActivity;
 import candor.fulki.R;
 import candor.fulki.SEARCH.SearchActivity;
 

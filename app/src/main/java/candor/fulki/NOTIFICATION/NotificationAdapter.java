@@ -28,7 +28,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -40,7 +39,7 @@ import candor.fulki.GENERAL.GetTimeAgo;
 import candor.fulki.GENERAL.MainActivity;
 import candor.fulki.EXPLORE.PEOPLE.Ratings;
 import candor.fulki.HOME.ShowPostActivity;
-import candor.fulki.PROFILE.ProfileActivity;
+import candor.fulki.profile.ProfileActivity;
 import candor.fulki.R;
 import de.hdodenhof.circleimageview.CircleImageView;
 

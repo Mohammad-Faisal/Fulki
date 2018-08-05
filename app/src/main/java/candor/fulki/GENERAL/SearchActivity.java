@@ -14,37 +14,23 @@ import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.algolia.search.saas.AlgoliaException;
 import com.algolia.search.saas.Client;
-import com.algolia.search.saas.CompletionHandler;
 import com.algolia.search.saas.Index;
 import com.algolia.search.saas.Query;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentChange;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.firestore.WriteBatch;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import candor.fulki.HOME.Posts;
-import candor.fulki.PROFILE.ListPeopleAdapter;
-import candor.fulki.PROFILE.ProfileSettingsActivity;
-import candor.fulki.PROFILE.ShowPleopleListActivity;
-import candor.fulki.PROFILE.UserBasic;
+import candor.fulki.profile.ListPeopleAdapter;
+import candor.fulki.profile.UserBasic;
 import candor.fulki.R;
 
 public class SearchActivity extends AppCompatActivity {

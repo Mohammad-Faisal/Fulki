@@ -29,7 +29,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".PROFILE.RegistrationAccount"
+            android:name=".profile.RegistrationAccount"
             android:screenOrientation="portrait" />
         <activity
             android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
@@ -44,7 +44,7 @@
             android:name=".HOME.CreatePhotoPostActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".PROFILE.ProfileActivity"
+            android:name=".profile.ProfileActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".SEARCH.SearchActivity"
@@ -57,7 +57,7 @@
             android:name=".HOME.CreateTextPostActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".PROFILE.ProfileSettingsActivity"
+            android:name=".profile.ProfileSettingsActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".NOTIFICATION.NotificationActivity"
@@ -103,7 +103,7 @@
             android:label="@string/title_activity_maps"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".PROFILE.ShowPleopleListActivity"
+            android:name=".profile.ShowPleopleListActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".GENERAL.SearchActivity"
@@ -122,10 +122,10 @@
             android:screenOrientation="portrait" />
         <activity android:name=".GENERAL.FragmentHolderActivity" />
         <activity
-            android:name=".PROFILE.ShowProfileImageActivity"
+            android:name=".profile.ShowProfileImageActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_show_profile_image"
-            android:parentActivityName=".PROFILE.ProfileActivity"
+            android:parentActivityName=".profile.ProfileActivity"
             android:screenOrientation="portrait"
             android:theme="@style/FullscreenTheme" />
         <activity android:name=".HOME.CreatePostActivity"></activity>

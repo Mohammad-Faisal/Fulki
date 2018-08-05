@@ -5,7 +5,7 @@
     android:theme="@style/FullscreenActionBarStyle"
     android:layout_height="match_parent"
     android:background="@color/Black"
-    tools:context=".PROFILE.ShowProfileImageActivity">
+    tools:context=".profile.ShowProfileImageActivity">
 
 
     <candor.fulki.UTILITIES.TouchImageView

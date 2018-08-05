@@ -1,6 +1,5 @@
 package candor.fulki.CHAT;
 
-import android.app.Dialog;
 import android.content.Intent;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -31,7 +30,7 @@ import java.util.List;
 import candor.fulki.CHAT.Conversation.Actives;
 import candor.fulki.CHAT.Conversation.ChatBuddies;
 import candor.fulki.CHAT.Meeting.CreateMeetingActivity;
-import candor.fulki.PROFILE.UserBasic;
+import candor.fulki.profile.UserBasic;
 import candor.fulki.R;
 import de.hdodenhof.circleimageview.CircleImageView;
 

@@ -63,7 +63,7 @@ import java.util.Map;
 
 import candor.fulki.GENERAL.MainActivity;
 import candor.fulki.EXPLORE.PEOPLE.Ratings;
-import candor.fulki.PROFILE.ProfileActivity;
+import candor.fulki.profile.ProfileActivity;
 
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,

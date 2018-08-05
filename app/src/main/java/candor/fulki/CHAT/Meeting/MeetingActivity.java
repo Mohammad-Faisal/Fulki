@@ -35,11 +35,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import candor.fulki.CHAT.InboxActivity;
 import candor.fulki.CHAT.MessageAdapter;
 import candor.fulki.CHAT.Messages;
 import candor.fulki.GENERAL.MainActivity;
-import candor.fulki.PROFILE.ProfileSettingsActivity;
 import candor.fulki.R;
 import de.hdodenhof.circleimageview.CircleImageView;
 

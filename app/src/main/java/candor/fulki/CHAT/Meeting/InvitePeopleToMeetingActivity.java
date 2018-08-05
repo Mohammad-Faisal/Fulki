@@ -1,35 +1,18 @@
 package candor.fulki.CHAT.Meeting;
 
-import android.content.Context;
-import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
-import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
 
-import com.firebase.ui.database.FirebaseRecyclerAdapter;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.miguelcatalan.materialsearchview.MaterialSearchView;
-import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 import candor.fulki.CHAT.Conversation.ConversationFragment;
-import candor.fulki.GENERAL.MainActivity;
-import candor.fulki.NOTIFICATION.Notifications;
-import candor.fulki.PROFILE.Users;
+import candor.fulki.profile.Users;
 import candor.fulki.R;
-import de.hdodenhof.circleimageview.CircleImageView;
 
 public class InvitePeopleToMeetingActivity extends AppCompatActivity {
 
