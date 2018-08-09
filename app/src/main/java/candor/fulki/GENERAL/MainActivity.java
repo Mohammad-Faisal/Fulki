@@ -80,7 +80,6 @@ public class MainActivity extends AppCompatActivity {
                                 startActivity(regIntent);
                                 finish();
                             }else{
-
                                 mUserImage = task.getResult().getString("image");
                                 mUserName = task.getResult().getString("name");
                                 mUserThumbImage = task.getResult().getString("thumb_image");
