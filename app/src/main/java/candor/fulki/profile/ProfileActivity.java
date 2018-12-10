@@ -37,19 +37,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import candor.fulki.CHAT.ChatActivity;
-import candor.fulki.CHAT.InboxActivity;
-import candor.fulki.EXPLORE.ExploreActivity;
-import candor.fulki.GENERAL.MainActivity;
-import candor.fulki.HOME.HomeActivity;
-import candor.fulki.HOME.HomeAdapter;
-import candor.fulki.HOME.Posts;
-import candor.fulki.EXPLORE.PEOPLE.Ratings;
+import candor.fulki.chat.ChatActivity;
+import candor.fulki.chat.InboxActivity;
+import candor.fulki.explore.ExploreActivity;
+import candor.fulki.general.MainActivity;
+import candor.fulki.home.CombinedHomeAdapter;
+import candor.fulki.home.CombinedPosts;
+import candor.fulki.home.HomeActivity;
+import candor.fulki.home.HomeAdapter;
+import candor.fulki.home.Posts;
+import candor.fulki.explore.people.Ratings;
 import candor.fulki.MapsActivity;
-import candor.fulki.NOTIFICATION.NotificationActivity;
-import candor.fulki.NOTIFICATION.Notifications;
+import candor.fulki.notification.NotificationActivity;
+import candor.fulki.notification.Notifications;
 import candor.fulki.R;
-import candor.fulki.SEARCH.SearchActivity;
+import candor.fulki.search.SearchActivity;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 
@@ -69,8 +71,12 @@ public class ProfileActivity extends AppCompatActivity {
     private List< Posts> posts;
     private FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
     private HomeAdapter mProfilePostAdapter;
+
+    private CombinedHomeAdapter mCombinedHomeAdapter;
+    private List<CombinedPosts> combinedPosts;
+
     private DocumentSnapshot lastVisible;
-    private boolean isFirstPageLoad = true;
+    private boolean isFirstPageLoad = false;
 
 
     private Button mProfileFollow;
@@ -185,10 +191,10 @@ public class ProfileActivity extends AppCompatActivity {
 
 
         //setting up recycler view
-        posts = new ArrayList<>();
-        mProfilePostAdapter = new HomeAdapter(mProfilePostsRecycelr, posts,ProfileActivity.this, ProfileActivity.this);
+        combinedPosts = new ArrayList<>();
+        mCombinedHomeAdapter = new CombinedHomeAdapter(combinedPosts,ProfileActivity.this, ProfileActivity.this);
         mProfilePostsRecycelr.setLayoutManager(new LinearLayoutManager(ProfileActivity.this));
-        mProfilePostsRecycelr.setAdapter(mProfilePostAdapter);
+        mProfilePostsRecycelr.setAdapter(mCombinedHomeAdapter);
         firebaseFirestore = FirebaseFirestore.getInstance();
 
 
@@ -379,7 +385,7 @@ public class ProfileActivity extends AppCompatActivity {
                 });
 
             firebaseFirestore = FirebaseFirestore.getInstance();
-            Query nextQuery = firebaseFirestore.collection("posts").orderBy("timestamp" , Query.Direction.DESCENDING).limit(100).whereEqualTo("user_id", mCurProfileId);
+            Query nextQuery = firebaseFirestore.collection("posts").orderBy("time_stamp" , Query.Direction.DESCENDING).limit(100).whereEqualTo("primary_user_id", mCurProfileId);
             nextQuery.addSnapshotListener(ProfileActivity.this , (documentSnapshots, e) -> {
                 if(documentSnapshots!=null){
                     if(!documentSnapshots.isEmpty()){
@@ -388,15 +394,15 @@ public class ProfileActivity extends AppCompatActivity {
                         }
                         for(DocumentChange doc: documentSnapshots.getDocumentChanges()){
                             if(doc.getType() == DocumentChange.Type.ADDED){
-                                Posts singlePosts = doc.getDocument().toObject(Posts.class);
-                                String uid = singlePosts.getUser_id();
+                                CombinedPosts singlePosts = doc.getDocument().toObject(CombinedPosts.class);
+                                String uid = singlePosts.getPrimary_user_id();
                                 Log.d(TAG, "onCreate:  found user id   "+ uid);
                                 if(isFirstPageLoad){
-                                        posts.add(singlePosts);
+                                        combinedPosts.add(singlePosts);
                                 }else{
-                                        posts.add(0, singlePosts);
+                                    combinedPosts.add(0, singlePosts);
                                 }
-                                mProfilePostAdapter.notifyDataSetChanged();
+                                mCombinedHomeAdapter.notifyDataSetChanged();
                             }
                         }
                         isFirstPageLoad = false;
@@ -411,7 +417,7 @@ public class ProfileActivity extends AppCompatActivity {
                 public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                     Boolean reachedBottom = !recyclerView.canScrollVertically(1);
                     if(reachedBottom){
-                        loadMorePost();
+                        //loadMorePost();
                     }
                 }
             });
@@ -420,11 +426,13 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
 
+
+    //eitay vul ase
     public void loadMorePost(){
         Query nextQuery = firebaseFirestore.collection("posts")
-                .orderBy("timestamp" , Query.Direction.DESCENDING)
+                .orderBy("time_stamp" , Query.Direction.DESCENDING)
                 .startAfter(lastVisible)
-                .whereEqualTo("user_id" , mCurProfileId)
+                .whereEqualTo("primary_user_id" , mCurProfileId)
                 .limit(5);
         nextQuery.addSnapshotListener(ProfileActivity.this , (documentSnapshots, e) -> {
             if(documentSnapshots!=null){
@@ -432,10 +440,10 @@ public class ProfileActivity extends AppCompatActivity {
                     lastVisible = documentSnapshots.getDocuments().get(documentSnapshots.size()-1);
                     for(DocumentChange doc: documentSnapshots.getDocumentChanges()){
                         if(doc.getType() == DocumentChange.Type.ADDED){
-                            Posts singlePosts = doc.getDocument().toObject(Posts.class);
-                            String uid = singlePosts.getUser_id();
-                            posts.add(singlePosts);
-                            mProfilePostAdapter.notifyDataSetChanged();
+                            CombinedPosts singlePosts = doc.getDocument().toObject(CombinedPosts.class);
+                            String uid = singlePosts.getPrimary_user_id();
+                            combinedPosts.add(singlePosts);
+                            mCombinedHomeAdapter.notifyDataSetChanged();
 
                         }
                     }
@@ -471,7 +479,7 @@ public class ProfileActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.action_log_out:
                 FirebaseAuth.getInstance().signOut();
-                Intent mainIntent = new Intent(ProfileActivity.this, candor.fulki.GENERAL.MainActivity.class);
+                Intent mainIntent = new Intent(ProfileActivity.this, candor.fulki.general.MainActivity.class);
                 startActivity(mainIntent);
                 finish();
                 return true;
@@ -481,7 +489,6 @@ public class ProfileActivity extends AppCompatActivity {
                 return true;
             case R.id.action_search:
                 Intent searchIntent = new Intent(ProfileActivity.this , SearchActivity.class);
-
                 startActivity(searchIntent);
                 return true;
             case R.id.action_message:

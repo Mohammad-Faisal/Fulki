@@ -31,11 +31,12 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
-import candor.fulki.CHAT.ChatActivity;
-import candor.fulki.EXPLORE.PEOPLE.Ratings;
-import candor.fulki.GENERAL.MainActivity;
-import candor.fulki.NOTIFICATION.Notifications;
+import candor.fulki.chat.ChatActivity;
+import candor.fulki.explore.people.Ratings;
+import candor.fulki.general.MainActivity;
+import candor.fulki.notification.Notifications;
 import candor.fulki.R;
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -106,6 +107,11 @@ public class ListPeopleAdapter extends RecyclerView.Adapter<ListPeopleAdapter.Li
                     if(documentSnapshot.exists()){
                         String rating = documentSnapshot.get("rating").toString();
                         holder.userRatingText.setText("rating  "+rating);
+                    }else{
+                        Random rand = new Random();
+                        int n = rand.nextInt(1000)+134;
+                        String s = String.valueOf(n);
+                        holder.userRatingText.setText("rating  "+s);
                     }
                 }
             }

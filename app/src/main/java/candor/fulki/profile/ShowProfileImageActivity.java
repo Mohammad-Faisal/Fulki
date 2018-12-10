@@ -6,7 +6,7 @@ import android.os.Bundle;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
 import candor.fulki.R;
-import candor.fulki.UTILITIES.TouchImageView;
+import candor.fulki.utilities.TouchImageView;
 
 
 public class ShowProfileImageActivity extends AppCompatActivity {

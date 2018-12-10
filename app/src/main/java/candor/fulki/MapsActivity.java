@@ -61,8 +61,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import candor.fulki.GENERAL.MainActivity;
-import candor.fulki.EXPLORE.PEOPLE.Ratings;
+import candor.fulki.general.MainActivity;
+import candor.fulki.explore.people.Ratings;
 import candor.fulki.profile.ProfileActivity;
 
 

@@ -61,13 +61,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import candor.fulki.GENERAL.Functions;
-import candor.fulki.GENERAL.MainActivity;
-import candor.fulki.GENERAL.ValueAdapter;
-import candor.fulki.HOME.HomeActivity;
-import candor.fulki.EXPLORE.PEOPLE.Ratings;
+import candor.fulki.general.Functions;
+import candor.fulki.general.MainActivity;
+import candor.fulki.general.ValueAdapter;
+import candor.fulki.home.HomeActivity;
+import candor.fulki.explore.people.Ratings;
 import candor.fulki.R;
-import candor.fulki.SEARCH.UserSearch;
+import candor.fulki.search.UserSearch;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ProfileSettingsActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener{

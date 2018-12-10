@@ -14,7 +14,7 @@ import com.squareup.picasso.Picasso;
 
 import java.io.File;
 
-import candor.fulki.UTILITIES.UniversalImageLoader;
+import candor.fulki.utilities.UniversalImageLoader;
 import okhttp3.Cache;
 import okhttp3.OkHttpClient;
 

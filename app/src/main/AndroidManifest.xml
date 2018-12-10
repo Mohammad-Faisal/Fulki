@@ -20,7 +20,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".GENERAL.MainActivity"
+            android:name=".general.MainActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -41,44 +41,44 @@
             android:resource="@array/preloaded_fonts" />
 
         <activity
-            android:name=".HOME.CreatePhotoPostActivity"
+            android:name=".home.CreatePhotoPostActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".profile.ProfileActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".SEARCH.SearchActivity"
+            android:name=".search.SearchActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".HOME.ShowPostActivity"
+            android:name=".home.ShowPostActivity"
             android:screenOrientation="portrait"
             android:theme="@style/ShowPost" />
         <activity
-            android:name=".HOME.CreateTextPostActivity"
+            android:name=".home.CreateTextPostActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".profile.ProfileSettingsActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".NOTIFICATION.NotificationActivity"
+            android:name=".notification.NotificationActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".EXPLORE.ExploreActivity"
+            android:name=".explore.ExploreActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".CHAT.ChatActivity"
+            android:name=".chat.ChatActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".CHAT.InboxActivity"
+            android:name=".chat.InboxActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".CHAT.Meeting.MeetingActivity"
+            android:name=".chat.meeting.MeetingActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".CHAT.Meeting.InvitePeopleToMeetingActivity"
+            android:name=".chat.meeting.InvitePeopleToMeetingActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".CHAT.Meeting.CreateMeetingActivity"
+            android:name=".chat.meeting.CreateMeetingActivity"
             android:screenOrientation="portrait" />
 
         <meta-data
@@ -106,21 +106,21 @@
             android:name=".profile.ShowPleopleListActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".GENERAL.SearchActivity"
-            android:parentActivityName=".GENERAL.MainActivity"
+            android:name=".general.SearchActivity"
+            android:parentActivityName=".general.MainActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".EXPLORE.EVENTS.CreateEventActivity"
-            android:parentActivityName=".EXPLORE.ExploreActivity"
+            android:name=".explore.events.CreateEventActivity"
+            android:parentActivityName=".explore.ExploreActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".EXPLORE.EVENTS.ShowEventActivity"
-            android:parentActivityName=".EXPLORE.ExploreActivity"
+            android:name=".explore.events.ShowEventActivity"
+            android:parentActivityName=".explore.ExploreActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".HOME.HomeActivity"
+            android:name=".home.HomeActivity"
             android:screenOrientation="portrait" />
-        <activity android:name=".GENERAL.FragmentHolderActivity" />
+        <activity android:name=".general.FragmentHolderActivity" />
         <activity
             android:name=".profile.ShowProfileImageActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
@@ -128,7 +128,7 @@
             android:parentActivityName=".profile.ProfileActivity"
             android:screenOrientation="portrait"
             android:theme="@style/FullscreenTheme" />
-        <activity android:name=".HOME.CreatePostActivity"></activity>
+        <activity android:name=".home.CreatePostActivity"></activity>
     </application>
 
 </manifest>

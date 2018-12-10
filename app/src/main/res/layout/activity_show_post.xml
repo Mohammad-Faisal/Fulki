@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".HOME.ShowPostActivity"
+    tools:context=".home.ShowPostActivity"
     android:backgroundTint="@color/White">
 
 
@@ -30,7 +30,7 @@
             >
 
 
-            <candor.fulki.UTILITIES.TouchImageView
+            <candor.fulki.utilities.TouchImageView
                 android:scaleType="fitXY"
                 android:src="@drawable/ic_camera_icon"
                 android:layout_width="match_parent"

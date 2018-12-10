@@ -38,8 +38,8 @@ import com.theartofdev.edmodo.cropper.CropImage;
 import java.util.HashMap;
 import java.util.Map;
 
-import candor.fulki.GENERAL.Functions;
-import candor.fulki.GENERAL.MainActivity;
+import candor.fulki.general.Functions;
+import candor.fulki.general.MainActivity;
 import candor.fulki.R;
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -217,7 +217,7 @@ public class RegistrationAccount extends AppCompatActivity {
 
 
                                     firebaseFirestore.collection("users").document(mUserID).set(userMap).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                        public static final String TAG ="registration process " ;
+                                        public static final String TAG ="registration process ";
 
                                         @Override
                                         public void onComplete(@NonNull Task<Void> task) {

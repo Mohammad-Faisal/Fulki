@@ -8,7 +8,7 @@
     tools:context=".profile.ShowProfileImageActivity">
 
 
-    <candor.fulki.UTILITIES.TouchImageView
+    <candor.fulki.utilities.TouchImageView
         android:layout_gravity="center_vertical"
         android:id="@+id/showProfile_image"
         android:layout_width="match_parent"

@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".GENERAL.MainActivity"
+    tools:context=".general.MainActivity"
     android:theme="@style/Theme.AppCompat.Light.NoActionBar"
     android:orientation="vertical">
 
@@ -27,7 +27,7 @@
         android:layout_gravity="center"
         android:layout_marginBottom="156dp"
         android:fontFamily="@font/averia_serif_libre_bold"
-        android:text="YMoves"
+        android:text="Gorjon"
         android:textAlignment="center"
         android:textColor="@color/Black"
         android:textSize="50sp" />
