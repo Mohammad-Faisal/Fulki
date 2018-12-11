@@ -42,6 +42,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.like.LikeButton;
 import com.like.OnLikeListener;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
 import java.util.ArrayList;
@@ -63,14 +64,14 @@ public class CombinedHomeAdapter extends RecyclerView.Adapter<CombinedHomeAdapte
     private static final String TAG = "CombinedHomeAdapter";
 
     List <CombinedPosts > data;
-    Context context;
-    Activity activity;
+    private Context context;
+    private Activity activity;
 
-    String mUserID = FirebaseAuth.getInstance().getCurrentUser().getUid();
-    FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
+    private String mUserID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+    private FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
 
-    String mUserName , mUserThumbImage;
-    String primaryUserName , primaryUserThumbImage;
+    private String mUserName , mUserThumbImage;
+    private String primaryUserName , primaryUserThumbImage;
 
     private ProgressDialog mProgress;
 
@@ -78,10 +79,10 @@ public class CombinedHomeAdapter extends RecyclerView.Adapter<CombinedHomeAdapte
         this.data = data;
         this.context = context;
         this.activity = activity;
-
     }
 
 
+    @NonNull
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view;
@@ -130,8 +131,8 @@ public class CombinedHomeAdapter extends RecyclerView.Adapter<CombinedHomeAdapte
                 if(documentSnapshot.exists()){
                     mUserName = documentSnapshot.getString("name");
                     mUserThumbImage =documentSnapshot.getString("thumb_image");
-                    Log.d(TAG, "HomeAdapter:      user name" + mUserName);
-                    Log.d(TAG, "HomeAdapter:      user name" + mUserID);
+                    Log.d(TAG, "CombinedHomeAdapter:      user name" + mUserName);
+                    Log.d(TAG, "CombinedHomeAdapter:      user name" + mUserID);
                 }
             }).addOnFailureListener(e -> {
                 mUserName = MainActivity.mUserName;
@@ -474,6 +475,12 @@ public class CombinedHomeAdapter extends RecyclerView.Adapter<CombinedHomeAdapte
     }
 
     @Override
+    public long getItemId(int position) {
+        //CombinedPosts post= data.get(position);
+        return super.getItemId(position);
+    }
+
+    @Override
     public int getItemCount() {
         return data.size();
     }
@@ -481,20 +488,20 @@ public class CombinedHomeAdapter extends RecyclerView.Adapter<CombinedHomeAdapte
     public class ViewHolder extends RecyclerView.ViewHolder  implements BaseSliderView.OnSliderClickListener, ViewPagerEx.OnPageChangeListener{
 
 
-        public ImageView mPostMoreOptions;
-        public TextView  postUserName;
-        public TextView  postCaption;
-        public TextView  postDateTime;
-        public TextView  postLocaiton;
-        public TextView  postLikeCount;
-        public TextView  postCommentCount;
-        public TextView  postShareCount;
-        public ImageView postImage;
-        public CircleImageView postUserImage;
+        ImageView mPostMoreOptions;
+        TextView  postUserName;
+        TextView  postCaption;
+        TextView  postDateTime;
+        TextView  postLocaiton;
+        TextView  postLikeCount;
+        TextView  postCommentCount;
+        TextView  postShareCount;
+        ImageView postImage;
+        CircleImageView postUserImage;
         public LikeButton postLikeButton;
-        public ImageButton postCommentButton;
-        public ImageButton postShareButton;
-        public LinearLayout postCommentLinear;
+        ImageButton postCommentButton;
+        ImageButton postShareButton;
+        LinearLayout postCommentLinear;
         ProgressBar  postProgres;
         SliderLayout postSlider;
 
@@ -629,9 +636,11 @@ public class CombinedHomeAdapter extends RecyclerView.Adapter<CombinedHomeAdapte
                     Log.d(TAG, "setUserImage:    visibility gone but caption is  " + image_url);
                     //postImage.setVisibility(View.GONE);
                 }else{
-                    ImageLoader imageLoader = ImageLoader.getInstance();
-                    imageLoader.displayImage(image_url, imageView);
-                    //imageLoader.displayImage(image_url, imageView, userImageOptions);
+                    DisplayImageOptions options = new DisplayImageOptions.Builder()
+                            .cacheInMemory(true)
+                            .cacheOnDisk(true)
+                            .build();
+                    ImageLoader.getInstance().displayImage(image_url, imageView, options);
                 }
             }
         }

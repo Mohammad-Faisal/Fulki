@@ -41,9 +41,6 @@
             android:resource="@array/preloaded_fonts" />
 
         <activity
-            android:name=".home.CreatePhotoPostActivity"
-            android:screenOrientation="portrait" />
-        <activity
             android:name=".profile.ProfileActivity"
             android:screenOrientation="portrait" />
         <activity
@@ -53,9 +50,6 @@
             android:name=".home.ShowPostActivity"
             android:screenOrientation="portrait"
             android:theme="@style/ShowPost" />
-        <activity
-            android:name=".home.CreateTextPostActivity"
-            android:screenOrientation="portrait" />
         <activity
             android:name=".profile.ProfileSettingsActivity"
             android:screenOrientation="portrait" />

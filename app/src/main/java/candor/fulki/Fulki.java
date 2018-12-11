@@ -1,9 +1,12 @@
 package candor.fulki;
 
+import com.google.firebase.crash.FirebaseCrash;
 import com.google.firebase.database.FirebaseDatabase;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.multidex.MultiDexApplication;
+import android.util.Log;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
@@ -17,6 +20,7 @@ import java.io.File;
 import candor.fulki.utilities.UniversalImageLoader;
 import okhttp3.Cache;
 import okhttp3.OkHttpClient;
+import timber.log.Timber;
 
 public class Fulki extends MultiDexApplication {
 
@@ -39,6 +43,13 @@ public class Fulki extends MultiDexApplication {
         UniversalImageLoader universalImageLoader = new UniversalImageLoader(this);
         ImageLoader.getInstance().init(universalImageLoader.getConfig());
 
+
+        //TImber
+        if (BuildConfig.DEBUG) {
+            Timber.uprootAll();
+            Timber.plant(new Timber.DebugTree());
+        }
+        else Timber.plant(new FirebaseTree());
 
 
         //Picasso offline
@@ -68,6 +79,22 @@ public class Fulki extends MultiDexApplication {
 
         // Initialize ImageLoader with configuration.
         ImageLoader.getInstance().init(config.build());
+    }
+
+
+    private static class FirebaseTree extends Timber.Tree {
+        @Override
+        protected void log(int priority, String tag, @NonNull String message, Throwable t) {
+            if (priority == Log.VERBOSE || priority == Log.DEBUG) {
+                return;
+            }
+
+            FirebaseCrash.log(message);
+
+            if (t != null) {
+                FirebaseCrash.report(t);
+            }
+        }
     }
 
 

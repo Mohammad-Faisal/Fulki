@@ -1,10 +1,13 @@
 package candor.fulki.home;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.ActivityCompat;
@@ -49,6 +52,7 @@ import java.util.Map;
 import candor.fulki.chat.InboxActivity;
 import candor.fulki.explore.ExploreActivity;
 import candor.fulki.explore.people.Ratings;
+import candor.fulki.general.Constants;
 import candor.fulki.general.MainActivity;
 
 import candor.fulki.MapsActivity;
@@ -57,6 +61,7 @@ import candor.fulki.profile.ProfileActivity;
 import candor.fulki.profile.ProfileSettingsActivity;
 import candor.fulki.R;
 import de.hdodenhof.circleimageview.CircleImageView;
+import timber.log.Timber;
 
 
 public class HomeActivity extends AppCompatActivity {
@@ -65,7 +70,6 @@ public class HomeActivity extends AppCompatActivity {
 
     private static final String TAG = "Home Activity";
     private static final int RC_CHECK_PERMISSION_LOCATION = 2;
-    private static final String SAVED_LAYOUT_MANAGER = "home recycler";
 
 
     public  String mUserID = null;
@@ -82,51 +86,19 @@ public class HomeActivity extends AppCompatActivity {
     LinearLayoutManager mLinearManager;
     private DocumentSnapshot lastVisible = null;
     private boolean isFirstPageLoad = true;
-    private ProgressDialog mProgress;
     EditText mCreatePostText;
     private ImageButton mCreatePostImage;
-    private boolean TextPost = false;
-
 
 
 
     int scroll_count = 1;
 
-    //----------- FIREBASE -----/
 
-
-
-    private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
-            = item -> {
-        switch (item.getItemId()) {
-            case R.id.navigation_home:
-                Intent mainIntent = new Intent(HomeActivity.this , HomeActivity.class);
-                startActivity(mainIntent);
-                finish();
-                return true;
-            case R.id.navigation_explore:
-                Intent exploreIntent = new Intent(HomeActivity.this , ExploreActivity.class);
-                startActivity(exploreIntent);
-                finish();
-                return true;
-            case R.id.navigation_location:
-                Intent mapIntent  = new Intent(HomeActivity.this , MapsActivity.class);
-                startActivity(mapIntent);
-                return true;
-            case R.id.navigation_notifications:
-                Intent notificaitonIntent = new Intent(HomeActivity.this , NotificationActivity.class);
-                startActivity(notificaitonIntent);
-                finish();
-                return true;
-            case R.id.navigation_profile:
-                Intent profileIntent = new Intent(HomeActivity.this , ProfileActivity.class);
-                profileIntent.putExtra("userID" , mUserID);
-                startActivity(profileIntent);
-                finish();
-                return true;
-        }
-        return false;
-    };
+    public static final String SHARED_PREF_NAME = "UserBasics" ;
+    public static final String Name = "nameKey";
+    public static final String Id = "idKey";
+    public static final String ThumbImage = "thumbKey";
+    public static final String Image = "imageKey";
 
 
 
@@ -142,41 +114,13 @@ public class HomeActivity extends AppCompatActivity {
             checkPermission();
         }
 
-
-        Log.d(TAG, "onCreate:   called !!!!!!!!!!!");
-
-
         if(getSupportActionBar()!=null){
             getSupportActionBar().setTitle("  Gorjon");
+            getSupportActionBar().setElevation(1);
         }
 
+        initBottomNavigation();
 
-
-        mCreatePostText = findViewById(R.id.home_create_post);
-        mCreatePostText.addTextChangedListener(filterTextWatcher);
-        mCreatePostImage = findViewById(R.id.create_post_image);
-        final CircleImageView imageView = findViewById(R.id.home_circle_image);
-
-        mCreatePostText.setOnClickListener(v -> {
-            Intent createPostIntent = new Intent(HomeActivity.this , CreatePostActivity.class);
-            startActivity(createPostIntent);
-        });
-
-
-
-        //------------- BOTTOM NAVIGATION HANDLING ------//
-        BottomNavigationViewEx mNavigation = findViewById(R.id.main_bottom_nav);
-        mNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
-        mNavigation.enableAnimation(false);
-        mNavigation.enableShiftingMode(false);
-        mNavigation.enableItemShiftingMode(false);
-        mNavigation.setIconSize(25, 25);
-        mNavigation.setTextSize(7);
-
-
-
-        getSupportActionBar().setTitle("   Gorjon");
-        getSupportActionBar().setElevation(1);
 
         if(FirebaseAuth.getInstance().getCurrentUser()!=null){
             mUserID = FirebaseAuth.getInstance().getCurrentUser().getUid();
@@ -189,8 +133,6 @@ public class HomeActivity extends AppCompatActivity {
 
         if (mUserID != null) {
 
-
-
             firebaseFirestore =FirebaseFirestore.getInstance();
             Map< String, Object> device_id = new HashMap<>();
             String deviceTokenID = FirebaseInstanceId.getInstance().getToken();
@@ -199,25 +141,10 @@ public class HomeActivity extends AppCompatActivity {
             firebaseFirestore.collection("device_ids").document(mUserID).set(device_id);
 
 
-            firebaseFirestore.collection("users").document(mUserID).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                @Override
-                public void onSuccess(DocumentSnapshot documentSnapshot) {
-                    if(documentSnapshot.exists()){
-                        mUserName = documentSnapshot.getString("name");
-                        mUserImage= documentSnapshot.getString("image");
-                        mUserThumbImage =documentSnapshot.getString("thumb_image");
-                        ImageLoader imageLoader = ImageLoader.getInstance();
-                        imageLoader.displayImage(mUserThumbImage, imageView);
-                    }
-                }
-            }).addOnFailureListener(e -> {
-                mUserImage = MainActivity.mUserImage;
-                mUserName = MainActivity.mUserName;
-                mUserThumbImage = MainActivity.mUserThumbImage;
-                ImageLoader imageLoader = ImageLoader.getInstance();
-                imageLoader.displayImage(mUserThumbImage, imageView);
-            });
-
+            SharedPreferences sp = getSharedPreferences(SHARED_PREF_NAME, MODE_PRIVATE);
+            mUserName = sp.getString(Constants.Name, null);
+            mUserImage = sp.getString(Constants.Image, null);
+            mUserThumbImage = sp.getString(Constants.ThumbImage, null);
 
 
             combinedPosts = new ArrayList<>();
@@ -226,226 +153,126 @@ public class HomeActivity extends AppCompatActivity {
             recyclerView.setLayoutManager(mLinearManager);
             recyclerView.setNestedScrollingEnabled(false);
             mCombinedHomeAdapter = new CombinedHomeAdapter( combinedPosts,HomeActivity.this, HomeActivity.this);
+            mCombinedHomeAdapter.setHasStableIds(true);
             recyclerView.setAdapter(mCombinedHomeAdapter);
 
 
 
-            mCreatePostImage.setOnClickListener(v -> {
-
-                Intent createPostIntent = new Intent(HomeActivity.this , CreatePostActivity.class);
-                startActivity(createPostIntent);
-
-                /*if(TextPost){
-                    if(isDataAvailable()){
-                        uploadTextPost();
-                    }else{
-                        Toast.makeText(this, "Please enable your data to upload your post", Toast.LENGTH_SHORT).show();
-                    }
-                } else{
-                    BringImagePicker();
-                }*/
-            });
-
             firebaseFirestore = FirebaseFirestore.getInstance();
 
-            loadFirstPosts();
+            //loadFirstPosts();
+
+            AsyncFirstPostLoading runner = new AsyncFirstPostLoading();
+            runner.execute();
 
             recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
                 @Override
                 public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                     Boolean reachedBottom = !recyclerView.canScrollVertically(1);
                     if(reachedBottom){
-                        Log.d(TAG, "onScrolled:      reached bottom "+scroll_count++);
-                        loadMorePost();
+                        Timber.d("onScrolled:    reached bottom %s", scroll_count++);
+                        AsyncMorePostLoading runner = new AsyncMorePostLoading();
+                        runner.execute();
                     }
                 }
             });
         }
     }
 
-    public void uploadTextPost(){
 
-        mProgress = new ProgressDialog(HomeActivity.this);
-        mProgress.setTitle("Posting.......");
-        mProgress.setMessage("please wait while we upload your post");
-        mProgress.setCanceledOnTouchOutside(false);
-        mProgress.show();
+    @SuppressLint("StaticFieldLeak")
+    public class AsyncFirstPostLoading extends AsyncTask<Void , CombinedPosts , Boolean>{
 
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+            Timber.d("do in background is started !!!!");
+            Query nextQuery = firebaseFirestore.collection("posts").orderBy("time_stamp" , Query.Direction.DESCENDING).limit(5);
+            nextQuery.addSnapshotListener(HomeActivity.this , (documentSnapshots, e) -> {
+                if(documentSnapshots!=null){
+                    if(!documentSnapshots.isEmpty()){
+                        if(isFirstPageLoad){
+                            lastVisible = documentSnapshots.getDocuments().get(documentSnapshots.size()-1);
+                        }
+                        for(DocumentChange doc: documentSnapshots.getDocumentChanges()){
+                            if(doc.getType() == DocumentChange.Type.ADDED){
+                                CombinedPosts singlePosts = doc.getDocument().toObject(CombinedPosts.class);
+                                String uid = singlePosts.getPrimary_user_id();
+                                Timber.d("found user id %s", uid);
+                                publishProgress(singlePosts);
+                            }
+                        }
+                        isFirstPageLoad = false;
+                    }
+                }else{
+                    Timber.d("onCreate:   document snapshot is null");
+                }
+            });
+            return true;
+        }
 
-        DocumentReference ref = FirebaseFirestore.getInstance().collection("posts").document();
-        String postPushId = ref.getId();
+        @Override
+        protected void onProgressUpdate(CombinedPosts... values) {
+            Timber.d("progress update is calleddd !!!!!!!!!!");
+            combinedPosts.add(values[0]);
+            mCombinedHomeAdapter.notifyDataSetChanged();
+        }
 
+        @Override
+        protected void onPostExecute(Boolean s) {
+            Timber.d("progress post execute is calleddd !!!!!!!!!!");
+            //super.onPostExecute(s);
+            //mCombinedHomeAdapter.notifyDataSetChanged();
 
-        Calendar c = Calendar.getInstance();
-        SimpleDateFormat sdf = new SimpleDateFormat("h:mm a MMM d, ''yy");
-        final String cur_time_and_date = sdf.format(c.getTime());
-        long timestamp = 1* new Date().getTime();
-        Long tsLong = System.currentTimeMillis()/1000;
-        String ts = tsLong.toString();
+        }
 
-        String Caption = mCreatePostText.getText().toString();
-
-        Map<String , Object> postMap = new HashMap<>();
-
-
-
-        postMap.put("user_id" , mUserID);
-        postMap.put("user_name" , mUserName);
-        postMap.put("user_thumb_image" , mUserThumbImage);
-        postMap.put("post_image_url" , "default");
-        postMap.put("post_thumb_image_url" , "default");
-        postMap.put("caption" , Caption);
-        postMap.put("time_and_date" , cur_time_and_date);
-        postMap.put("timestamp" ,timestamp );
-        postMap.put("post_push_id" , postPushId);
-        postMap.put("location" , "");
-        postMap.put("like_cnt" , 0);
-        postMap.put("comment_cnt" ,0);
-        postMap.put("share_cnt" ,0);
-
-
-
-
-        firebaseFirestore.collection("posts").document(postPushId).set(postMap).addOnCompleteListener(task1 -> {
-            mProgress.dismiss();
-            if(task1.isSuccessful()){
-                addRating(mUserID , 10);
-                mProgress.dismiss();
-                mCreatePostText.setText("");
-            }else{
-                mProgress.dismiss();
-            }
-        });
     }
 
-    public void loadFirstPosts(){
 
 
-        Query nextQuery = firebaseFirestore.collection("posts").orderBy("time_stamp" , Query.Direction.DESCENDING).limit(10);
-        nextQuery.addSnapshotListener(HomeActivity.this , (documentSnapshots, e) -> {
-            if(documentSnapshots!=null){
-                if(!documentSnapshots.isEmpty()){
-                    if(isFirstPageLoad==true){
+    @SuppressLint("StaticFieldLeak")
+    public class AsyncMorePostLoading extends AsyncTask<Void , CombinedPosts , Boolean>{
+
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+            Timber.d("do in background is started !!!!");
+            Query nextQuery = firebaseFirestore.collection("posts")
+                    .orderBy("time_stamp" , Query.Direction.DESCENDING)
+                    .startAfter(lastVisible)
+                    .limit(5);
+            nextQuery.get().addOnSuccessListener(documentSnapshots -> {
+                if(documentSnapshots!=null){
+                    if(!documentSnapshots.isEmpty()){
                         lastVisible = documentSnapshots.getDocuments().get(documentSnapshots.size()-1);
-                    }
-                    for(DocumentChange doc: documentSnapshots.getDocumentChanges()){
-                        if(doc.getType() == DocumentChange.Type.ADDED){
-                            //Toast.makeText(this, "found", Toast.LENGTH_SHORT).show();
-                            CombinedPosts singlePosts = doc.getDocument().toObject(CombinedPosts.class);
-                            String uid = singlePosts.getPrimary_user_id();
-                            Log.d(TAG, "found user id               "+ uid);
-                            Log.d(TAG, "caption  for this user is   "+singlePosts.getCaption());
-                            if(isFirstPageLoad){
-                                combinedPosts.add(singlePosts);
-                            }else{
-                                combinedPosts.add(0, singlePosts);
+                        for(DocumentChange doc: documentSnapshots.getDocumentChanges()){
+                            if(doc.getType() == DocumentChange.Type.ADDED){
+
+                                CombinedPosts singlePosts = doc.getDocument().toObject(CombinedPosts.class);
+                                String uid = singlePosts.getPrimary_user_id();
+                                Log.d(TAG, "found user id               "+ uid);
+                                publishProgress(singlePosts);
                             }
-                            mCombinedHomeAdapter.notifyDataSetChanged();
-                        }
-                    }
-                    isFirstPageLoad = false;
-                }
-            }else{
-                Log.d(TAG, "onCreate:   document snapshot is null");
-            }
-        });
-
-    }
-
-
-    public void loadMorePost(){
-        Query nextQuery = firebaseFirestore.collection("posts")
-                .orderBy("time_stamp" , Query.Direction.DESCENDING)
-                .startAfter(lastVisible)
-                .limit(10);
-        nextQuery.get().addOnSuccessListener(documentSnapshots -> {
-            if(documentSnapshots!=null){
-                if(!documentSnapshots.isEmpty()){
-                    lastVisible = documentSnapshots.getDocuments().get(documentSnapshots.size()-1);
-                    for(DocumentChange doc: documentSnapshots.getDocumentChanges()){
-                        if(doc.getType() == DocumentChange.Type.ADDED){
-
-                            CombinedPosts singlePosts = doc.getDocument().toObject(CombinedPosts.class);
-                            String uid = singlePosts.getPrimary_user_id();
-                            Log.d(TAG, "found user id               "+ uid);
-                            Log.d(TAG, "caption  for this user is   "+singlePosts.getCaption());
-                            if(isFirstPageLoad){
-                                combinedPosts.add(singlePosts);
-                            }else{
-                                combinedPosts.add(0, singlePosts);
-                            }
-                            mCombinedHomeAdapter.notifyDataSetChanged();
-
                         }
                     }
                 }
-            }
-        });
-
-    }
-
-    private Task<Void> addRating( String mUserID  , int factor) {
-
-        FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
-        Log.d(TAG, "addRating:   function calledd !!!!");
-        final DocumentReference ratingRef = FirebaseFirestore.getInstance().collection("ratings")
-                .document(mUserID);
-        return firebaseFirestore.runTransaction(transaction -> {
-
-            Ratings ratings = transaction.get(ratingRef)
-                    .toObject(Ratings.class);
-            long curRating = ratings.getRating();
-            long nextRating = curRating + factor;
-
-            ratings.setRating(nextRating);
-            transaction.set(ratingRef, ratings);
-            return null;
-        });
-    }
-
-    private TextWatcher filterTextWatcher = new TextWatcher() {
-
-        @Override
-        public void onTextChanged(CharSequence s, int start, int before, int count) {
-            final String userName  = s.toString();
-            int length= userName.length();
-            if(length>0){
-                mCreatePostImage.setBackgroundResource(R.drawable.ic_send_icon);
-                mCreatePostText.setMovementMethod(ScrollingMovementMethod.getInstance());
-
-                TextPost = true;
-            }else{
-                mCreatePostImage.setBackgroundResource(R.drawable.ic_camera_icon);
-                TextPost = false;
-            }
+            });
+            return true;
         }
 
         @Override
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
+        protected void onProgressUpdate(CombinedPosts... values) {
+            Timber.d("progress update is calleddd !!!!!!!!!!");
+            combinedPosts.add(values[0]);
+            mCombinedHomeAdapter.notifyDataSetChanged();
         }
 
         @Override
-        public void afterTextChanged(Editable s) {
-
+        protected void onPostExecute(Boolean s) {
+            Timber.d("progress post execute is calleddd !!!!!!!!!!");
+            super.onPostExecute(s);
         }
-    };
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
-            CropImage.ActivityResult result = CropImage.getActivityResult(data);
-            if (resultCode == RESULT_OK) {
-                Uri imageUri = result.getUri();
-                Intent CreatePostIntent = new Intent(HomeActivity.this , CreatePhotoPostActivity.class);
-                CreatePostIntent.putExtra("imageUri" , imageUri.toString());
-                startActivity(CreatePostIntent);
-
-            } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
-                Exception error = result.getError();
-            }
-        }
     }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -493,13 +320,7 @@ public class HomeActivity extends AppCompatActivity {
         super.onStop();
     }
 
-    public void BringImagePicker() {
-        CropImage.activity()
-                .setGuidelines(CropImageView.Guidelines.ON)
-                .setAspectRatio(10, 8)
-                .setMinCropResultSize(512 , 512)
-                .start(HomeActivity.this);
-    }
+
 
     public void checkPermission(){
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
@@ -513,10 +334,48 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
-    private boolean isDataAvailable() {
-        android.net.ConnectivityManager connectivityManager = (android.net.ConnectivityManager) getSystemService(android.content.Context.CONNECTIVITY_SERVICE);
-        android.net.NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-        return networkInfo != null && networkInfo.isConnected();
+
+    private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
+            = item -> {
+        switch (item.getItemId()) {
+            case R.id.navigation_home:
+                Intent mainIntent = new Intent(HomeActivity.this , HomeActivity.class);
+                startActivity(mainIntent);
+                finish();
+                return true;
+            case R.id.navigation_explore:
+                Intent exploreIntent = new Intent(HomeActivity.this , ExploreActivity.class);
+                startActivity(exploreIntent);
+                finish();
+                return true;
+            case R.id.navigation_location:
+                Intent mapIntent  = new Intent(HomeActivity.this , MapsActivity.class);
+                startActivity(mapIntent);
+                return true;
+            case R.id.navigation_notifications:
+                Intent notificaitonIntent = new Intent(HomeActivity.this , NotificationActivity.class);
+                startActivity(notificaitonIntent);
+                finish();
+                return true;
+            case R.id.navigation_profile:
+                Intent profileIntent = new Intent(HomeActivity.this , ProfileActivity.class);
+                profileIntent.putExtra("userID" , mUserID);
+                startActivity(profileIntent);
+                finish();
+                return true;
+        }
+        return false;
+    };
+
+    private void initBottomNavigation() {
+        BottomNavigationViewEx mNavigation = findViewById(R.id.main_bottom_nav);
+        mNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+        mNavigation.enableAnimation(false);
+        mNavigation.enableShiftingMode(false);
+        mNavigation.enableItemShiftingMode(false);
+        mNavigation.setIconSize(25, 25);
+        mNavigation.setTextSize(7);
     }
+
 
 }
