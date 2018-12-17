@@ -17,8 +17,6 @@ import java.util.List;
 
 import candor.fulki.home.CombinedHomeAdapter;
 import candor.fulki.home.CombinedPosts;
-import candor.fulki.home.HomeAdapter;
-import candor.fulki.home.Posts;
 import candor.fulki.R;
 
 public class PostsFragment extends Fragment {
@@ -26,9 +24,9 @@ public class PostsFragment extends Fragment {
 
 
     private RecyclerView recyclerView;
-    private List< Posts> posts;
+    private List< CombinedPosts> posts;
     private FirebaseFirestore firebaseFirestore;
-    private HomeAdapter mHomeAdapter;
+    private CombinedHomeAdapter mHomeAdapter;
 
 
     //new

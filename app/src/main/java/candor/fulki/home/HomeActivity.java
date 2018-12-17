@@ -94,12 +94,27 @@ public class HomeActivity extends AppCompatActivity {
     int scroll_count = 1;
 
 
-    public static final String SHARED_PREF_NAME = "UserBasics" ;
     public static final String Name = "nameKey";
-    public static final String Id = "idKey";
-    public static final String ThumbImage = "thumbKey";
-    public static final String Image = "imageKey";
 
+
+    private void loadDetails(){
+        android.content.SharedPreferences sp = getSharedPreferences(candor.fulki.general.Constants.SHARED_PREF_NAME, MODE_PRIVATE);
+        mUserID = sp.getString(candor.fulki.general.Constants.Id, null);
+        mUserName = sp.getString(candor.fulki.general.Constants.Name, null);
+        mUserImage = sp.getString(candor.fulki.general.Constants.Image, null);
+        mUserThumbImage = sp.getString(candor.fulki.general.Constants.ThumbImage, null);
+    }
+
+    private void initRecycler(){
+        combinedPosts = new ArrayList<>();
+            recyclerView = findViewById(R.id.home_recycler_view);
+            mLinearManager = new LinearLayoutManager(HomeActivity.this);
+            recyclerView.setLayoutManager(mLinearManager);
+            recyclerView.setNestedScrollingEnabled(false);
+            mCombinedHomeAdapter = new CombinedHomeAdapter( combinedPosts,HomeActivity.this, HomeActivity.this);
+            mCombinedHomeAdapter.setHasStableIds(true);
+            recyclerView.setAdapter(mCombinedHomeAdapter);
+    }
 
 
     @Override
@@ -119,12 +134,11 @@ public class HomeActivity extends AppCompatActivity {
             getSupportActionBar().setElevation(1);
         }
 
+        loadDetails();
         initBottomNavigation();
+        initRecycler();
 
 
-        if(FirebaseAuth.getInstance().getCurrentUser()!=null){
-            mUserID = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        }
 
         findViewById(R.id.home_floating).setOnClickListener(v -> {
             Intent createPostIntent = new Intent(HomeActivity.this , CreatePostActivity.class);
@@ -141,26 +155,9 @@ public class HomeActivity extends AppCompatActivity {
             firebaseFirestore.collection("device_ids").document(mUserID).set(device_id);
 
 
-            SharedPreferences sp = getSharedPreferences(SHARED_PREF_NAME, MODE_PRIVATE);
-            mUserName = sp.getString(Constants.Name, null);
-            mUserImage = sp.getString(Constants.Image, null);
-            mUserThumbImage = sp.getString(Constants.ThumbImage, null);
-
-
-            combinedPosts = new ArrayList<>();
-            recyclerView = findViewById(R.id.home_recycler_view);
-            mLinearManager = new LinearLayoutManager(HomeActivity.this);
-            recyclerView.setLayoutManager(mLinearManager);
-            recyclerView.setNestedScrollingEnabled(false);
-            mCombinedHomeAdapter = new CombinedHomeAdapter( combinedPosts,HomeActivity.this, HomeActivity.this);
-            mCombinedHomeAdapter.setHasStableIds(true);
-            recyclerView.setAdapter(mCombinedHomeAdapter);
-
-
 
             firebaseFirestore = FirebaseFirestore.getInstance();
 
-            //loadFirstPosts();
 
             AsyncFirstPostLoading runner = new AsyncFirstPostLoading();
             runner.execute();

@@ -1,5 +1,6 @@
 package candor.fulki.home;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -570,13 +571,13 @@ public class CombinedHomeAdapter extends RecyclerView.Adapter<CombinedHomeAdapte
 
         }
 
-        private Task<Void> addRating(String mUserID  , int factor) {
+        private void addRating(String mUserID  , int factor) {
 
             FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
             Log.d(TAG, "addRating:   function calledd !!!!");
             final DocumentReference ratingRef = FirebaseFirestore.getInstance().collection("ratings")
                     .document(mUserID);
-            return firebaseFirestore.runTransaction(transaction -> {
+            firebaseFirestore.runTransaction(transaction -> {
                 Ratings ratings = transaction.get(ratingRef)
                         .toObject(Ratings.class);
                 long curRating = ratings.getRating();
@@ -603,7 +604,7 @@ public class CombinedHomeAdapter extends RecyclerView.Adapter<CombinedHomeAdapte
                 updateMap.put("like_cnt" , nextLike);
                 transaction.update(postRef , updateMap);
                 return nextLike;
-            }).addOnSuccessListener(aLong -> setPostLikeCount(aLong));
+            }).addOnSuccessListener(this::setPostLikeCount);
         }
 
 
@@ -611,6 +612,7 @@ public class CombinedHomeAdapter extends RecyclerView.Adapter<CombinedHomeAdapte
             postDateTime.setText(dateTime);
         }
 
+        @SuppressLint("SetTextI18n")
         public void setPostLikeCount(long currentLikesCount) {
             if(currentLikesCount>1){
                 postLikeCount.setText(""+currentLikesCount+" likes");
@@ -619,6 +621,7 @@ public class CombinedHomeAdapter extends RecyclerView.Adapter<CombinedHomeAdapte
             }
         }
 
+        @SuppressLint("SetTextI18n")
         public void setPostCommentCount(long currentCommentsCount) {
             if(currentCommentsCount>1){
                 postCommentCount.setText(""+currentCommentsCount+" comments");

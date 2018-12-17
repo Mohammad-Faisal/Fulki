@@ -47,7 +47,6 @@ public class ShowPostActivity extends AppCompatActivity {
     private static final String TAG = "ShowPostActivity";
     private String mPostID , mUserID , mPostOwnerId;
     private String mUserName , mUserThumbImage , mUserImage;
-    /*CollapsingToolbarLayout collapsingToolbarLayout;*/
     public DisplayImageOptions postImageOptions;
     FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
 
@@ -67,6 +66,13 @@ public class ShowPostActivity extends AppCompatActivity {
 
     public String mPostOwnerID;
 
+    private void loadDetails(){
+        android.content.SharedPreferences sp = getSharedPreferences(candor.fulki.general.Constants.SHARED_PREF_NAME, MODE_PRIVATE);
+        mUserID = sp.getString(candor.fulki.general.Constants.Id, null);
+        mUserName = sp.getString(candor.fulki.general.Constants.Name, null);
+        mUserImage = sp.getString(candor.fulki.general.Constants.Image, null);
+        mUserThumbImage = sp.getString(candor.fulki.general.Constants.ThumbImage, null);
+    }
 
 
     @Override
@@ -89,30 +95,8 @@ public class ShowPostActivity extends AppCompatActivity {
 
 
         mPostID = getIntent().getStringExtra("postID");
-        mUserID = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
-
-        mUserID = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        if(mUserID!=null){
-            firebaseFirestore.collection("users").document(mUserID).get().addOnSuccessListener(documentSnapshot -> {
-                if(documentSnapshot.exists()){
-                    mUserName = documentSnapshot.getString("name");
-                    mUserImage= documentSnapshot.getString("image");
-                    mUserThumbImage =documentSnapshot.getString("thumb_image");
-
-                    ImageLoader imageLoader = ImageLoader.getInstance();
-                    imageLoader.displayImage(mUserThumbImage, mShowPostOwnImage);
-
-                }
-            }).addOnFailureListener(e -> {
-                mUserImage = MainActivity.mUserImage;
-                mUserName = MainActivity.mUserName;
-                mUserThumbImage = MainActivity.mUserThumbImage;
-
-                ImageLoader imageLoader = ImageLoader.getInstance();
-                imageLoader.displayImage(mUserThumbImage, mShowPostOwnImage);
-            });
-        }
+        loadDetails();
 
 
         postLikeCount.setOnClickListener(v -> {
@@ -132,18 +116,21 @@ public class ShowPostActivity extends AppCompatActivity {
                 if(task.isSuccessful()){
                     if(task.getResult().exists()){
 
-                        Posts post = task.getResult()
-                                .toObject(Posts.class);
-                        String postImage = post.getPost_image_url();
+
+                        //comment out korte hobe
+
+                        /*CombinedPosts post = task.getResult()
+                                .toObject(CombinedPosts.class);
+                        String postImage = post.get
                         String postCaptionText = post.getCaption();
                         String postTime = post.getTime_and_date();
                         String postOwnerID = post.getUser_id();
                         String postOwnerThumbImage = post.getUser_thumb_image();
                         String postOwnerName = post.getUser_name();
                         long likeCount = post.getLike_cnt();
-                        long commentCount = post.getComment_cnt();
+                        long commentCount = post.getComment_cnt();*/
 
-
+/*
                         if(postImage.equals("default")){
                             postImageView.setVisibility(View.GONE);
                         }
@@ -163,7 +150,7 @@ public class ShowPostActivity extends AppCompatActivity {
                             postCaption.setVisibility(View.GONE);
                         }else{
                             postCaption.setText(postCaptionText);
-                        }
+                        }*/
 
 
 
@@ -369,8 +356,8 @@ public class ShowPostActivity extends AppCompatActivity {
                 .document(mPostID);
 
         firebaseFirestore.runTransaction(transaction -> {
-            Posts post = transaction.get(postRef)
-                    .toObject(Posts.class);
+            CombinedPosts post = transaction.get(postRef)
+                    .toObject(CombinedPosts.class);
             long curLikes = post.getLike_cnt();
             long nextLike = curLikes + factor;
 

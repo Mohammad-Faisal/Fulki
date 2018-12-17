@@ -44,8 +44,6 @@ import candor.fulki.general.MainActivity;
 import candor.fulki.home.CombinedHomeAdapter;
 import candor.fulki.home.CombinedPosts;
 import candor.fulki.home.HomeActivity;
-import candor.fulki.home.HomeAdapter;
-import candor.fulki.home.Posts;
 import candor.fulki.explore.people.Ratings;
 import candor.fulki.MapsActivity;
 import candor.fulki.notification.NotificationActivity;
@@ -60,17 +58,12 @@ public class ProfileActivity extends AppCompatActivity {
 
     private static final String TAG = "ProfileActivity";
 
-    String mUserID = "";
-    String mUserImage;
-    String mUserName;
-    String mUserThumbImage;
+    String mUserID = "" , mUserImage ,  mUserName ,  mUserThumbImage;
 
 
-
-
-    private List< Posts> posts;
+    private List< CombinedPosts> posts;
     private FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
-    private HomeAdapter mProfilePostAdapter;
+    private CombinedHomeAdapter mProfilePostAdapter;
 
     private CombinedHomeAdapter mCombinedHomeAdapter;
     private List<CombinedPosts> combinedPosts;
@@ -84,54 +77,15 @@ public class ProfileActivity extends AppCompatActivity {
     public RecyclerView mProfilePostsRecycelr , mProfileBadgesRecycler;
     public String mCurProfileId;  //jar profile e asi amra
 
+    android.widget.LinearLayout cardFollowers , cardFollowings , sendMessage;
 
+    TextView mProfileSendMessage;
+    CircleImageView mProfileImageView;
 
     boolean ownProfile = false;
     boolean followState = false;
-    int active = 1;
 
-
-    public String mCurUserImage;
-    public String mCurUserName;
-    public String mCurUserTHumbImage;
-
-
-
-    private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
-            = item -> {
-        switch (item.getItemId()) {
-            case R.id.navigation_home:
-                Intent mainIntent = new Intent(ProfileActivity.this , HomeActivity.class);
-                startActivity(mainIntent);
-                finish();
-                //setFragment(mHomeFragment);
-                return true;
-            case R.id.navigation_explore:
-                Intent exploreIntent = new Intent(ProfileActivity.this , ExploreActivity.class);
-                startActivity(exploreIntent);
-                finish();
-                //setFragment(mExploreFragment);
-                return true;
-            case R.id.navigation_location:
-                Intent mapIntent  = new Intent(ProfileActivity.this , MapsActivity.class);
-                startActivity(mapIntent);
-                return true;
-            case R.id.navigation_notifications:
-                Intent notificaitonIntent = new Intent(ProfileActivity.this , NotificationActivity.class);
-                startActivity(notificaitonIntent);
-                finish();
-                //setFragment(mNotificationFragment);
-                return true;
-            case R.id.navigation_profile:
-                Intent profileIntent = new Intent(ProfileActivity.this , ProfileActivity.class);
-                profileIntent.putExtra("userID" , mUserID);
-                startActivity(profileIntent);
-                finish();
-                //setFragment(mProfileFragment);
-                return true;
-        }
-        return false;
-    };
+    public String mCurUserImage , mCurUserName , mCurUserTHumbImage;
 
 
 
@@ -140,68 +94,13 @@ public class ProfileActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
 
-
-
-
-
-        mUserID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        loadDetails();
+        initBottomNav();
+        initViews();
+        initRecycler();
 
         mCurProfileId = getIntent().getStringExtra("userID");
         ownProfile = mCurProfileId.equals(mUserID);
-
-
-        //------------- BOTTOM NAVIGATION HANDLING ------//
-        BottomNavigationViewEx mNavigation = findViewById(R.id.main_bottom_nav);
-        mNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
-        mNavigation.enableAnimation(true);
-        mNavigation.enableShiftingMode(false);
-        mNavigation.enableItemShiftingMode(false);
-        mNavigation.setIconSize(25, 25);
-        mNavigation.setTextSize(7);
-
-
-
-        //getting views
-        mProfileName  = findViewById(R.id.profile_name);
-        mProfileBio  = findViewById(R.id.profile_bio);
-        mProfileFollow  = findViewById(R.id.profile_follow_button);
-        mProfileFollowersCnt  =findViewById(R.id.profile_followers_cnt);
-        mProfileFollowingsCnt  = findViewById(R.id.profile_followings_cnt);
-        mProfilePostsRecycelr = findViewById(R.id.profile_posts_recycler);
-        mProfileBadgesRecycler = findViewById(R.id.profile_badges_recycler);
-        mProfilePostsRecycelr.setNestedScrollingEnabled(false);
-        mProfileBadgesRecycler.setNestedScrollingEnabled(false);
-
-
-        mUserID = FirebaseAuth.getInstance().getCurrentUser().getUid();
-
-        firebaseFirestore.collection("users").document(mUserID).get().addOnSuccessListener(documentSnapshot -> {
-            if(documentSnapshot.exists()){
-                mUserName = documentSnapshot.getString("name");
-                mUserImage= documentSnapshot.getString("image");
-                mUserThumbImage =documentSnapshot.getString("thumb_image");
-
-            }
-        }).addOnFailureListener(e -> {
-            mUserImage = MainActivity.mUserImage;
-            mUserName = MainActivity.mUserName;
-            mUserThumbImage = MainActivity.mUserThumbImage;
-        });
-
-
-
-        //setting up recycler view
-        combinedPosts = new ArrayList<>();
-        mCombinedHomeAdapter = new CombinedHomeAdapter(combinedPosts,ProfileActivity.this, ProfileActivity.this);
-        mProfilePostsRecycelr.setLayoutManager(new LinearLayoutManager(ProfileActivity.this));
-        mProfilePostsRecycelr.setAdapter(mCombinedHomeAdapter);
-        firebaseFirestore = FirebaseFirestore.getInstance();
-
-
-        android.widget.LinearLayout cardFollowers = findViewById(R.id.profile_followers_linear);
-        android.widget.LinearLayout cardFollowings = findViewById(R.id.profile_followings_linear);
-        android.widget.LinearLayout sendMessage = findViewById(R.id.profile_send_message_linear);
-        TextView mProfileSendMessage = findViewById(R.id.profile_send_message_text);
 
         if(ownProfile){
             mProfileSendMessage.setText("save a note");
@@ -231,7 +130,6 @@ public class ProfileActivity extends AppCompatActivity {
             startActivity(chatIntent);
         });
 
-        final CircleImageView mProfileImageView =findViewById(R.id.profile_image);
         mProfileImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -242,9 +140,8 @@ public class ProfileActivity extends AppCompatActivity {
             }
 
         });
-        FirebaseUser mUser = FirebaseAuth.getInstance().getCurrentUser();
 
-        if(mUser!=null){
+        if(mCurProfileId!=null){
             FirebaseFirestore.getInstance().collection("users").document(mCurProfileId).get().addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
                     if(task.getResult().exists()){
@@ -258,9 +155,8 @@ public class ProfileActivity extends AppCompatActivity {
                         mProfileName.setText(mCurUserName);
                         ImageLoader imageLoader = ImageLoader.getInstance();
                         imageLoader.displayImage(mCurUserImage, mProfileImageView);
-                        getSupportActionBar().setTitle("  "+mCurUserName);
+                        if(getSupportActionBar()!=null)getSupportActionBar().setTitle("  "+mCurUserName);
                     }
-                } else {
                 }
             });
             //setting the current state of follow button
@@ -385,18 +281,18 @@ public class ProfileActivity extends AppCompatActivity {
                 });
 
             firebaseFirestore = FirebaseFirestore.getInstance();
-            Query nextQuery = firebaseFirestore.collection("posts").orderBy("time_stamp" , Query.Direction.DESCENDING).limit(100).whereEqualTo("primary_user_id", mCurProfileId);
+            Query nextQuery = firebaseFirestore.collection("posts").orderBy("time_stamp" , Query.Direction.ASCENDING).limit(100).whereEqualTo("primary_user_id", mCurProfileId);
             nextQuery.addSnapshotListener(ProfileActivity.this , (documentSnapshots, e) -> {
                 if(documentSnapshots!=null){
                     if(!documentSnapshots.isEmpty()){
-                        if(isFirstPageLoad==true){
+                        if(isFirstPageLoad){
                             lastVisible = documentSnapshots.getDocuments().get(documentSnapshots.size()-1);
                         }
                         for(DocumentChange doc: documentSnapshots.getDocumentChanges()){
                             if(doc.getType() == DocumentChange.Type.ADDED){
                                 CombinedPosts singlePosts = doc.getDocument().toObject(CombinedPosts.class);
                                 String uid = singlePosts.getPrimary_user_id();
-                                Log.d(TAG, "onCreate:  found user id   "+ uid);
+                                timber.log.Timber.d("onCreate:  found user id   "+ uid);
                                 if(isFirstPageLoad){
                                         combinedPosts.add(singlePosts);
                                 }else{
@@ -504,7 +400,7 @@ public class ProfileActivity extends AppCompatActivity {
     private Task<Void> addRating(String mUserID  , int factor) {
 
         FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
-        Log.d(TAG, "addRating:   function calledd !!!!");
+        timber.log.Timber.tag(TAG).d("addRating:   function calledd !!!!");
         final DocumentReference ratingRef = FirebaseFirestore.getInstance().collection("ratings")
                 .document(mUserID);
         return firebaseFirestore.runTransaction(transaction -> {
@@ -518,6 +414,93 @@ public class ProfileActivity extends AppCompatActivity {
             transaction.set(ratingRef, ratings);
             return null;
         });
+    }
+
+
+
+    private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
+            = item -> {
+        switch (item.getItemId()) {
+            case R.id.navigation_home:
+                Intent mainIntent = new Intent(ProfileActivity.this , HomeActivity.class);
+                startActivity(mainIntent);
+                finish();
+                //setFragment(mHomeFragment);
+                return true;
+            case R.id.navigation_explore:
+                Intent exploreIntent = new Intent(ProfileActivity.this , ExploreActivity.class);
+                startActivity(exploreIntent);
+                finish();
+                //setFragment(mExploreFragment);
+                return true;
+            case R.id.navigation_location:
+                Intent mapIntent  = new Intent(ProfileActivity.this , MapsActivity.class);
+                startActivity(mapIntent);
+                return true;
+            case R.id.navigation_notifications:
+                Intent notificaitonIntent = new Intent(ProfileActivity.this , NotificationActivity.class);
+                startActivity(notificaitonIntent);
+                finish();
+                //setFragment(mNotificationFragment);
+                return true;
+            case R.id.navigation_profile:
+                Intent profileIntent = new Intent(ProfileActivity.this , ProfileActivity.class);
+                profileIntent.putExtra("userID" , mUserID);
+                startActivity(profileIntent);
+                finish();
+                //setFragment(mProfileFragment);
+                return true;
+        }
+        return false;
+    };
+
+    private void loadDetails(){
+        android.content.SharedPreferences sp = getSharedPreferences(candor.fulki.general.Constants.SHARED_PREF_NAME, MODE_PRIVATE);
+        mUserID = sp.getString(candor.fulki.general.Constants.Id, null);
+        mUserName = sp.getString(candor.fulki.general.Constants.Name, null);
+        mUserImage = sp.getString(candor.fulki.general.Constants.Image, null);
+        mUserThumbImage = sp.getString(candor.fulki.general.Constants.ThumbImage, null);
+    }
+
+    private void initBottomNav(){
+        BottomNavigationViewEx mNavigation = findViewById(R.id.main_bottom_nav);
+        mNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+        mNavigation.enableAnimation(true);
+        mNavigation.enableShiftingMode(false);
+        mNavigation.enableItemShiftingMode(false);
+        mNavigation.setIconSize(25, 25);
+        mNavigation.setTextSize(7);
+    }
+
+    private void initRecycler(){
+        combinedPosts = new ArrayList<>();
+        mCombinedHomeAdapter = new CombinedHomeAdapter(combinedPosts,ProfileActivity.this, ProfileActivity.this);
+        mProfilePostsRecycelr.setLayoutManager(new LinearLayoutManager(ProfileActivity.this));
+        mProfilePostsRecycelr.setAdapter(mCombinedHomeAdapter);
+        firebaseFirestore = FirebaseFirestore.getInstance();
+    }
+
+    private void initViews(){
+         //getting views
+        mProfileName  = findViewById(R.id.profile_name);
+        mProfileBio  = findViewById(R.id.profile_bio);
+        mProfileFollowersCnt  =findViewById(R.id.profile_followers_cnt);
+        mProfileFollowingsCnt  = findViewById(R.id.profile_followings_cnt);
+        mProfilePostsRecycelr = findViewById(R.id.profile_posts_recycler);
+        mProfileBadgesRecycler = findViewById(R.id.profile_badges_recycler);
+        mProfilePostsRecycelr.setNestedScrollingEnabled(false);
+        mProfileBadgesRecycler.setNestedScrollingEnabled(false);
+
+        mProfileFollow = findViewById(R.id.profile_follow_button);
+
+
+        cardFollowers = findViewById(R.id.profile_followers_linear);
+        cardFollowings = findViewById(R.id.profile_followings_linear);
+        sendMessage = findViewById(R.id.profile_send_message_linear);
+        mProfileSendMessage = findViewById(R.id.profile_send_message_text);
+
+        mProfileImageView =findViewById(R.id.profile_image);
+
     }
 
 

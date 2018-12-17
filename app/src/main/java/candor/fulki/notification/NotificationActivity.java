@@ -77,6 +77,15 @@ public class NotificationActivity extends AppCompatActivity {
         return false;
     };
 
+    private void initBottomNav(){
+         BottomNavigationViewEx mNavigation = findViewById(R.id.main_bottom_nav);
+        mNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+        mNavigation.enableAnimation(true);
+        mNavigation.enableShiftingMode(false);
+        mNavigation.enableItemShiftingMode(false);
+        mNavigation.setIconSize(25, 25);
+        mNavigation.setTextSize(7);
+    }
 
 
     @Override
@@ -85,20 +94,13 @@ public class NotificationActivity extends AppCompatActivity {
         setContentView(R.layout.activity_notification);
 
 
-        //------------- BOTTOM NAVIGATION HANDLING ------//
-        BottomNavigationViewEx mNavigation = findViewById(R.id.main_bottom_nav);
-        mNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
-        mNavigation.enableAnimation(true);
-        mNavigation.enableShiftingMode(false);
-        mNavigation.enableItemShiftingMode(false);
-        mNavigation.setIconSize(25, 25);
-        mNavigation.setTextSize(7);
+        initBottomNav();
 
-        getSupportActionBar().setTitle("  Notifications");
+        if(getSupportActionBar() != null)getSupportActionBar().setTitle("  Notifications");
 
 
         if(FirebaseAuth.getInstance().getCurrentUser() != null){
-            mUserID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+            if(FirebaseAuth.getInstance().getCurrentUser() != null)mUserID = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
 
             //setting RecyclerView
@@ -120,7 +122,7 @@ public class NotificationActivity extends AppCompatActivity {
                         notifications.add(singleNotifications);
                         mNotificationAdapter.notifyDataSetChanged();
                     }else{
-                        Log.d(TAG, "onEvent: notification type is not added");
+                        timber.log.Timber.d("onEvent: notification type is not added");
                     }
                 }
             });

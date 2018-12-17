@@ -247,13 +247,13 @@ public class PostCommentAdapter extends RecyclerView.Adapter<PostCommentAdapter.
 
 
     public class PostCommentViewHolder  extends RecyclerView.ViewHolder{
-        public TextView commentText;
-        public CircleImageView commentImage;
-        public TextView commentName;
+         TextView commentText;
+         CircleImageView commentImage;
+         TextView commentName;
         public ImageButton commentLove;
-        public TextView commentLoveCount;
-        public TextView commentTimeAgo;
-        public PostCommentViewHolder(View itemView) {
+         TextView commentLoveCount;
+         TextView commentTimeAgo;
+         PostCommentViewHolder(View itemView) {
             super(itemView);
             commentText = itemView.findViewById(R.id.comment_item_text);
             commentImage = itemView.findViewById(R.id.comment_item_image);
@@ -306,8 +306,8 @@ public class PostCommentAdapter extends RecyclerView.Adapter<PostCommentAdapter.
                     .document(mPostID);
 
             firebaseFirestore.runTransaction(transaction -> {
-                Posts post = transaction.get(postRef)
-                        .toObject(Posts.class);
+                CombinedPosts post = transaction.get(postRef)
+                        .toObject(CombinedPosts.class);
                 long curLikes = post.getLike_cnt();
                 long curComments = post.getComment_cnt();
                 long curShares = post.getShare_cnt();
